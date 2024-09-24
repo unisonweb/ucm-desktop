@@ -1,0 +1,22 @@
+{
+  "name": "ucm-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1",
+    "elm": "^0.19.1-6",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1",
+    "vite-plugin-elm": "^3.0.1"
+  }
+}
