@@ -7,14 +7,26 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "elm-test",
+    "ui-core-check-css": "ui-core-check-css",
+    "ui-core-install": "ui-core-install",
+    "ui-core-update": "ui-core-update",
+    "postinstall": "ui-core-install"
   },
   "dependencies": {
     "@tauri-apps/api": "^1"
   },
   "devDependencies": {
+    "@octokit/core": "^4.0.5",
     "@tauri-apps/cli": "^1",
+    "@unison-lang/ui-core-scripts": "^1.1.9",
     "elm": "^0.19.1-6",
+    "elm-format": "^0.8.7",
+    "elm-git-install": "^0.1.4",
+    "elm-json": "^0.2.13",
+    "elm-review": "^2.12.0",
+    "elm-test": "^0.19.1-revision12",
     "typescript": "^5.2.2",
     "vite": "^5.3.1",
     "vite-plugin-elm": "^3.0.1"
