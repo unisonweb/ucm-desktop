@@ -4,6 +4,7 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, article, h1, main_, text)
 import Html.Attributes exposing (class)
+import UI.Button as Button
 import Url exposing (Url)
 
 
@@ -82,6 +83,7 @@ view model =
     , body =
         [ main_ []
             [ viewScreenContent model.screen
+            , Button.view (Button.button NoOp "Click me")
             ]
         ]
     }

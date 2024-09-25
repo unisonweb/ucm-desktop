@@ -1,9 +1,18 @@
 import { defineConfig } from "vite";
 import elmPlugin from 'vite-plugin-elm'
+import path from "path";
+
+const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [elmPlugin()],
+
+  resolve: {
+    alias: {
+      "ui-core": path.resolve(__dirname, UI_CORE_SRC)
+    },
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
