@@ -11,6 +11,7 @@ import "ui-core/Lib/MermaidDiagram";
 import "ui-core/Lib/EmbedSvg";
 import detectOs from "ui-core/Lib/detectOs";
 import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
+import "./main.css";
 
 import { Elm } from './Main.elm'
 

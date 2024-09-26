@@ -2,9 +2,10 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, article, h1, main_, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, article, div, footer, header, main_, text)
+import Html.Attributes exposing (attribute, class)
 import UI.Button as Button
+import UI.Icon as Icon
 import Url exposing (Url)
 
 
@@ -64,27 +65,64 @@ subscriptions _ =
 
 
 viewScreenContent : Screen -> Html Msg
-viewScreenContent screen =
-    let
-        title t =
-            h1 [] [ text t ]
+viewScreenContent _ =
+    article [ class "screen-content" ] []
 
-        ( title_, content ) =
-            case screen of
-                HomeScreen ->
-                    ( title "UCM", text "Hello World" )
-    in
-    article [ class "screen-content" ] [ title_, content ]
+
+viewWindowTitlebar : Html Msg
+viewWindowTitlebar =
+    header [ attribute "data-tauri-drag-region" "1", class "window-control-bar window-titlebar" ]
+        [ div [ class "window-control-bar-group" ]
+            [ Button.iconThenLabelThenIcon NoOp Icon.pencilRuler "@unison/base" Icon.caretDown
+                |> Button.small
+                |> Button.view
+            , Button.iconThenLabelThenIcon NoOp Icon.branch "/main" Icon.caretDown
+                |> Button.small
+                |> Button.view
+            , Button.iconThenLabelThenIcon NoOp Icon.pencilRuler "History" Icon.caretDown
+                |> Button.small
+                |> Button.view
+            ]
+        , div [ class "window-control-bar-group" ]
+            [ Button.icon NoOp Icon.search
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            , Button.icon NoOp Icon.branch
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            , Button.icon NoOp Icon.pencilRuler
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            , Button.iconThenLabel NoOp Icon.pencilRuler "Sign-in"
+                |> Button.small
+                |> Button.decorativePurple
+                |> Button.view
+            ]
+        ]
+
+
+viewWindowFooter : Html Msg
+viewWindowFooter =
+    footer [ class "window-control-bar window-footer" ]
+        [ Button.icon NoOp Icon.leftSidebarOff
+            |> Button.small
+            |> Button.subdued
+            |> Button.view
+        ]
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "UCM"
+    { title = "@unison/base UCM"
     , body =
-        [ main_ []
+        [ viewWindowTitlebar
+        , main_ []
             [ viewScreenContent model.screen
-            , Button.view (Button.button NoOp "Click me")
             ]
+        , viewWindowFooter
         ]
     }
 

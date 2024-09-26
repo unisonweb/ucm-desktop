@@ -6,7 +6,7 @@ const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [elmPlugin()],
+  plugins: [elmPlugin({ debug: false })],
 
   resolve: {
     alias: {
