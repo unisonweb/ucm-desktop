@@ -1,0 +1,33 @@
+body {
+  background: var(--u-color_background);
+  color: var(--u-color_text);
+  display: grid;
+  grid-template-rows: 2.5rem calc(100vh - 5rem) 2.5rem;
+  user-select: none;
+}
+
+.window-control-bar {
+  height: 2.5rem;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem;
+}
+
+.window-control-bar-group {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+.window-titlebar {
+  padding-left: 4.5rem;
+  border-bottom: 1px solid var(--u-color_border);
+  background: var(--color-gray-darken-10);
+}
+
+.window-footer {
+  border-top: 1px solid var(--u-color_border);
+  background: var(--color-gray-darken-20);
+}

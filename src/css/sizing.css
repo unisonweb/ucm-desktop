@@ -1,0 +1,24 @@
+:root {
+  --sz-base: 1rem;
+
+  --sz-0: 1px;
+  --sz-1: 0.125rem;
+  --sz-2: 0.25rem;
+  --sz-3: 0.325rem;
+  --sz-4: 0.5rem;
+  --sz-4: 0.75rem;
+  --sz-4: 0.875rem;
+  --sz-4: 1rem;
+  --sz-4: 1.125rem;
+  --sz-4: 1.25rem;
+  --sz-4: 1.5rem;
+  --sz-4: 1.75rem;
+  --sz-4: 1.875rem;
+  --sz-4: 2rem;
+  --sz-4: 2.25rem;
+  --sz-4: 2.5rem;
+  --sz-4: 2.75rem;
+  --sz-4: 3rem;
+  --sz-4: 3.5rem;
+  --sz-4: 4rem;
+}
