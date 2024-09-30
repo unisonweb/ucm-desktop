@@ -15,4 +15,12 @@ import "./main.css";
 
 import { Elm } from './Main.elm'
 
-Elm.Main.init();
+const flags = {
+  operatingSystem: detectOs(window.navigator),
+  basePath: new URL(document.baseURI).pathname,
+  apiUrl: "http://127.0.0.1:4444/asdf/api"
+};
+
+preventDefaultGlobalKeyboardEvents();
+
+Elm.Main.init({ flags });

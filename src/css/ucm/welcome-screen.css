@@ -1,0 +1,98 @@
+.screen-content.welcome-screen {
+  padding-top: 2rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.screen-content.welcome-screen .app-logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.screen-content.welcome-screen .app-logo h2 {
+  color: var(--u-color_text);
+}
+
+.screen-content.welcome-screen .app-logo p {
+  margin: 0;
+}
+
+.screen-content.welcome-screen .app-icon {
+  /* compensate for the app icon which has 1.5rem transparent margin in the
+   * image (used when an actual app icon) */
+  margin-left: -1.5rem;
+  width: 4rem;
+  height: 4rem;
+}
+
+.screen-content.welcome-screen .welcome-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 21rem;
+}
+
+.screen-content.welcome-screen h2 {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: 600;
+  color: var(--u-color_text_subdued);
+}
+
+.screen-content.welcome-screen h2 .icon {
+  color: var(--u-color_icon_subdued);
+}
+
+.screen-content.welcome-screen .unison-version {
+  color: var(--u-color_text_very-subdued);
+  font-size: var(--font-size-small);
+}
+
+.screen-content.welcome-screen .actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.select-project {
+  display: flex;
+  padding: 0;
+  gap: 0;
+}
+
+.screen-content .text-field {
+  width: 100%;
+}
+
+.project-option {
+  width: 100%;
+  padding: 0rem 0.75rem;
+  height: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--u-color_border_subdued);
+  line-height: 1;
+  font-size: var(--font-size-medium);
+}
+
+.project-option .icon {
+  font-size: var(--font-size-medium);
+}
+
+.project-option:hover {
+  background: var(--u-color_container_hovered);
+  color: var(--u-color_interactive);
+  cursor: pointer;
+}
+
+.project-option:last-child {
+  border: 0;
+}
+

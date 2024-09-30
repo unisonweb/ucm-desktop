@@ -1,42 +1,43 @@
 module Ucm.App exposing (..)
 
 import Browser
-import Browser.Navigation as Nav
-import Html exposing (Html, article, div, footer, h1, h2, header, main_, p, text)
-import Html.Attributes exposing (attribute, class)
+import Html
+    exposing
+        ( Html
+        , article
+        , div
+        , footer
+        , header
+        , main_
+        )
+import Html.Attributes exposing (attribute, class, classList)
 import UI
 import UI.Button as Button
-import UI.Card as Card
-import UI.Divider as Divider
-import UI.Form.TextField as TextField
 import UI.Icon as Icon
+import Ucm.AppContext exposing (AppContext)
+import Ucm.WelcomeScreen as WelcomeScreen
 import Url exposing (Url)
 
 
-type alias WelcomeScreenModel =
-    { searchQuery : String
-    }
-
-
 type Screen
-    = WelcomeScreen WelcomeScreenModel
+    = WelcomeScreen WelcomeScreen.Model
     | ProjectScreen
 
 
 type alias Model =
-    { screen : Screen
+    { appContext : AppContext
+    , screen : Screen
     }
 
 
-type alias Flags =
-    ()
-
-
-init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init _ _ _ =
-    ( { screen = WelcomeScreen { searchQuery = "" }
-      }
-    , Cmd.none
+init : AppContext -> Url -> ( Model, Cmd Msg )
+init appContext _ =
+    let
+        ( welcome, welcomeCmd ) =
+            WelcomeScreen.init appContext
+    in
+    ( { appContext = appContext, screen = WelcomeScreen welcome }
+    , Cmd.map WelcomeScreenMsg welcomeCmd
     )
 
 
@@ -49,6 +50,7 @@ type Msg
     | UrlRequest Browser.UrlRequest
     | UrlChange Url
     | ChangeScreen Screen
+    | WelcomeScreenMsg WelcomeScreen.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -74,51 +76,12 @@ subscriptions _ =
 -- VIEW
 
 
-viewWelcomeScreen : WelcomeScreenModel -> List (Html Msg)
-viewWelcomeScreen model =
-    let
-        viewProjectOption p =
-            div [ class "project-option" ] [ text p, Icon.view Icon.chevronRight ]
-    in
-    [ div [ class "welcome-column" ]
-        [ header []
-            [ Icon.view Icon.unisonMark
-            , h1 [] [ text "Unison" ]
-            , p [ class "subdued" ] [ text "Version: release/0.5.26 (built on 2024-09-05)" ]
-            , div [ class "actions" ]
-                [ Button.iconThenLabel NoOp Icon.docs "Unison Docs"
-                    |> Button.small
-                    |> Button.view
-                , Button.iconThenLabel NoOp Icon.largePlus "New project"
-                    |> Button.small
-                    |> Button.view
-                , Button.iconThenLabel NoOp Icon.download "Clone project"
-                    |> Button.small
-                    |> Button.view
-                ]
-            ]
-        , Divider.divider |> Divider.small |> Divider.view
-        , h2 [] [ Icon.view Icon.pencilRuler, text "Select a project to get started" ]
-        , TextField.fieldWithoutLabel (always NoOp) "Search projects" model.searchQuery
-            |> TextField.view
-        , Card.card
-            [ viewProjectOption "@unison/base"
-            , viewProjectOption "@unison/cloud"
-            , viewProjectOption "@hojberg/html"
-            , viewProjectOption "@hojberg/svg"
-            ]
-            |> Card.asContained
-            |> Card.withClassName "select-project"
-            |> Card.view
-        ]
-    ]
-
-
 viewScreenContent : Screen -> Html Msg
 viewScreenContent screen =
     case screen of
         WelcomeScreen m ->
-            article [ class "screen-content welcome-screen" ] (viewWelcomeScreen m)
+            article [ class "screen-content welcome-screen" ]
+                [ Html.map WelcomeScreenMsg (div [] (WelcomeScreen.view m)) ]
 
         ProjectScreen ->
             article [ class "screen-content project-screen" ] []
@@ -127,10 +90,10 @@ viewScreenContent screen =
 viewWindowTitlebar : Screen -> Html Msg
 viewWindowTitlebar screen =
     let
-        ( left, right ) =
+        ( left, right, transparentTitlebar ) =
             case screen of
                 WelcomeScreen _ ->
-                    ( [], [] )
+                    ( [], [], True )
 
                 ProjectScreen ->
                     ( [ Button.iconThenLabelThenIcon NoOp Icon.pencilRuler "@unison/base" Icon.caretDown
@@ -160,9 +123,14 @@ viewWindowTitlebar screen =
                             |> Button.decorativePurple
                             |> Button.view
                       ]
+                    , False
                     )
     in
-    header [ attribute "data-tauri-drag-region" "1", class "window-control-bar window-titlebar" ]
+    header
+        [ attribute "data-tauri-drag-region" "1"
+        , class "window-control-bar window-titlebar"
+        , classList [ ( "window-titlebar_transparent", transparentTitlebar ) ]
+        ]
         [ div [ class "window-control-bar-group" ] left
         , div [ class "window-control-bar-group" ] right
         ]
