@@ -16,11 +16,13 @@
     "postinstall": "ui-core-install"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1"
+    "@tauri-apps/api": "^2.0.0-rc.0",
+    "@tauri-apps/plugin-http": "^2.0.0-rc.2",
+    "@tauri-apps/plugin-shell": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "@octokit/core": "^4.0.5",
-    "@tauri-apps/cli": "^1",
+    "@tauri-apps/cli": "^2.0.0-rc.18",
     "@unison-lang/ui-core-scripts": "^1.1.9",
     "elm": "^0.19.1-6",
     "elm-format": "^0.8.7",
