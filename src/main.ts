@@ -17,7 +17,7 @@ import { Elm } from './Main.elm'
 
 const flags = {
   operatingSystem: detectOs(window.navigator),
-  basePath: new URL(document.baseURI).pathname,
+  basePath: "",
   apiUrl: "http://127.0.0.1:4444/asdf/api"
 };
 

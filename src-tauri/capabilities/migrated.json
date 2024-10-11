@@ -16,11 +16,6 @@
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     "shell:allow-open",
-    "shell:default",
-    "http:allow-fetch",
-    {
-      "identifier": "http:default",
-      "allow": [{ "url": "http://127.0.0.1:4444/*" }]
-    }
+    "shell:default"
   ]
 }

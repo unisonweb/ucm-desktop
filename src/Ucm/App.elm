@@ -1,27 +1,16 @@
 module Ucm.App exposing (..)
 
 import Browser
-import Html
-    exposing
-        ( Html
-        , article
-        , div
-        , footer
-        , header
-        , main_
-        )
-import Html.Attributes exposing (attribute, class, classList)
-import UI
-import UI.Button as Button
-import UI.Icon as Icon
 import Ucm.AppContext exposing (AppContext)
-import Ucm.WelcomeScreen as WelcomeScreen
+import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
+import Ucm.WorkspaceScreen as WorkspaceScreen
 import Url exposing (Url)
+import Window
 
 
 type Screen
     = WelcomeScreen WelcomeScreen.Model
-    | ProjectScreen
+    | WorkspaceScreen WorkspaceScreen.Model
 
 
 type alias Model =
@@ -49,15 +38,59 @@ type Msg
     = NoOp
     | UrlRequest Browser.UrlRequest
     | UrlChange Url
-    | ChangeScreen Screen
     | WelcomeScreenMsg WelcomeScreen.Msg
+    | WorkspaceScreenMsg WorkspaceScreen.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ChangeScreen s ->
-            ( { model | screen = s }, Cmd.none )
+        WelcomeScreenMsg wMsg ->
+            case model.screen of
+                WelcomeScreen welcome ->
+                    let
+                        ( newWelcome, welcomeCmd, welcomeOut ) =
+                            WelcomeScreen.update wMsg welcome
+
+                        ( screen, newScreenCmd ) =
+                            case welcomeOut of
+                                WelcomeScreen.None ->
+                                    ( WelcomeScreen newWelcome, Cmd.none )
+
+                                ChangeScreenToWorkspace wsc ->
+                                    let
+                                        ( workspace, workspaceCmd ) =
+                                            WorkspaceScreen.init model.appContext wsc
+                                    in
+                                    ( WorkspaceScreen workspace
+                                    , Cmd.map WorkspaceScreenMsg workspaceCmd
+                                    )
+                    in
+                    ( { model | screen = screen }
+                    , Cmd.batch [ Cmd.map WelcomeScreenMsg welcomeCmd, newScreenCmd ]
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        WorkspaceScreenMsg workspaceMsg ->
+            case model.screen of
+                WorkspaceScreen workspace ->
+                    let
+                        ( newWorkspace, workspaceCmd, workspaceOut ) =
+                            WorkspaceScreen.update workspaceMsg workspace
+
+                        screen =
+                            case workspaceOut of
+                                WorkspaceScreen.None ->
+                                    WorkspaceScreen newWorkspace
+                    in
+                    ( { model | screen = screen }
+                    , Cmd.map WorkspaceScreenMsg workspaceCmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -76,95 +109,15 @@ subscriptions _ =
 -- VIEW
 
 
-viewScreenContent : Screen -> Html Msg
-viewScreenContent screen =
-    case screen of
-        WelcomeScreen m ->
-            article [ class "screen-content welcome-screen" ]
-                [ Html.map WelcomeScreenMsg (div [] (WelcomeScreen.view m)) ]
-
-        ProjectScreen ->
-            article [ class "screen-content project-screen" ] []
-
-
-viewWindowTitlebar : Screen -> Html Msg
-viewWindowTitlebar screen =
-    let
-        ( left, right, transparentTitlebar ) =
-            case screen of
-                WelcomeScreen _ ->
-                    ( [], [], True )
-
-                ProjectScreen ->
-                    ( [ Button.iconThenLabelThenIcon NoOp Icon.pencilRuler "@unison/base" Icon.caretDown
-                            |> Button.small
-                            |> Button.view
-                      , Button.iconThenLabelThenIcon NoOp Icon.branch "/main" Icon.caretDown
-                            |> Button.small
-                            |> Button.view
-                      , Button.iconThenLabelThenIcon NoOp Icon.pencilRuler "History" Icon.caretDown
-                            |> Button.small
-                            |> Button.view
-                      ]
-                    , [ Button.icon NoOp Icon.search
-                            |> Button.small
-                            |> Button.subdued
-                            |> Button.view
-                      , Button.icon NoOp Icon.largePlus
-                            |> Button.small
-                            |> Button.subdued
-                            |> Button.view
-                      , Button.icon NoOp Icon.windowSplit
-                            |> Button.small
-                            |> Button.subdued
-                            |> Button.view
-                      , Button.iconThenLabel NoOp Icon.unisonMark "Sign-in to Unison Share"
-                            |> Button.small
-                            |> Button.decorativePurple
-                            |> Button.view
-                      ]
-                    , False
-                    )
-    in
-    header
-        [ attribute "data-tauri-drag-region" "1"
-        , class "window-control-bar window-titlebar"
-        , classList [ ( "window-titlebar_transparent", transparentTitlebar ) ]
-        ]
-        [ div [ class "window-control-bar-group" ] left
-        , div [ class "window-control-bar-group" ] right
-        ]
-
-
-viewWindowFooter : Screen -> Html Msg
-viewWindowFooter screen =
-    case screen of
-        WelcomeScreen _ ->
-            UI.nothing
-
-        ProjectScreen ->
-            footer [ class "window-control-bar window-footer" ]
-                [ div [ class "window-control-bar-group" ]
-                    [ Button.icon NoOp Icon.leftSidebarOff
-                        |> Button.small
-                        |> Button.subdued
-                        |> Button.view
-                    ]
-                , div [ class "window-control-bar-group" ]
-                    [ Button.icon NoOp Icon.cli
-                        |> Button.small
-                        |> Button.subdued
-                        |> Button.view
-                    ]
-                ]
-
-
 view : Model -> Browser.Document Msg
 view { screen } =
-    { title = "@unison/base UCM"
-    , body =
-        [ viewWindowTitlebar screen
-        , main_ [] [ viewScreenContent screen ]
-        , viewWindowFooter screen
-        ]
-    }
+    case screen of
+        WelcomeScreen m ->
+            WelcomeScreen.view m
+                |> Window.map WelcomeScreenMsg
+                |> Window.view
+
+        WorkspaceScreen m ->
+            WorkspaceScreen.view m
+                |> Window.map WorkspaceScreenMsg
+                |> Window.view

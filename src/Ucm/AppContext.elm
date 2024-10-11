@@ -5,7 +5,7 @@ import Code.Config
 import Code.Perspective as Perspective
 import Lib.HttpApi as HttpApi exposing (HttpApi)
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
-import Ucm.Api
+import Ucm.Api as Api
 import Ucm.WorkspaceContext exposing (WorkspaceContext)
 
 
@@ -37,6 +37,6 @@ toCodeConfig : AppContext -> WorkspaceContext -> Code.Config.Config
 toCodeConfig appContext workspaceContext =
     { operatingSystem = appContext.operatingSystem
     , perspective = Perspective.relativeRootPerspective
-    , toApiEndpoint = Ucm.Api.codebaseApiEndpointToEndpoint workspaceContext
+    , toApiEndpoint = Api.codebaseApiEndpointToEndpoint workspaceContext
     , api = appContext.api
     }

@@ -1,12 +1,13 @@
-module Ucm.Api exposing (codebaseApiEndpointToEndpoint, namespace, projectBranches, projects)
+module Ucm.Api exposing (codebaseApiEndpointToEndpoint, projectBranches, projects)
 
 import Code.BranchRef as BranchRef
 import Code.CodebaseApi as CodebaseApi
 import Code.Definition.Reference as Reference
 import Code.FullyQualifiedName as FQN exposing (FQN)
-import Code.Hash as Hash
+import Code.Hash as Hash exposing (Hash)
 import Code.HashQualified as HQ
 import Code.Namespace.NamespaceRef as NamespaceRef
+import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Syntax as Syntax
 import Code.Version as Version
 import Lib.HttpApi exposing (Endpoint(..))
@@ -15,14 +16,6 @@ import Regex
 import Ucm.ProjectName as ProjectName exposing (ProjectName)
 import Ucm.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
-
-
-namespace : WorkspaceContext -> FQN -> Endpoint
-namespace context fqn =
-    GET
-        { path = baseCodePathFromContext context ++ [ "namespaces", FQN.toString fqn ]
-        , queryParams = []
-        }
 
 
 projects : Endpoint
@@ -48,17 +41,18 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
             baseCodePathFromContext context
     in
     case cbEndpoint of
-        CodebaseApi.Find { withinFqn, limit, sourceWidth, query } ->
+        CodebaseApi.Find { perspective, withinFqn, limit, sourceWidth, query } ->
             let
                 params =
                     case withinFqn of
                         Just fqn ->
-                            [ Just (relativeTo fqn)
+                            [ toRootBranch (Perspective.rootPerspective perspective)
+                            , Just (relativeTo fqn)
                             ]
                                 |> MaybeE.values
 
                         Nothing ->
-                            []
+                            perspectiveToQueryParams perspective
 
                 width =
                     case sourceWidth of
@@ -75,21 +69,20 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
                         ++ params
                 }
 
-        CodebaseApi.Browse { ref } ->
+        CodebaseApi.Browse { perspective, ref } ->
             let
                 namespace_ =
                     ref
                         |> Maybe.map NamespaceRef.toString
                         |> Maybe.map (string "namespace")
                         |> Maybe.map (\qp -> [ qp ])
-                        |> Maybe.withDefault []
             in
             GET
                 { path = base ++ [ "list" ]
-                , queryParams = namespace_
+                , queryParams = Maybe.withDefault [] namespace_ ++ perspectiveToQueryParams perspective
                 }
 
-        CodebaseApi.Definition { ref } ->
+        CodebaseApi.Definition { perspective, ref } ->
             let
                 constructorSuffixRegex =
                     Maybe.withDefault Regex.never (Regex.fromString "#[ad]\\d$")
@@ -113,9 +106,9 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
             in
             [ refToString ref ]
                 |> List.map (string "names")
-                |> (\names -> GET { path = base ++ [ "getDefinition" ], queryParams = names })
+                |> (\names -> GET { path = base ++ [ "getDefinition" ], queryParams = names ++ perspectiveToQueryParams perspective })
 
-        CodebaseApi.Summary { ref } ->
+        CodebaseApi.Summary { perspective, ref } ->
             let
                 hqPath hq =
                     case hq of
@@ -161,7 +154,7 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
             in
             GET
                 { path = base ++ path
-                , queryParams = query
+                , queryParams = query ++ perspectiveToQueryParams perspective
                 }
 
 
@@ -181,6 +174,31 @@ baseCodePathFromContext { projectName, branchRef } =
 
 
 -- QUERY PARAMS ---------------------------------------------------------------
+
+
+perspectiveToQueryParams : Perspective -> List QueryParameter
+perspectiveToQueryParams perspective =
+    case perspective of
+        Root p ->
+            MaybeE.values [ toRootBranch p.root ]
+
+        Namespace d ->
+            [ toRootBranch d.root, Just (relativeTo d.fqn) ] |> MaybeE.values
+
+
+toRootBranch : Perspective.RootPerspective -> Maybe QueryParameter
+toRootBranch rootPerspective =
+    case rootPerspective of
+        Perspective.Relative ->
+            Nothing
+
+        Perspective.Absolute h ->
+            Just (rootBranch h)
+
+
+rootBranch : Hash -> QueryParameter
+rootBranch hash =
+    string "rootBranch" (hash |> Hash.toString)
 
 
 relativeTo : FQN -> QueryParameter

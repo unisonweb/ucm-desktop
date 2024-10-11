@@ -1,0 +1,100 @@
+body {
+  --window-control-bar_height: 2.5rem;
+  background: var(--u-color_chrome_subdued);
+  color: var(--u-color_text);
+  display: grid;
+  grid-template-rows: 
+    var(--window-control-bar_height) 
+    calc(100vh - var(--window-control-bar_height));
+  user-select: none;
+}
+
+body:has(.window-footer) {
+  grid-template-rows: 
+    var(--window-control-bar_height) 
+    calc(calc(100vh - var(--window-control-bar_height)) - var(--window-control-bar_height))
+    var(--window-control-bar_height) 
+}
+
+.with-window-sidebar_left {
+  display: grid;
+  grid-template-columns: 0.2fr auto;
+}
+
+.window-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-width: 100%;
+  overflow: auto;
+  font-size: var(--font-size-medium);
+}
+
+.window-control-bar {
+  height: 2.5rem;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem;
+}
+
+.window-control-bar-group {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+.window-titlebar {
+  padding-left: 4.5rem;
+  border-bottom: 1px solid var(--u-color_chrome_border);
+  background: var(--u-color_chrome_emphasized)
+}
+
+.window-titlebar.window-titlebar_transparent {
+  border: 0;
+  background: transparent;
+}
+
+.window-titlebar.window-titlebar_borderless {
+  border: 0;
+}
+
+.window-titlebar.window-titlebar_transparent + .window-content {
+  margin-top: -2.5rem;
+  height: calc(100% + 2.5rem);
+}
+
+.window-sidebar {
+  position: relative;
+  background: var(--u-color_chrome);
+  border-right: 1px solid var(--u-color_chrome_border);
+  font-size: var(--font-size-medium);
+}
+
+.window-sidebar_content {
+  overflow: auto;
+  height: calc(calc(100vh - var(--window-control-bar_height)) - var(--window-control-bar_height));
+}
+
+.window-sidebar_resize-handle {
+  position: absolute;
+  top: 0;
+  right: -0.25rem;
+  bottom: 0;
+  width: 0.5rem;
+  transition: all 0.2s;
+  cursor: col-resize;
+}
+
+.window-sidebar:has(.window-sidebar_resize-handle:hover) {
+  border-color: var(--u-color_focus-border);
+  border-width: 2px;
+}
+
+.window-footer {
+  border-top: 1px solid var(--u-color_chrome_border);
+  background: var(--u-color_chrome);
+}

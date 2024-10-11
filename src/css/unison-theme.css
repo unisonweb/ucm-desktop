@@ -157,6 +157,11 @@
   --u-color_working_element_subdued: var(--color-gray-lighten-60);
   --u-color_working_text-on-element_subdued: var(--u-color_text);
 
+  --u-color_chrome: var(--color-gray-darken-20);
+  --u-color_chrome_subdued: var(--color-gray-darken-30);
+  --u-color_chrome_emphasized: var(--color-gray-darken-10);
+  --u-color_chrome_border: var(--u-color_border);
+
   /* = Syntax =------------------------------------------------------------- */
   --color-syntax-plain: var(--u-color_text);
 
