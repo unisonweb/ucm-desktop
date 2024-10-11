@@ -121,9 +121,19 @@ view model =
                     div [ class "projects" ] [ text "Error" ]
 
                 Success projects ->
+                    let
+                        projects_ =
+                            if not (String.isEmpty model.searchQuery) then
+                                projects
+                                    |> List.filter
+                                        (ProjectName.isMatch model.searchQuery)
+
+                            else
+                                projects
+                    in
                     section [ class "projects" ]
                         [ div [ class "project-cards" ]
-                            (List.map viewProjectOption projects)
+                            (List.map viewProjectOption projects_)
                         ]
 
         welcomeHeader =

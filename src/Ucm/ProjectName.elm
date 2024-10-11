@@ -91,6 +91,24 @@ equals (ProjectName handleA slugA) (ProjectName handleB slugB) =
             False
 
 
+isMatch : String -> ProjectName -> Bool
+isMatch s (ProjectName handle slug) =
+    let
+        removeAt s_ =
+            String.replace "@" "" s_
+
+        handle_ =
+            handle
+                |> Maybe.map UserHandle.toString
+                |> Maybe.map removeAt
+                |> Maybe.withDefault ""
+
+        slug_ =
+            ProjectSlug.toString slug
+    in
+    String.startsWith (removeAt s) handle_ || String.startsWith s slug_
+
+
 toString : ProjectName -> String
 toString (ProjectName handle slug) =
     let
