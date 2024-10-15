@@ -1,9 +1,72 @@
 module Window exposing (..)
 
 import Browser
-import Html exposing (Attribute, Html, aside, div, footer, header, main_, text)
+import Html
+    exposing
+        ( Attribute
+        , Html
+        , aside
+        , div
+        , footer
+        , header
+        , main_
+        , text
+        )
 import Html.Attributes exposing (attribute, class, classList, id)
+import SplitPane
 import UI
+
+
+
+-- MODEL
+
+
+type alias Model =
+    { splitPane : SplitPane.State
+    }
+
+
+init : Model
+init =
+    { splitPane =
+        SplitPane.init SplitPane.Horizontal
+            |> SplitPane.configureSplitter (SplitPane.percentage 0.15 Nothing)
+    }
+
+
+
+-- UPDATE
+
+
+type Msg
+    = SplitPaneMsg SplitPane.Msg
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        SplitPaneMsg paneMsg ->
+            ( { model
+                | splitPane =
+                    SplitPane.update
+                        paneMsg
+                        model.splitPane
+              }
+            , Cmd.none
+            )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map SplitPaneMsg (SplitPane.subscriptions model.splitPane)
+
+
+
+-- WINDOW
 
 
 type WindowTitlebar msg
@@ -28,7 +91,9 @@ type WindowFooter msg
 
 type WindowSidebar msg
     = NoWindowSidebar
-    | WindowSidebar (List (Html msg))
+    | WindowSidebar
+        { content : List (Html msg)
+        }
 
 
 type alias Window msg =
@@ -243,7 +308,7 @@ withFooterRight right win =
 
 withLeftSidebar : List (Html msg) -> Window msg -> Window msg
 withLeftSidebar sidebar win =
-    { win | leftSidebar = WindowSidebar sidebar }
+    { win | leftSidebar = WindowSidebar { content = sidebar } }
 
 
 map : (fromMsg -> toMsg) -> Window fromMsg -> Window toMsg
@@ -274,7 +339,7 @@ map f win =
                     NoWindowSidebar
 
                 WindowSidebar sb ->
-                    WindowSidebar (map_ sb)
+                    WindowSidebar { content = map_ sb.content }
 
         newFooter =
             case win.footer of
@@ -373,8 +438,8 @@ viewWindowFooter id_ footer_ =
                 ]
 
 
-view : Window msg -> Browser.Document msg
-view win =
+view : (Msg -> msg) -> Model -> Window msg -> Browser.Document msg
+view toMsg model win =
     let
         mainContent =
             case win.leftSidebar of
@@ -386,20 +451,37 @@ view win =
                         win.content
 
                 WindowSidebar sb ->
-                    main_
-                        [ id (win.id ++ "_window-content-grid")
-                        , class "window-content-grid with-window-sidebar_left"
-                        ]
-                        [ aside [ class "window-sidebar" ]
-                            [ div [ class "window-sidebar_content" ] sb
-                            , div [ class "window-sidebar_resize-handle" ] []
-                            ]
-                        , div
-                            [ id (win.id ++ "_window-content")
-                            , class "window-content"
-                            ]
-                            win.content
-                        ]
+                    let
+                        sidebarPane =
+                            aside [ class "window-sidebar" ]
+                                sb.content
+
+                        mainPane =
+                            div
+                                [ id (win.id ++ "_window-content")
+                                , class "window-content"
+                                ]
+                                win.content
+
+                        paneConfig =
+                            SplitPane.createViewConfig
+                                { toMsg = SplitPaneMsg >> toMsg
+                                , customSplitter =
+                                    Just (SplitPane.createCustomSplitter (SplitPaneMsg >> toMsg) splitter)
+                                }
+
+                        splitter =
+                            { attributes = [ class "window-sidebar_resize-handle" ]
+                            , children =
+                                [ div [ class "window-sidebar_resize-handle_sidebar-side" ] []
+                                , div [ class "window-sidebar_resize-handle_main-pane-side" ] []
+                                ]
+                            }
+
+                        panes =
+                            SplitPane.view paneConfig sidebarPane mainPane model.splitPane
+                    in
+                    main_ [] [ panes ]
     in
     { title = "UCM"
     , body =

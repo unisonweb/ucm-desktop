@@ -1,5 +1,6 @@
 module Ucm.WorkspaceScreen exposing (..)
 
+import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
@@ -10,7 +11,7 @@ import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.ProjectName as ProjectName
 import Ucm.WorkspaceContext exposing (WorkspaceContext)
-import Window exposing (Window)
+import Window
 
 
 
@@ -28,6 +29,7 @@ type alias Model =
     { workspaceContext : WorkspaceContext
     , codebaseTree : CodebaseTree.Model
     , config : Code.Config.Config
+    , window : Window.Model
     }
 
 
@@ -43,13 +45,19 @@ init appContext workspaceContext =
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
       , config = config
+      , window = Window.init
       }
     , Cmd.map CodebaseTreeMsg codebaseTreeCmd
     )
 
 
+
+-- UPDATE
+
+
 type Msg
     = NoOp
+    | WindowMsg Window.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
 
 
@@ -91,8 +99,28 @@ update msg model =
                _ ->
                  ( m, cmd_ )
         -}
+        WindowMsg wMsg ->
+            let
+                ( window, wCmd ) =
+                    Window.update wMsg model.window
+            in
+            ( { model | window = window }, Cmd.map WindowMsg wCmd, None )
+
         _ ->
             ( model, Cmd.none, None )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map WindowMsg (Window.subscriptions model.window)
+
+
+
+-- VIEW
 
 
 titlebarLeft : WorkspaceContext -> List (Html Msg)
@@ -135,7 +163,7 @@ viewLeftSidebar codebaseTree =
     ]
 
 
-view : Model -> Window Msg
+view : Model -> Browser.Document Msg
 view model =
     let
         footerLeft =
@@ -155,3 +183,4 @@ view model =
         |> Window.withFooterRight footerRight
         |> Window.withLeftSidebar (viewLeftSidebar model.codebaseTree)
         |> Window.withContent [ text "Pick a definition" ]
+        |> Window.view WindowMsg model.window

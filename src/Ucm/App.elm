@@ -1,11 +1,11 @@
 module Ucm.App exposing (..)
 
 import Browser
+import Html
 import Ucm.AppContext exposing (AppContext)
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
 import Ucm.WorkspaceScreen as WorkspaceScreen
 import Url exposing (Url)
-import Window
 
 
 type Screen
@@ -101,23 +101,35 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions model =
+    case model.screen of
+        WelcomeScreen welcome ->
+            Sub.map WelcomeScreenMsg (WelcomeScreen.subscriptions welcome)
+
+        WorkspaceScreen workspace ->
+            Sub.map WorkspaceScreenMsg (WorkspaceScreen.subscriptions workspace)
 
 
 
 -- VIEW
 
 
+mapDocument : (msgA -> msgB) -> Browser.Document msgA -> Browser.Document msgB
+mapDocument f document =
+    { title = document.title
+    , body = List.map (Html.map f) document.body
+    }
+
+
 view : Model -> Browser.Document Msg
-view { screen } =
-    case screen of
+view model =
+    case model.screen of
         WelcomeScreen m ->
-            WelcomeScreen.view m
-                |> Window.map WelcomeScreenMsg
-                |> Window.view
+            m
+                |> WelcomeScreen.view
+                |> mapDocument WelcomeScreenMsg
 
         WorkspaceScreen m ->
-            WorkspaceScreen.view m
-                |> Window.map WorkspaceScreenMsg
-                |> Window.view
+            m
+                |> WorkspaceScreen.view
+                |> mapDocument WorkspaceScreenMsg

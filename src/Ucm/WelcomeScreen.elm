@@ -1,5 +1,6 @@
 module Ucm.WelcomeScreen exposing (..)
 
+import Browser
 import Code.BranchRef as BranchRef exposing (BranchRef)
 import Html
     exposing
@@ -25,7 +26,7 @@ import Ucm.AppContext exposing (AppContext)
 import Ucm.Link as Link
 import Ucm.ProjectName as ProjectName exposing (ProjectName)
 import Ucm.WorkspaceContext exposing (WorkspaceContext)
-import Window exposing (Window)
+import Window
 
 
 
@@ -35,12 +36,16 @@ import Window exposing (Window)
 type alias Model =
     { searchQuery : String
     , projects : WebData (List ProjectName)
+    , window : Window.Model
     }
 
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( { searchQuery = "", projects = Loading }
+    ( { searchQuery = ""
+      , projects = Loading
+      , window = Window.init
+      }
     , fetchProjects appContext
     )
 
@@ -53,6 +58,7 @@ type Msg
     = FetchProjectsFinished (WebData (List ProjectName))
     | UpdateSearchQuery String
     | SelectProject ProjectName BranchRef
+    | WindowMsg Window.Msg
 
 
 type OutMsg
@@ -76,6 +82,13 @@ update msg model =
             in
             ( model, Cmd.none, ChangeScreenToWorkspace workspaceContext )
 
+        WindowMsg wMsg ->
+            let
+                ( window, wCmd ) =
+                    Window.update wMsg model.window
+            in
+            ( { model | window = window }, Cmd.map WindowMsg wCmd, None )
+
 
 
 --EFFECTS
@@ -95,10 +108,19 @@ fetchProjects appContext =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map WindowMsg (Window.subscriptions model.window)
+
+
+
 -- VIEW
 
 
-view : Model -> Window Msg
+view : Model -> Browser.Document Msg
 view model =
     let
         viewProjectOption p =
@@ -166,3 +188,4 @@ view model =
             ]
         |> Window.withoutTitlebarBorder
         |> Window.withContent windowContent
+        |> Window.view WindowMsg model.window

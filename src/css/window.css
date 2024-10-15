@@ -1,24 +1,19 @@
 body {
-  --window-control-bar_height: 2.5rem;
+  --c-window_control-bar_height: 2.5rem;
   background: var(--u-color_chrome_subdued);
   color: var(--u-color_text);
   display: grid;
   grid-template-rows: 
-    var(--window-control-bar_height) 
-    calc(100vh - var(--window-control-bar_height));
+    var(--c-window_control-bar_height) 
+    calc(100vh - var(--c-window_control-bar_height));
   user-select: none;
 }
 
 body:has(.window-footer) {
   grid-template-rows: 
-    var(--window-control-bar_height) 
-    calc(calc(100vh - var(--window-control-bar_height)) - var(--window-control-bar_height))
-    var(--window-control-bar_height) 
-}
-
-.with-window-sidebar_left {
-  display: grid;
-  grid-template-columns: 0.2fr auto;
+    var(--c-window_control-bar_height) 
+    calc(calc(100vh - var(--c-window_control-bar_height)) - var(--c-window_control-bar_height))
+    var(--c-window_control-bar_height) 
 }
 
 .window-content {
@@ -68,30 +63,44 @@ body:has(.window-footer) {
 }
 
 .window-sidebar {
+  display: flex;
   position: relative;
   background: var(--u-color_chrome);
-  border-right: 1px solid var(--u-color_chrome_border);
   font-size: var(--font-size-medium);
+  overflow: auto;
+  height: calc(calc(100vh - var(--c-window_control-bar_height)) - var(--c-window_control-bar_height));
+  width: 100%;
 }
 
-.window-sidebar_content {
-  overflow: auto;
-  height: calc(calc(100vh - var(--window-control-bar_height)) - var(--window-control-bar_height));
+/* prevents a tiny white box in the corner that appears when both horizontal
+ * and vertical scrollbars are visible */
+.window-sidebar::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .window-sidebar_resize-handle {
-  position: absolute;
-  top: 0;
-  right: -0.25rem;
-  bottom: 0;
-  width: 0.5rem;
+  --c-window_sidebar_resize-handle_width: 1rem;
+  height: 100%;
+  width: var(--c-window_sidebar_resize-handle_width);
   transition: all 0.2s;
   cursor: col-resize;
+  margin-left: -0.5rem;
+
+  & .window-sidebar_resize-handle_sidebar-side {
+    position: relative;
+    height: 100%;
+    width: calc(var(--c-window_sidebar_resize-handle_width) / 2);
+    border-right: 1px solid var(--u-color_chrome_border);
+  }
+
+  & .window-sidebar_resize-handle_main-pane-side {
+    height: 100%;
+    width: calc(var(--c-window_sidebar_resize-handle_width) / 2);
+  }
 }
 
-.window-sidebar:has(.window-sidebar_resize-handle:hover) {
+.window-sidebar_resize-handle:hover .window-sidebar_resize-handle_sidebar-side {
   border-color: var(--u-color_focus-border);
-  border-width: 2px;
 }
 
 .window-footer {
