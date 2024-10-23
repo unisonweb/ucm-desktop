@@ -17,7 +17,9 @@ import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
 import UI
+import UI.Button as Button
 import UI.Click as Click
+import UI.Icon as Icon
 import UI.TabList as TabList
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Workspace.WorkspaceCard as WorkspaceCard
@@ -51,6 +53,7 @@ init _ _ =
 type Msg
     = NoOp
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
+    | CloseWorkspaceItem WorkspaceItemRef
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,6 +91,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        CloseWorkspaceItem ref ->
+            ( { workspaceItems = WorkspaceItems.remove model.workspaceItems ref }, Cmd.none )
 
 
 
@@ -204,6 +210,9 @@ viewDefinitionItemSource defItem =
         WorkspaceItem.TermItem (Term.Term _ _ { info, source }) ->
             Source.viewTermSource (SourceViewConfig.rich SyntaxConfig.empty) info.name source
 
+        WorkspaceItem.TypeItem (Type.Type _ _ { source }) ->
+            Source.viewTypeSource (SourceViewConfig.rich SyntaxConfig.empty) source
+
         _ ->
             UI.nothing
 
@@ -220,13 +229,19 @@ viewItem item isFocused =
                     cardBase
                         |> WorkspaceCard.withContent [ text "Loading..." ]
 
-                WorkspaceItem.Success _ (WorkspaceItem.DefinitionWorkspaceItem defItem) ->
+                WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem defItem) ->
                     let
                         tabList =
                             TabList.tabList [] (TabList.tab "Code" (Click.onClick NoOp)) []
                     in
                     cardBase
                         |> WorkspaceCard.withTitle (FQN.toString (definitionItemName defItem))
+                        |> WorkspaceCard.withTitlebarRight
+                            [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
+                                |> Button.subdued
+                                |> Button.small
+                                |> Button.view
+                            ]
                         -- |> WorkspaceCard.withTabList tabList
                         |> WorkspaceCard.withContent [ viewDefinitionItemSource defItem ]
 

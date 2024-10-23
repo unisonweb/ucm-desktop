@@ -42,7 +42,10 @@ card content =
 
 withTitle : String -> WorkspaceCard msg -> WorkspaceCard msg
 withTitle title card_ =
-    { card_ | titleLeft = [ span [ class "workspace-card_title" ] [ text title ] ] }
+    { card_
+        | titleLeft =
+            [ span [ class "workspace-card_title" ] [ text title ] ]
+    }
 
 
 withTitlebar : { left : List (Html msg), right : List (Html msg) } -> WorkspaceCard msg -> WorkspaceCard msg
@@ -56,8 +59,8 @@ withTitlebarLeft left card_ =
 
 
 withTitlebarRight : List (Html msg) -> WorkspaceCard msg -> WorkspaceCard msg
-withTitlebarRight left card_ =
-    { card_ | titleLeft = left }
+withTitlebarRight right card_ =
+    { card_ | titleRight = right }
 
 
 withContent : List (Html msg) -> WorkspaceCard msg -> WorkspaceCard msg
