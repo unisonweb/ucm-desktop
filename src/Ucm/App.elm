@@ -4,6 +4,7 @@ import Browser
 import Html
 import Ucm.AppContext exposing (AppContext)
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
+import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.WorkspaceScreen as WorkspaceScreen
 import Url exposing (Url)
 
@@ -19,14 +20,27 @@ type alias Model =
     }
 
 
-init : AppContext -> Url -> ( Model, Cmd Msg )
-init appContext _ =
+init : AppContext -> Maybe WorkspaceContext -> Url -> ( Model, Cmd Msg )
+init appContext workspaceContext _ =
     let
-        ( welcome, welcomeCmd ) =
-            WelcomeScreen.init appContext
+        ( screen, cmd ) =
+            case workspaceContext of
+                Just wsc ->
+                    let
+                        ( workspace, wsCmd ) =
+                            WorkspaceScreen.init appContext wsc
+                    in
+                    ( WorkspaceScreen workspace, Cmd.map WorkspaceScreenMsg wsCmd )
+
+                Nothing ->
+                    let
+                        ( welcome, welcomeCmd ) =
+                            WelcomeScreen.init appContext
+                    in
+                    ( WelcomeScreen welcome, Cmd.map WelcomeScreenMsg welcomeCmd )
     in
-    ( { appContext = appContext, screen = WelcomeScreen welcome }
-    , Cmd.map WelcomeScreenMsg welcomeCmd
+    ( { appContext = appContext, screen = screen }
+    , cmd
     )
 
 

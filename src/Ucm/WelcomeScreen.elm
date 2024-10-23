@@ -25,7 +25,7 @@ import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Link as Link
 import Ucm.ProjectName as ProjectName exposing (ProjectName)
-import Ucm.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Window
 
 
@@ -80,7 +80,7 @@ update msg model =
                 workspaceContext =
                     { projectName = projectName, branchRef = branchRef }
             in
-            ( model, Cmd.none, ChangeScreenToWorkspace workspaceContext )
+            ( model, WorkspaceContext.save workspaceContext, ChangeScreenToWorkspace workspaceContext )
 
         WindowMsg wMsg ->
             let

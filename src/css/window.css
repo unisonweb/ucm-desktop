@@ -27,6 +27,10 @@ body:has(.window-footer) {
   font-size: var(--font-size-medium);
 }
 
+.window-content-shell:has(.window-sidebar) .window-content {
+  margin-left: -0.5rem;
+}
+
 .window-control-bar {
   height: 2.5rem;
   user-select: none;

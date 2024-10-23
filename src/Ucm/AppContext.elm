@@ -3,10 +3,11 @@ module Ucm.AppContext exposing (..)
 import Browser.Navigation as Nav
 import Code.Config
 import Code.Perspective as Perspective
+import Json.Decode exposing (Value)
 import Lib.HttpApi as HttpApi exposing (HttpApi)
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
 import Ucm.Api as Api
-import Ucm.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 
 
 type alias AppContext =
@@ -21,6 +22,7 @@ type alias Flags =
     { operatingSystem : String
     , basePath : String
     , apiUrl : String
+    , workspaceContext : Value
     }
 
 

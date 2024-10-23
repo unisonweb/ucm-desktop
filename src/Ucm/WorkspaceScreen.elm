@@ -4,25 +4,15 @@ import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import UI.Button as Button
 import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.ProjectName as ProjectName
-import Ucm.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
-
-
-
-{-
-   type alias Config =
-       { operatingSystem : OperatingSystem
-       , perspective : Perspective
-       , toApiEndpoint : ToApiEndpoint
-       , api : HttpApi
-     }
--}
 
 
 type alias Model =
@@ -30,6 +20,8 @@ type alias Model =
     , codebaseTree : CodebaseTree.Model
     , config : Code.Config.Config
     , window : Window.Model
+    , leftPane : WorkspacePane.Model
+    , rightPane : Maybe WorkspacePane.Model
     }
 
 
@@ -41,13 +33,21 @@ init appContext workspaceContext =
 
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init config
+
+        ( leftPane, leftPaneCmd ) =
+            WorkspacePane.init appContext workspaceContext
     in
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
       , config = config
       , window = Window.init
+      , leftPane = leftPane
+      , rightPane = Nothing
       }
-    , Cmd.map CodebaseTreeMsg codebaseTreeCmd
+    , Cmd.batch
+        [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+        , Cmd.map LeftPaneMsg leftPaneCmd
+        ]
     )
 
 
@@ -59,6 +59,7 @@ type Msg
     = NoOp
     | WindowMsg Window.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
+    | LeftPaneMsg WorkspacePane.Msg
 
 
 type OutMsg
@@ -70,35 +71,33 @@ update msg model =
     case msg of
         CodebaseTreeMsg codebaseTreeMsg ->
             let
-                ( codebaseTree, codebaseTreeCmd, _ ) =
+                ( codebaseTree, codebaseTreeCmd, outMsg ) =
                     CodebaseTree.update model.config codebaseTreeMsg model.codebaseTree
 
-                ( m, cmd_ ) =
+                ( model_, cmd_ ) =
                     ( { model | codebaseTree = codebaseTree }
                     , Cmd.map CodebaseTreeMsg codebaseTreeCmd
                     )
+
+                ( m, c ) =
+                    case outMsg of
+                        CodebaseTree.OpenDefinition ref ->
+                            let
+                                ( leftPane, paneMsg ) =
+                                    WorkspacePane.openDefinition
+                                        model.config
+                                        model_.leftPane
+                                        ref
+                            in
+                            ( { model_ | leftPane = leftPane }
+                            , Cmd.batch [ cmd_, Cmd.map LeftPaneMsg paneMsg ]
+                            )
+
+                        _ ->
+                            ( model_, cmd_ )
             in
-            ( m, cmd_, None )
+            ( m, c, None )
 
-        {-
-           case outMsg of
-                  CodebaseTree.OpenDefinition ref ->
-                      let
-                          navCmd =
-                              navigateToCode appContext context (Route.definition model.config.perspective ref)
-
-                          -- Close the sidebar when opening items on mobile
-                          m_ =
-                              if m.sidebarToggled then
-                                  { m | sidebarToggled = False }
-
-                              else
-                                  m
-                      in
-                      ( m_, Cmd.batch [ cmd, cmd_, navCmd ] )
-               _ ->
-                 ( m, cmd_ )
-        -}
         WindowMsg wMsg ->
             let
                 ( window, wCmd ) =
@@ -106,7 +105,14 @@ update msg model =
             in
             ( { model | window = window }, Cmd.map WindowMsg wCmd, None )
 
-        _ ->
+        LeftPaneMsg workspacePaneMsg ->
+            let
+                ( pane, paneCmd ) =
+                    WorkspacePane.update workspacePaneMsg model.leftPane
+            in
+            ( { model | leftPane = pane }, Cmd.map LeftPaneMsg paneCmd, None )
+
+        NoOp ->
             ( model, Cmd.none, None )
 
 
@@ -182,5 +188,5 @@ view model =
         |> Window.withFooterLeft footerLeft
         |> Window.withFooterRight footerRight
         |> Window.withLeftSidebar (viewLeftSidebar model.codebaseTree)
-        |> Window.withContent [ text "Pick a definition" ]
+        |> Window.withContent [ Html.map LeftPaneMsg (WorkspacePane.view model.leftPane) ]
         |> Window.view WindowMsg model.window

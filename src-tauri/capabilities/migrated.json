@@ -15,6 +15,7 @@
     "core:window:allow-hide",
     "core:window:allow-close",
     "core:window:allow-start-dragging",
+    "store:default",
     "shell:allow-open",
     "shell:default"
   ]

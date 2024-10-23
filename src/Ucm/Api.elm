@@ -14,7 +14,7 @@ import Lib.HttpApi exposing (Endpoint(..))
 import Maybe.Extra as MaybeE
 import Regex
 import Ucm.ProjectName as ProjectName exposing (ProjectName)
-import Ucm.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
 
 

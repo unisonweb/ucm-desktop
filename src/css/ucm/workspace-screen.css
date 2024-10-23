@@ -1,3 +1,6 @@
+@import "./workspace/workspace-pane.css";
+@import "./workspace/workspace-card.css";
+
 #workspace-screen_window-content {
   display: flex;
   flex-direction: row;

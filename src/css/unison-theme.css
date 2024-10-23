@@ -47,9 +47,9 @@
   /* [x] */ --u-color_border: var(--color-gray-base); 
   /* [x] */ --u-color_border_hovered: var(--color-gray-lighten-20);
   /* [x] */ --u-color_border_subdued: var(--color-gray-darken-10);
-  /* [x] */--u-color_border_emphasized: var(--color-gray-lighten-30);
+  /* [x] */ --u-color_border_emphasized: var(--color-gray-lighten-30);
   /* [x] */ --u-color_interactive: var(--color-blue-3);
-  /* [x] */  --u-color_interactive_hovered: var(--color-blue-5);
+  /* [x] */ --u-color_interactive_hovered: var(--color-blue-5);
   /* [x] */ --u-color_interactive_pressed: var(--color-pink-3);
 
   /* [x] */ --u-color_action: var(--color-gray-base);
@@ -174,19 +174,19 @@
   --color-icon-doc: var(--color-orange-2);
   --color-icon-patch: var(--color-blue-2);
 
-  --color-syntax-base: var(--color-gray-darken-30);
+  --color-syntax-base: var(--u-color_text);
   --color-syntax-subtle: var(--color-gray-lighten-20);
   --color-syntax-subtle-em: var(--color-gray-base);
   --color-syntax-keyword: var(--color-pink-2);
   --color-syntax-operator: var(--color-gray-lighten-30);
-  --color-syntax-term: var(--color-purple-2);
-  --color-syntax-term-namespace: var(--color-purple-3);
+  --color-syntax-term: var(--color-purple-5);
+  --color-syntax-term-namespace: var(--color-purple-4);
   --color-syntax-ability: var(--color-pink-1);
-  --color-syntax-type: var(--color-blue-1);
+  --color-syntax-type: var(--color-blue-3);
   --color-syntax-type-namespace: var(--color-blue-2);
-  --color-syntax-constructor: var(--color-blue-1);
+  --color-syntax-constructor: var(--color-blue-3);
   --color-syntax-constructor-namespace: var(--color-blue-2);
-  --color-syntax-text: var(--color-green-1);
+  --color-syntax-text: var(--color-green-3);
   --color-syntax-link-hover-bg: var(--color-gray-lighten-50);
 
   --color-syntax-monochrome-subtle: var(--u-color_text_subdued);

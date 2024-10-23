@@ -481,7 +481,7 @@ view toMsg model win =
                         panes =
                             SplitPane.view paneConfig sidebarPane mainPane model.splitPane
                     in
-                    main_ [] [ panes ]
+                    main_ [ class "window-content-shell" ] [ panes ]
     in
     { title = "UCM"
     , body =
