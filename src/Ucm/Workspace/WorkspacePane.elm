@@ -16,6 +16,7 @@ import Html.Attributes exposing (class)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
+import Maybe.Extra as MaybeE
 import UI
 import UI.Button as Button
 import UI.Click as Click
@@ -217,6 +218,19 @@ viewDefinitionItemSource defItem =
             UI.nothing
 
 
+hasDocs : WorkspaceItem.DefinitionItem -> Bool
+hasDocs defItem =
+    case defItem of
+        WorkspaceItem.TermItem (Term.Term _ _ { doc }) ->
+            MaybeE.isJust doc
+
+        WorkspaceItem.TypeItem (Type.Type _ _ { doc }) ->
+            MaybeE.isJust doc
+
+        _ ->
+            False
+
+
 viewItem : WorkspaceItem -> Bool -> Html Msg
 viewItem item isFocused =
     let
@@ -226,13 +240,21 @@ viewItem item isFocused =
         card =
             case item of
                 WorkspaceItem.Loading _ ->
-                    cardBase
-                        |> WorkspaceCard.withContent [ text "Loading..." ]
+                    Nothing
 
                 WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem defItem) ->
                     let
-                        tabList =
-                            TabList.tabList [] (TabList.tab "Code" (Click.onClick NoOp)) []
+                        withTabList c =
+                            if hasDocs defItem then
+                                c
+                                    |> WorkspaceCard.withTabList
+                                        (TabList.tabList []
+                                            (TabList.tab "Code" (Click.onClick NoOp))
+                                            [ TabList.tab "Docs" (Click.onClick NoOp) ]
+                                        )
+
+                            else
+                                c
                     in
                     cardBase
                         |> WorkspaceCard.withTitle (FQN.toString (definitionItemName defItem))
@@ -242,20 +264,24 @@ viewItem item isFocused =
                                 |> Button.small
                                 |> Button.view
                             ]
-                        -- |> WorkspaceCard.withTabList tabList
+                        |> withTabList
                         |> WorkspaceCard.withContent [ viewDefinitionItemSource defItem ]
+                        |> Just
 
                 WorkspaceItem.Failure _ e ->
                     cardBase
                         |> WorkspaceCard.withContent [ text (Util.httpErrorToString e) ]
+                        |> Just
 
                 _ ->
                     cardBase
                         |> WorkspaceCard.withContent [ text "TODO" ]
+                        |> Just
     in
     card
-        |> WorkspaceCard.withFocus isFocused
-        |> WorkspaceCard.view
+        |> Maybe.map (WorkspaceCard.withFocus isFocused)
+        |> Maybe.map WorkspaceCard.view
+        |> Maybe.withDefault UI.nothing
 
 
 view : Model -> Html Msg

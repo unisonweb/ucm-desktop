@@ -18,7 +18,7 @@ import "./main.css";
 
 console.log("Starting UCM");
 
-import { Elm } from './Main.elm'
+import { Elm } from './Main.elm';
 
 type WorkspaceContext = {
   projectName: string;
@@ -30,10 +30,10 @@ const store = await Store.load('settings.json');
 console.log("Store loaded");
 
 const workspaceContexts = (await store.get<Array<WorkspaceContext>>('workspace-contexts') || []);
-console.log(workspaceContexts);
 
-const unlisten = await getCurrentWindow().onCloseRequested(async (_) => {
+const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
   console.log("TODO");
+  ev.preventDefault();
 });
 
 // you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
