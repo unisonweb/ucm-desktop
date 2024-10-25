@@ -31,8 +31,8 @@
     --c-color_tabs_border: var(--color-card-border);
     --c-color_tabs_text_selected: var(--u-color_text_subdued);
     --c-color_tabs_border_selected: var(--u-color_border_emphasized);
-    --c-color_tabs_text_hovered: var(--u-color_interactive);
-    --c-color_tabs_border_hovered: var(--u-color_border_hovered);
+    --c-color_tabs_text_hovered: var(--u-color_text);
+    --c-color_tabs_border_hovered: var(--color-card-border);
 
     & .tab {
       font-weight: 600;
