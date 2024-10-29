@@ -7,6 +7,7 @@
   gap: 0;
   padding: 0;
   width: 100%;
+  max-width: calc(var(--readable-column-width-medium) + 2rem);
 
   & .workspace-card_titlebar {
     display: flex;
@@ -53,7 +54,7 @@
   --color-card-border: var(--c-workspace-card_border);
 }
 
-.workspace-card.workspace-card_has-focus {
+.workspace-card.focused {
   --c-workspace-card_border: var(--u-color_border);
   --c-workspace-card_background: var(--u-color_container_selected);
 

@@ -115,7 +115,7 @@ view { titleLeft, titleRight, tabList, content, hasFocus } =
     let
         className =
             if hasFocus then
-                "workspace-card workspace-card_has-focus"
+                "workspace-card focused"
 
             else
                 "workspace-card"

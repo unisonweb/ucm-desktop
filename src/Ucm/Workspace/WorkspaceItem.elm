@@ -45,7 +45,6 @@ type alias SearchResultsItem =
 type DefinitionItemTab
     = CodeTab
     | DocsTab DocFoldToggles
-    | TestsTab
 
 
 type alias DefinitionItemState =
@@ -85,6 +84,29 @@ isSameRef item ref =
 isSameByRef : WorkspaceItem -> WorkspaceItem -> Bool
 isSameByRef a b =
     reference a == reference b
+
+
+docs : DefinitionItem -> Maybe Doc
+docs defItem =
+    case defItem of
+        TermItem (Term.Term _ _ { doc }) ->
+            doc
+
+        TypeItem (Type.Type _ _ { doc }) ->
+            doc
+
+        _ ->
+            Nothing
+
+
+isDoc : DefinitionItem -> Bool
+isDoc defItem =
+    case defItem of
+        TermItem (Term.Term _ Term.DocTerm _) ->
+            True
+
+        _ ->
+            False
 
 
 

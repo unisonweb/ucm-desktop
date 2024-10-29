@@ -69,13 +69,23 @@ update msg model =
             let
                 workspaceItemRef =
                     WorkspaceItemRef.DefinitionItemRef dRef
+
+                activeTab =
+                    if WorkspaceItem.isDoc defItem then
+                        WorkspaceItem.DocsTab Doc.emptyDocFoldToggles
+
+                    else
+                        WorkspaceItem.CodeTab
             in
             ( { workspaceItems =
                     WorkspaceItems.replace
                         model.workspaceItems
                         workspaceItemRef
                         (WorkspaceItem.Success workspaceItemRef
-                            (WorkspaceItem.DefinitionWorkspaceItem { activeTab = WorkspaceItem.CodeTab } defItem)
+                            (WorkspaceItem.DefinitionWorkspaceItem
+                                { activeTab = activeTab }
+                                defItem
+                            )
                         )
               }
             , Cmd.none
@@ -103,7 +113,14 @@ update msg model =
             )
 
         ChangeDefinitionItemTab wsRef newTab ->
-            ( model, Cmd.none )
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        (\_ -> { activeTab = newTab })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none )
 
 
 
@@ -216,12 +233,16 @@ definitionItemName defItem =
 
 viewDefinitionItemSource : WorkspaceItem.DefinitionItem -> Html msg
 viewDefinitionItemSource defItem =
+    let
+        sourceViewConfig =
+            SourceViewConfig.rich SyntaxConfig.empty
+    in
     case defItem of
         WorkspaceItem.TermItem (Term.Term _ _ { info, source }) ->
-            Source.viewTermSource (SourceViewConfig.rich SyntaxConfig.empty) info.name source
+            Source.viewTermSource sourceViewConfig info.name source
 
         WorkspaceItem.TypeItem (Type.Type _ _ { source }) ->
-            Source.viewTypeSource (SourceViewConfig.rich SyntaxConfig.empty) source
+            Source.viewTypeSource sourceViewConfig source
 
         _ ->
             UI.nothing
@@ -229,18 +250,10 @@ viewDefinitionItemSource defItem =
 
 hasDocs : WorkspaceItem.DefinitionItem -> Bool
 hasDocs defItem =
-    case defItem of
-        WorkspaceItem.TermItem (Term.Term _ _ { doc }) ->
-            MaybeE.isJust doc
-
-        WorkspaceItem.TypeItem (Type.Type _ _ { doc }) ->
-            MaybeE.isJust doc
-
-        _ ->
-            False
+    MaybeE.isJust (WorkspaceItem.docs defItem)
 
 
-definitionItemTabs : WorkspaceItemRef -> { code : TabList.Tab Msg, docs : TabList.Tab Msg, tests : TabList.Tab Msg }
+definitionItemTabs : WorkspaceItemRef -> { code : TabList.Tab Msg, docs : TabList.Tab Msg }
 definitionItemTabs wsRef =
     { code =
         TabList.tab "Code"
@@ -248,9 +261,6 @@ definitionItemTabs wsRef =
     , docs =
         TabList.tab "Docs"
             (Click.onClick (ChangeDefinitionItemTab wsRef (WorkspaceItem.DocsTab Doc.emptyDocFoldToggles)))
-    , tests =
-        TabList.tab "Tests"
-            (Click.onClick (ChangeDefinitionItemTab wsRef WorkspaceItem.TestsTab))
     }
 
 
@@ -274,16 +284,21 @@ viewItem item isFocused =
                             if hasDocs defItem then
                                 case state.activeTab of
                                     WorkspaceItem.CodeTab ->
-                                        c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs, tabs.tests ])
+                                        c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs ])
 
                                     WorkspaceItem.DocsTab _ ->
-                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code ] tabs.docs [ tabs.tests ])
-
-                                    WorkspaceItem.TestsTab ->
-                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code, tabs.docs ] tabs.tests [])
+                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code ] tabs.docs [])
 
                             else
                                 c
+
+                        itemContent =
+                            case ( state.activeTab, WorkspaceItem.docs defItem ) of
+                                ( WorkspaceItem.DocsTab docFoldToggles, Just docs ) ->
+                                    Doc.view SyntaxConfig.empty (always NoOp) docFoldToggles docs
+
+                                _ ->
+                                    viewDefinitionItemSource defItem
                     in
                     cardBase
                         |> WorkspaceCard.withTitle (FQN.toString (definitionItemName defItem))
@@ -294,7 +309,7 @@ viewItem item isFocused =
                                 |> Button.view
                             ]
                         |> withTabList
-                        |> WorkspaceCard.withContent [ viewDefinitionItemSource defItem ]
+                        |> WorkspaceCard.withContent [ itemContent ]
                         |> Just
 
                 WorkspaceItem.Failure _ e ->

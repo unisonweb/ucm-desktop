@@ -93,7 +93,7 @@
   --u-color_element_hovered: var(--color-blue-5);
   --u-color_element_selected: var(--color-blue-4);
   --u-color_element_disabled: var(--color-gray-lighten-55);
-  --u-color_element_subdued: var(--color-gray-lighten-60);
+  /* [x] */ --u-color_element_subdued: var(--color-gray-darken-30);
   --u-color_element_subdued_hovered: var(--color-gray-lighten-55);
   --u-color_element_subdued_selected: var(--color-gray-lighten-55);
   --u-color_element_emphasized: var(--color-gray-lighten-55);
