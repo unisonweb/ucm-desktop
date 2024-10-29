@@ -1,10 +1,10 @@
 module Ucm.Project exposing (..)
 
 import Code.BranchRef as BranchRef exposing (BranchRef)
+import Code.ProjectName as ProjectName exposing (ProjectName)
 import Json.Decode as Decode exposing (nullable)
 import Json.Decode.Pipeline exposing (required)
 import UI.DateTime as DateTime exposing (DateTime)
-import Ucm.ProjectName as ProjectName exposing (ProjectName)
 
 
 

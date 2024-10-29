@@ -30,7 +30,7 @@ init : Model
 init =
     { splitPane =
         SplitPane.init SplitPane.Horizontal
-            |> SplitPane.configureSplitter (SplitPane.percentage 0.15 Nothing)
+            |> SplitPane.configureSplitter (SplitPane.px 256 Nothing)
     }
 
 

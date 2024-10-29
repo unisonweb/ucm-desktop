@@ -4,6 +4,7 @@ import Code.CodebaseApi as CodebaseApi
 import Code.Config exposing (Config)
 import Code.Definition.AbilityConstructor as AbilityConstructor
 import Code.Definition.DataConstructor as DataConstructor
+import Code.Definition.Doc as Doc
 import Code.Definition.Reference exposing (Reference)
 import Code.Definition.Source as Source
 import Code.Definition.Term as Term
@@ -55,6 +56,7 @@ type Msg
     = NoOp
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
     | CloseWorkspaceItem WorkspaceItemRef
+    | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,7 +75,7 @@ update msg model =
                         model.workspaceItems
                         workspaceItemRef
                         (WorkspaceItem.Success workspaceItemRef
-                            (WorkspaceItem.DefinitionWorkspaceItem defItem)
+                            (WorkspaceItem.DefinitionWorkspaceItem { activeTab = WorkspaceItem.CodeTab } defItem)
                         )
               }
             , Cmd.none
@@ -94,7 +96,14 @@ update msg model =
             )
 
         CloseWorkspaceItem ref ->
-            ( { workspaceItems = WorkspaceItems.remove model.workspaceItems ref }, Cmd.none )
+            ( { workspaceItems =
+                    WorkspaceItems.remove model.workspaceItems ref
+              }
+            , Cmd.none
+            )
+
+        ChangeDefinitionItemTab wsRef newTab ->
+            ( model, Cmd.none )
 
 
 
@@ -125,7 +134,7 @@ openItem config ({ workspaceItems } as model) relativeToRef ref =
         DefinitionItemRef dRef ->
             -- We don't want to refetch or replace any already open definitions, but we
             -- do want to focus and scroll to it (unless its already currently focused)
-            if WorkspaceItems.member workspaceItems ref then
+            if WorkspaceItems.includesItem workspaceItems ref then
                 if not (WorkspaceItems.isFocused workspaceItems ref) then
                     let
                         nextWorkspaceItems =
@@ -231,6 +240,20 @@ hasDocs defItem =
             False
 
 
+definitionItemTabs : WorkspaceItemRef -> { code : TabList.Tab Msg, docs : TabList.Tab Msg, tests : TabList.Tab Msg }
+definitionItemTabs wsRef =
+    { code =
+        TabList.tab "Code"
+            (Click.onClick (ChangeDefinitionItemTab wsRef WorkspaceItem.CodeTab))
+    , docs =
+        TabList.tab "Docs"
+            (Click.onClick (ChangeDefinitionItemTab wsRef (WorkspaceItem.DocsTab Doc.emptyDocFoldToggles)))
+    , tests =
+        TabList.tab "Tests"
+            (Click.onClick (ChangeDefinitionItemTab wsRef WorkspaceItem.TestsTab))
+    }
+
+
 viewItem : WorkspaceItem -> Bool -> Html Msg
 viewItem item isFocused =
     let
@@ -242,16 +265,22 @@ viewItem item isFocused =
                 WorkspaceItem.Loading _ ->
                     Nothing
 
-                WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem defItem) ->
+                WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem state defItem) ->
                     let
+                        tabs =
+                            definitionItemTabs wsRef
+
                         withTabList c =
                             if hasDocs defItem then
-                                c
-                                    |> WorkspaceCard.withTabList
-                                        (TabList.tabList []
-                                            (TabList.tab "Code" (Click.onClick NoOp))
-                                            [ TabList.tab "Docs" (Click.onClick NoOp) ]
-                                        )
+                                case state.activeTab of
+                                    WorkspaceItem.CodeTab ->
+                                        c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs, tabs.tests ])
+
+                                    WorkspaceItem.DocsTab _ ->
+                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code ] tabs.docs [ tabs.tests ])
+
+                                    WorkspaceItem.TestsTab ->
+                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code, tabs.docs ] tabs.tests [])
 
                             else
                                 c

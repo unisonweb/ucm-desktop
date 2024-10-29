@@ -4,12 +4,12 @@ import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
+import Code.ProjectName as ProjectName
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import UI.Button as Button
 import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
-import Ucm.ProjectName as ProjectName
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
@@ -60,10 +60,12 @@ type Msg
     | WindowMsg Window.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
     | LeftPaneMsg WorkspacePane.Msg
+    | ShowChooseProject
 
 
 type OutMsg
     = None
+    | ShowWelcomeScreen
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -112,6 +114,9 @@ update msg model =
             in
             ( { model | leftPane = pane }, Cmd.map LeftPaneMsg paneCmd, None )
 
+        ShowChooseProject ->
+            ( model, Cmd.none, ShowWelcomeScreen )
+
         NoOp ->
             ( model, Cmd.none, None )
 
@@ -138,7 +143,7 @@ titlebarLeft workspaceContext =
         branchRef =
             BranchRef.toString workspaceContext.branchRef
     in
-    [ Button.iconThenLabelThenIcon NoOp Icon.pencilRuler projectName Icon.caretDown
+    [ Button.iconThenLabel ShowChooseProject Icon.pencilRuler projectName
         |> Button.small
         |> Button.view
     , Button.iconThenLabelThenIcon NoOp Icon.branch branchRef Icon.caretDown

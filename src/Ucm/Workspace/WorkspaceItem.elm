@@ -42,14 +42,19 @@ type alias SearchResultsItem =
     { ref : SearchResultsRef }
 
 
-type alias ItemData =
-    { item : LoadedWorkspaceItem
-    , docFoldToggles : DocFoldToggles
+type DefinitionItemTab
+    = CodeTab
+    | DocsTab DocFoldToggles
+    | TestsTab
+
+
+type alias DefinitionItemState =
+    { activeTab : DefinitionItemTab
     }
 
 
 type LoadedWorkspaceItem
-    = DefinitionWorkspaceItem DefinitionItem
+    = DefinitionWorkspaceItem DefinitionItemState DefinitionItem
     | SearchResultsWorkspaceItem SearchResultsItem
 
 

@@ -2,6 +2,9 @@ module Ucm.WelcomeScreen exposing (..)
 
 import Browser
 import Code.BranchRef as BranchRef exposing (BranchRef)
+import Code.ProjectName as ProjectName exposing (ProjectName(..))
+import Code.ProjectNameListing as ProjectNameListing
+import Code.ProjectSlug as ProjectSlug
 import Html
     exposing
         ( div
@@ -15,6 +18,7 @@ import Html
 import Html.Attributes exposing (alt, class, src)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
+import Lib.UserHandle as UserHandle
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.Button as Button
 import UI.Card as Card
@@ -24,7 +28,6 @@ import UI.Icon as Icon
 import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Link as Link
-import Ucm.ProjectName as ProjectName exposing (ProjectName)
 import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Window
 
@@ -120,13 +123,34 @@ subscriptions model =
 -- VIEW
 
 
+isMatch : String -> ProjectName -> Bool
+isMatch s (ProjectName handle slug) =
+    let
+        removeAt s_ =
+            String.replace "@" "" s_
+
+        handle_ =
+            handle
+                |> Maybe.map UserHandle.toString
+                |> Maybe.map removeAt
+                |> Maybe.withDefault ""
+
+        slug_ =
+            ProjectSlug.toString slug
+    in
+    String.startsWith (removeAt s) handle_ || String.startsWith s slug_
+
+
 view : Model -> Browser.Document Msg
 view model =
     let
         viewProjectOption p =
             Click.onClick (SelectProject p BranchRef.main_)
                 |> Click.view [ class "project-option" ]
-                    [ Card.card [ text (ProjectName.toString p) ]
+                    [ Card.card
+                        [ ProjectNameListing.projectNameListing p
+                            |> ProjectNameListing.view
+                        ]
                         |> Card.asContained
                         |> Card.view
                     ]
@@ -147,8 +171,7 @@ view model =
                         projects_ =
                             if not (String.isEmpty model.searchQuery) then
                                 projects
-                                    |> List.filter
-                                        (ProjectName.isMatch model.searchQuery)
+                                    |> List.filter (isMatch model.searchQuery)
 
                             else
                                 projects

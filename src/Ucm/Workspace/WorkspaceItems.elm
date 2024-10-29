@@ -60,11 +60,6 @@ empty =
     Empty
 
 
-member : WorkspaceItems -> WorkspaceItemRef -> Bool
-member items ref =
-    False
-
-
 isEmpty : WorkspaceItems -> Bool
 isEmpty workspaceItems =
     case workspaceItems of
@@ -126,7 +121,7 @@ insertWithFocusBefore items beforeRef toInsert =
             singleton toInsert
 
         WorkspaceItems _ ->
-            if member items beforeRef then
+            if includesItem items beforeRef then
                 let
                     insertBefore item =
                         if WorkspaceItem.isSameRef item beforeRef then
@@ -168,7 +163,7 @@ insertWithFocusAfter items afterRef toInsert =
             singleton toInsert
 
         WorkspaceItems _ ->
-            if member items afterRef then
+            if includesItem items afterRef then
                 let
                     insertAfter item =
                         if WorkspaceItem.isSameRef item afterRef then
@@ -431,28 +426,30 @@ prev items =
 
 
 -- TRANFORM
-{-
-   updateData :
-       (WorkspaceItem.ItemData -> WorkspaceItem.ItemData)
-       -> WorkspaceItemRef
-       -> WorkspaceItems
-       -> WorkspaceItems
-   updateData f ref wItems =
-       let
-           update_ workspaceItem =
-               case workspaceItem of
-                   WorkspaceItem.Success r d ->
-                       if ref == r then
-                           WorkspaceItem.Success r (f d)
 
-                       else
-                           workspaceItem
 
-                   _ ->
-                       workspaceItem
-       in
-       map update_ wItems
--}
+updateDefinitionItemState :
+    (WorkspaceItem.DefinitionItemState -> WorkspaceItem.DefinitionItemState)
+    -> WorkspaceItemRef
+    -> WorkspaceItems
+    -> WorkspaceItems
+updateDefinitionItemState f ref wItems =
+    let
+        update_ workspaceItem =
+            case workspaceItem of
+                WorkspaceItem.Success r (WorkspaceItem.DefinitionWorkspaceItem state innerItem) ->
+                    if ref == r then
+                        WorkspaceItem.Success
+                            r
+                            (WorkspaceItem.DefinitionWorkspaceItem (f state) innerItem)
+
+                    else
+                        workspaceItem
+
+                _ ->
+                    workspaceItem
+    in
+    map update_ wItems
 
 
 map :

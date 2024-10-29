@@ -8,12 +8,12 @@ import Code.Hash as Hash exposing (Hash)
 import Code.HashQualified as HQ
 import Code.Namespace.NamespaceRef as NamespaceRef
 import Code.Perspective as Perspective exposing (Perspective(..))
+import Code.ProjectName as ProjectName exposing (ProjectName)
 import Code.Syntax as Syntax
 import Code.Version as Version
 import Lib.HttpApi exposing (Endpoint(..))
 import Maybe.Extra as MaybeE
 import Regex
-import Ucm.ProjectName as ProjectName exposing (ProjectName)
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
 

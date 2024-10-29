@@ -1,10 +1,10 @@
 port module Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext, decode, save)
 
 import Code.BranchRef as BranchRef
+import Code.ProjectName as ProjectName exposing (ProjectName)
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import Ucm.ProjectName as ProjectName exposing (ProjectName)
 
 
 type alias WorkspaceContext =

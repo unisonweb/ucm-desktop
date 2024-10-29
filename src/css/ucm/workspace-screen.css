@@ -55,9 +55,6 @@
   color: var(--u-color_icon_subdued);
   transition: color 0.2s;
   margin: 0;
-}
-
-.inner-sidebar .codebase-tree .namespace-tree .node > label {
   line-height: 1;
 }
 
