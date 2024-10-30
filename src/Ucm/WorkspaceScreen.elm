@@ -110,7 +110,10 @@ update msg model =
         LeftPaneMsg workspacePaneMsg ->
             let
                 ( pane, paneCmd ) =
-                    WorkspacePane.update workspacePaneMsg model.leftPane
+                    WorkspacePane.update
+                        model.config
+                        workspacePaneMsg
+                        model.leftPane
             in
             ( { model | leftPane = pane }, Cmd.map LeftPaneMsg paneCmd, None )
 

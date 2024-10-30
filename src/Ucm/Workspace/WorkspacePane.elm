@@ -9,6 +9,7 @@ import Code.Definition.Reference exposing (Reference)
 import Code.Definition.Source as Source
 import Code.Definition.Term as Term
 import Code.Definition.Type as Type
+import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
@@ -26,7 +27,7 @@ import UI.TabList as TabList
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Workspace.WorkspaceCard as WorkspaceCard
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
-import Ucm.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), WorkspaceItem)
+import Ucm.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
 import Ucm.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Ucm.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
@@ -37,12 +38,14 @@ import Ucm.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
 type alias Model =
     { workspaceItems : WorkspaceItems
+    , definitionSummaryTooltip : DefinitionSummaryTooltip.Model
     }
 
 
 init : AppContext -> WorkspaceContext -> ( Model, Cmd Msg )
 init _ _ =
     ( { workspaceItems = WorkspaceItems.init Nothing
+      , definitionSummaryTooltip = DefinitionSummaryTooltip.init
       }
     , Cmd.none
     )
@@ -57,14 +60,13 @@ type Msg
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
+    | OpenDependency Reference
+    | DefinitionSummaryTooltipMsg DefinitionSummaryTooltip.Msg
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Config -> Msg -> Model -> ( Model, Cmd Msg )
+update config msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
         FetchDefinitionItemFinished dRef (Ok defItem) ->
             let
                 workspaceItemRef =
@@ -77,7 +79,8 @@ update msg model =
                     else
                         WorkspaceItem.CodeTab
             in
-            ( { workspaceItems =
+            ( { model
+                | workspaceItems =
                     WorkspaceItems.replace
                         model.workspaceItems
                         workspaceItemRef
@@ -96,7 +99,8 @@ update msg model =
                 workspaceItemRef =
                     WorkspaceItemRef.DefinitionItemRef dRef
             in
-            ( { workspaceItems =
+            ( { model
+                | workspaceItems =
                     WorkspaceItems.replace
                         model.workspaceItems
                         workspaceItemRef
@@ -106,7 +110,8 @@ update msg model =
             )
 
         CloseWorkspaceItem ref ->
-            ( { workspaceItems =
+            ( { model
+                | workspaceItems =
                     WorkspaceItems.remove model.workspaceItems ref
               }
             , Cmd.none
@@ -121,6 +126,21 @@ update msg model =
                         model.workspaceItems
             in
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none )
+
+        OpenDependency r ->
+            openDefinition config model r
+
+        DefinitionSummaryTooltipMsg tMsg ->
+            let
+                ( definitionSummaryTooltip, tCmd ) =
+                    DefinitionSummaryTooltip.update config tMsg model.definitionSummaryTooltip
+            in
+            ( { model | definitionSummaryTooltip = definitionSummaryTooltip }
+            , Cmd.map DefinitionSummaryTooltipMsg tCmd
+            )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -215,6 +235,17 @@ scrollToItem ref =
 -- VIEW
 
 
+syntaxConfig : DefinitionSummaryTooltip.Model -> SyntaxConfig.SyntaxConfig Msg
+syntaxConfig definitionSummaryTooltip =
+    SyntaxConfig.default
+        (OpenDependency >> Click.onClick)
+        (DefinitionSummaryTooltip.tooltipConfig
+            DefinitionSummaryTooltipMsg
+            definitionSummaryTooltip
+        )
+        |> SyntaxConfig.withSyntaxHelp
+
+
 definitionItemName : WorkspaceItem.DefinitionItem -> FQN
 definitionItemName defItem =
     case defItem of
@@ -231,11 +262,11 @@ definitionItemName defItem =
             info.name
 
 
-viewDefinitionItemSource : WorkspaceItem.DefinitionItem -> Html msg
-viewDefinitionItemSource defItem =
+viewDefinitionItemSource : DefinitionSummaryTooltip.Model -> WorkspaceItem.DefinitionItem -> Html Msg
+viewDefinitionItemSource definitionSummaryTooltip defItem =
     let
         sourceViewConfig =
-            SourceViewConfig.rich SyntaxConfig.empty
+            SourceViewConfig.rich (syntaxConfig definitionSummaryTooltip)
     in
     case defItem of
         WorkspaceItem.TermItem (Term.Term _ _ { info, source }) ->
@@ -264,8 +295,8 @@ definitionItemTabs wsRef =
     }
 
 
-viewItem : WorkspaceItem -> Bool -> Html Msg
-viewItem item isFocused =
+viewItem : DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
+viewItem definitionSummaryTooltip item isFocused =
     let
         cardBase =
             WorkspaceCard.empty
@@ -298,7 +329,7 @@ viewItem item isFocused =
                                     Doc.view SyntaxConfig.empty (always NoOp) docFoldToggles docs
 
                                 _ ->
-                                    viewDefinitionItemSource defItem
+                                    viewDefinitionItemSource definitionSummaryTooltip defItem
                     in
                     cardBase
                         |> WorkspaceCard.withTitle (FQN.toString (definitionItemName defItem))
@@ -332,5 +363,5 @@ view : Model -> Html Msg
 view model =
     div [ class "workspace-pane" ]
         (model.workspaceItems
-            |> WorkspaceItems.mapToList viewItem
+            |> WorkspaceItems.mapToList (viewItem model.definitionSummaryTooltip)
         )
