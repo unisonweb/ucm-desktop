@@ -93,14 +93,16 @@
   --u-color_element_hovered: var(--color-blue-5);
   --u-color_element_selected: var(--color-blue-4);
   --u-color_element_disabled: var(--color-gray-lighten-55);
+  --u-color_icon-on-element: var(--color-gray-base);
+
   /* [x] */ --u-color_element_subdued: var(--color-gray-darken-30);
   --u-color_element_subdued_hovered: var(--color-gray-lighten-55);
   --u-color_element_subdued_selected: var(--color-gray-lighten-55);
-  --u-color_element_emphasized: var(--color-gray-lighten-55);
-  --u-color_text-on-element-emphasized: var(--color-gray-base);
-  --u-color_icon-on-element: var(--color-gray-base);
-  --u-color_icon-on-element-emphasized: var(--color-gray-base);
-  --u-color_element_emphasized_hovered: var(--color-gray-lighten-50);
+
+  --u-color_element_emphasized: var(--color-gray-darken-10);
+  --u-color_text-on-element-emphasized: var(--color-gray-lighten-60);
+  --u-color_icon-on-element-emphasized: var(--color-gray-lighten-20);
+  --u-color_element_emphasized_hovered: var(--color-gray-base);
   --u-color_element_emphasized_selected: var(--color-gray-lighten-50);
 
   --u-color_search-highlight_text: var(--color-blue-2);
@@ -115,11 +117,11 @@
   --u-color_critical_action_hovered: var(--color-pink-1);
   --u-color_critical_text-on-action_hovered: var(--color-gray-lighten-100);
   --u-color_critical_icon-on-action_hovered: var(--color-pink-3);
-  --u-color_critical_element: var(--color-pink-2);
-  --u-color_critical_text-on-element: var(--color-gray-lighten-100);
-  --u-color_critical_icon-on-element: var(--color-gray-lighten-100);
-  --u-color_critical_element_subdued: var(--color-pink-5);
-  --u-color_critical_text-on-element_subdued: var(--u-color_text);
+  /* [x] */ --u-color_critical_element: var(--color-pink-1);
+  /* [x] */ --u-color_critical_text-on-element: var(--color-gray-lighten-100);
+  /* [x] */ --u-color_critical_icon-on-element: var(--color-gray-lighten-100);
+  /* [x] */ --u-color_critical_element_subdued: var(--color-pink-0-25pct);
+  /* [x] */ --u-color_critical_text-on-element_subdued: var(--color-pink-4);
 
   --u-color_info_container_subdued: var(--color-blue-5);
   --u-color_info_text: var(--color-blue-2);

@@ -26,11 +26,20 @@ projects =
         }
 
 
-projectBranches : ProjectName -> Endpoint
-projectBranches projectName =
+projectBranches : ProjectName -> Maybe String -> Endpoint
+projectBranches projectName query =
+    let
+        queryParams =
+            case query of
+                Just q ->
+                    [ string "prefix" q ]
+
+                Nothing ->
+                    []
+    in
     GET
         { path = [ "projects", ProjectName.toApiString projectName, "branches" ]
-        , queryParams = []
+        , queryParams = queryParams
         }
 
 

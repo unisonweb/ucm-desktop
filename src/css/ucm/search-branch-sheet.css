@@ -1,0 +1,18 @@
+.search-branch-sheet {
+  width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  & search {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  & .search-branch-sheet_branch-list_items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

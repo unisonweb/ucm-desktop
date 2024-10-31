@@ -6,31 +6,24 @@
   flex-direction: row;
 }
 
-/* TODO: Move to Window.elm */
-.inner-sidebar {
-  padding: 1rem 1.125rem;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.inner-sidebar .codebase-tree .namespace-tree {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree {
   margin-left: 0;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree > div {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree > div {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .namespace-content > div {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .namespace-content > div {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .node {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -42,23 +35,23 @@
   transition: color 0.2s;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) {
   color: var(--u-color_text);
   font-weight: bold;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) .namespace-icon .icon {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) .namespace-icon .icon {
   color: var(--u-color_icon);
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .node .icon {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node .icon {
   color: var(--u-color_icon_subdued);
   transition: color 0.2s;
   margin: 0;
   line-height: 1;
 }
 
-.inner-sidebar .codebase-tree .namespace-tree .node:hover {
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node:hover {
   color: var(--u-color_text);
 
   & .icon {

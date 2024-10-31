@@ -74,6 +74,12 @@ body:has(.window-footer) {
   overflow: auto;
   height: calc(calc(100vh - var(--c-window_control-bar_height)) - var(--c-window_control-bar_height));
   width: 100%;
+
+  & .window-sidebar_inner-sidebar {
+    padding: 1rem 1.125rem;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 /* prevents a tiny white box in the corner that appears when both horizontal

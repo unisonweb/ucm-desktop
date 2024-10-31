@@ -1,15 +1,16 @@
 module Ucm.WorkspaceScreen exposing (..)
 
 import Browser
-import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
 import Code.ProjectName as ProjectName
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
 import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
+import Ucm.SwitchBranch as SwitchBranch
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
@@ -22,6 +23,7 @@ type alias Model =
     , window : Window.Model
     , leftPane : WorkspacePane.Model
     , rightPane : Maybe WorkspacePane.Model
+    , switchBranch : SwitchBranch.Model
     }
 
 
@@ -43,6 +45,7 @@ init appContext workspaceContext =
       , window = Window.init
       , leftPane = leftPane
       , rightPane = Nothing
+      , switchBranch = SwitchBranch.init
       }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
@@ -61,6 +64,7 @@ type Msg
     | CodebaseTreeMsg CodebaseTree.Msg
     | LeftPaneMsg WorkspacePane.Msg
     | ShowChooseProject
+    | SwitchBranchMsg SwitchBranch.Msg
 
 
 type OutMsg
@@ -68,8 +72,8 @@ type OutMsg
     | ShowWelcomeScreen
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update msg model =
+update : AppContext -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update appContext msg model =
     case msg of
         CodebaseTreeMsg codebaseTreeMsg ->
             let
@@ -120,6 +124,48 @@ update msg model =
         ShowChooseProject ->
             ( model, Cmd.none, ShowWelcomeScreen )
 
+        SwitchBranchMsg switchBranchMsg ->
+            let
+                ( switchBranch, switchBranchCmd, out ) =
+                    SwitchBranch.update
+                        appContext
+                        model.workspaceContext.projectName
+                        switchBranchMsg
+                        model.switchBranch
+
+                ( model_, cmd_ ) =
+                    case out of
+                        SwitchBranch.None ->
+                            ( model, Cmd.none )
+
+                        SwitchBranch.SwitchToBranchRequest br ->
+                            let
+                                workspaceContext =
+                                    { projectName = model.workspaceContext.projectName, branchRef = br }
+
+                                config =
+                                    AppContext.toCodeConfig appContext workspaceContext
+
+                                ( codebaseTree, codebaseTreeCmd ) =
+                                    CodebaseTree.init config
+
+                                ( leftPane, leftPaneCmd ) =
+                                    WorkspacePane.init appContext workspaceContext
+                            in
+                            ( { model
+                                | workspaceContext = workspaceContext
+                                , codebaseTree = codebaseTree
+                                , config = config
+                                , leftPane = leftPane
+                              }
+                            , Cmd.batch
+                                [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+                                , Cmd.map LeftPaneMsg leftPaneCmd
+                                ]
+                            )
+            in
+            ( { model_ | switchBranch = switchBranch }, Cmd.batch [ Cmd.map SwitchBranchMsg switchBranchCmd, cmd_ ], None )
+
         NoOp ->
             ( model, Cmd.none, None )
 
@@ -137,21 +183,18 @@ subscriptions model =
 -- VIEW
 
 
-titlebarLeft : WorkspaceContext -> List (Html Msg)
-titlebarLeft workspaceContext =
+titlebarLeft : SwitchBranch.Model -> WorkspaceContext -> List (Html Msg)
+titlebarLeft switchBranch workspaceContext =
     let
         projectName =
             ProjectName.toString workspaceContext.projectName
-
-        branchRef =
-            BranchRef.toString workspaceContext.branchRef
     in
     [ Button.iconThenLabel ShowChooseProject Icon.pencilRuler projectName
         |> Button.small
         |> Button.view
-    , Button.iconThenLabelThenIcon NoOp Icon.branch branchRef Icon.caretDown
-        |> Button.small
-        |> Button.view
+    , SwitchBranch.toAnchoredOverlay workspaceContext.branchRef switchBranch
+        |> AnchoredOverlay.map SwitchBranchMsg
+        |> AnchoredOverlay.view
     ]
 
 
@@ -170,7 +213,8 @@ titlebarRight =
 
 viewLeftSidebar : CodebaseTree.Model -> List (Html Msg)
 viewLeftSidebar codebaseTree =
-    [ div [ class "inner-sidebar" ]
+    -- TODO: this class should be controlled by Window
+    [ div [ class "window-sidebar_inner-sidebar" ]
         [ Html.map CodebaseTreeMsg
             (CodebaseTree.view { withPerspective = False } codebaseTree)
         ]
@@ -191,7 +235,7 @@ view model =
             []
     in
     Window.window "workspace-screen"
-        |> Window.withTitlebarLeft (titlebarLeft model.workspaceContext)
+        |> Window.withTitlebarLeft (titlebarLeft model.switchBranch model.workspaceContext)
         |> Window.withTitlebarRight titlebarRight
         |> Window.withFooterLeft footerLeft
         |> Window.withFooterRight footerRight

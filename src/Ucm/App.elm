@@ -92,7 +92,7 @@ update msg model =
                 WorkspaceScreen workspace ->
                     let
                         ( newWorkspace, workspaceCmd, workspaceOut ) =
-                            WorkspaceScreen.update workspaceMsg workspace
+                            WorkspaceScreen.update model.appContext workspaceMsg workspace
 
                         ( screen, screenCmd ) =
                             case workspaceOut of
