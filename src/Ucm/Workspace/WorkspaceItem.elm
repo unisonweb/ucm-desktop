@@ -9,6 +9,7 @@ import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDe
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
+import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Http
 import Json.Decode as Decode exposing (field, index)
 import Lib.Util as Util
@@ -107,6 +108,17 @@ isDoc defItem =
 
         _ ->
             False
+
+
+fromDependency : DefinitionItem -> Maybe ProjectDependency
+fromDependency defItem =
+    case defItem of
+        TermItem (Term.Term _ _ { info }) ->
+            -- info.fqn
+            Nothing
+
+        _ ->
+            Nothing
 
 
 

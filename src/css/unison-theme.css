@@ -202,10 +202,20 @@
   --u-shadow: var(--color-gray-darken-30-20pct);
 }
 
+/* TODO: these component overwrites shouldn't be needed... */
 .definition-doc {
   --color-doc-bg: transparent;
   --color-doc-focus-bg: transparent;
 }
+
 .definition-doc .copyable-source .copy-on-click {
   background: transparent;
+}
+
+.tooltip {
+  --color-tooltip-border: var(--u-color_border);
+}
+
+.anchored-overlay {
+  --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
