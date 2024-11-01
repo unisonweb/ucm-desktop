@@ -34,6 +34,7 @@ type alias Model =
     , switchProject : SwitchProject.Model
     , switchBranch : SwitchBranch.Model
     , modal : WorkspaceScreenModal
+    , sidebarVisible : Bool
     }
 
 
@@ -58,6 +59,7 @@ init appContext workspaceContext =
       , switchProject = SwitchProject.init
       , switchBranch = SwitchBranch.init
       , modal = NoModal
+      , sidebarVisible = True
       }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
@@ -79,6 +81,7 @@ type Msg
     | SwitchBranchMsg SwitchBranch.Msg
     | FetchProjectsFinished (WebData (List ProjectName))
     | CloseModal
+    | ToggleSidebar
 
 
 type OutMsg
@@ -123,6 +126,9 @@ update appContext msg model =
                     Window.update wMsg model.window
             in
             ( { model | window = window }, Cmd.map WindowMsg wCmd, None )
+
+        ToggleSidebar ->
+            ( { model | sidebarVisible = not model.sidebarVisible }, Cmd.none, None )
 
         LeftPaneMsg workspacePaneMsg ->
             let
@@ -275,10 +281,6 @@ titlebarRight =
         |> Button.small
         |> Button.subdued
         |> Button.view
-    , Button.icon NoOp Icon.windowSplit
-        |> Button.small
-        |> Button.subdued
-        |> Button.view
     ]
 
 
@@ -295,8 +297,20 @@ viewLeftSidebar codebaseTree =
 view : Model -> Browser.Document Msg
 view model =
     let
+        window =
+            Window.window "workspace-screen"
+
+        ( sidebarIcon, window_ ) =
+            if model.sidebarVisible then
+                ( Icon.leftSidebarOff
+                , Window.withLeftSidebar (viewLeftSidebar model.codebaseTree) window
+                )
+
+            else
+                ( Icon.leftSidebarOn, window )
+
         footerLeft =
-            [ Button.icon NoOp Icon.leftSidebarOff
+            [ Button.icon ToggleSidebar sidebarIcon
                 |> Button.small
                 |> Button.subdued
                 |> Button.view
@@ -305,11 +319,10 @@ view model =
         footerRight =
             []
     in
-    Window.window "workspace-screen"
-        |> Window.withTitlebarLeft (titlebarLeft model)
-        |> Window.withTitlebarRight titlebarRight
+    window_
         |> Window.withFooterLeft footerLeft
         |> Window.withFooterRight footerRight
-        |> Window.withLeftSidebar (viewLeftSidebar model.codebaseTree)
+        |> Window.withTitlebarLeft (titlebarLeft model)
+        |> Window.withTitlebarRight titlebarRight
         |> Window.withContent [ Html.map LeftPaneMsg (WorkspacePane.view model.leftPane) ]
         |> Window.view WindowMsg model.window
