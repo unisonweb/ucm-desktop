@@ -14,7 +14,7 @@ import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.SwitchBranch as SwitchBranch
 import Ucm.SwitchProject as SwitchProject
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
+import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
 
@@ -186,10 +186,17 @@ update appContext msg model =
                             , Cmd.batch
                                 [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
                                 , Cmd.map LeftPaneMsg leftPaneCmd
+                                , WorkspaceContext.save workspaceContext
                                 ]
                             )
             in
-            ( { model_ | switchProject = switchProject }, Cmd.batch [ Cmd.map SwitchProjectMsg switchProjectCmd, cmd_ ], None )
+            ( { model_ | switchProject = switchProject }
+            , Cmd.batch
+                [ Cmd.map SwitchProjectMsg switchProjectCmd
+                , cmd_
+                ]
+            , None
+            )
 
         SwitchBranchMsg switchBranchMsg ->
             let
@@ -228,6 +235,7 @@ update appContext msg model =
                             , Cmd.batch
                                 [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
                                 , Cmd.map LeftPaneMsg leftPaneCmd
+                                , WorkspaceContext.save workspaceContext
                                 ]
                             )
             in
