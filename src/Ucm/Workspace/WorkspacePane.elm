@@ -128,7 +128,15 @@ update config msg model =
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none )
 
         OpenDependency r ->
-            openDefinition config model r
+            case WorkspaceItems.focus model.workspaceItems of
+                Just item ->
+                    openReference config
+                        model
+                        (WorkspaceItem.reference item)
+                        (WorkspaceItemRef.DefinitionItemRef r)
+
+                Nothing ->
+                    openDefinition config model r
 
         DefinitionSummaryTooltipMsg tMsg ->
             let
@@ -326,7 +334,10 @@ viewItem definitionSummaryTooltip item isFocused =
                         itemContent =
                             case ( state.activeTab, WorkspaceItem.docs defItem ) of
                                 ( WorkspaceItem.DocsTab docFoldToggles, Just docs ) ->
-                                    Doc.view SyntaxConfig.empty (always NoOp) docFoldToggles docs
+                                    Doc.view (syntaxConfig definitionSummaryTooltip)
+                                        (always NoOp)
+                                        docFoldToggles
+                                        docs
 
                                 _ ->
                                     viewDefinitionItemSource definitionSummaryTooltip defItem
