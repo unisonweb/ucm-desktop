@@ -98,13 +98,6 @@ update msg model =
                             case workspaceOut of
                                 WorkspaceScreen.None ->
                                     ( WorkspaceScreen newWorkspace, Cmd.map WorkspaceScreenMsg workspaceCmd )
-
-                                WorkspaceScreen.ShowWelcomeScreen ->
-                                    let
-                                        ( welcome, welcomeCmd ) =
-                                            WelcomeScreen.init model.appContext
-                                    in
-                                    ( WelcomeScreen welcome, Cmd.map WelcomeScreenMsg welcomeCmd )
                     in
                     ( { model | screen = screen }, screenCmd )
 

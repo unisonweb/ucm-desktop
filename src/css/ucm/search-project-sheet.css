@@ -1,0 +1,18 @@
+.search-project-sheet {
+  width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  & search {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  & .search-project-sheet_project-list_items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

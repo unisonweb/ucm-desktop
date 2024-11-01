@@ -1,19 +1,27 @@
 module Ucm.WorkspaceScreen exposing (..)
 
 import Browser
+import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
-import Code.ProjectName as ProjectName
+import Code.ProjectName exposing (ProjectName)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import RemoteData exposing (RemoteData(..), WebData)
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
 import UI.Icon as Icon
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.SwitchBranch as SwitchBranch
+import Ucm.SwitchProject as SwitchProject
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
+
+
+type WorkspaceScreenModal
+    = NoModal
+    | SwitchProjectModal (WebData { query : String, projects : List ProjectName })
 
 
 type alias Model =
@@ -23,7 +31,9 @@ type alias Model =
     , window : Window.Model
     , leftPane : WorkspacePane.Model
     , rightPane : Maybe WorkspacePane.Model
+    , switchProject : SwitchProject.Model
     , switchBranch : SwitchBranch.Model
+    , modal : WorkspaceScreenModal
     }
 
 
@@ -45,7 +55,9 @@ init appContext workspaceContext =
       , window = Window.init
       , leftPane = leftPane
       , rightPane = Nothing
+      , switchProject = SwitchProject.init
       , switchBranch = SwitchBranch.init
+      , modal = NoModal
       }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
@@ -63,13 +75,14 @@ type Msg
     | WindowMsg Window.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
     | LeftPaneMsg WorkspacePane.Msg
-    | ShowChooseProject
+    | SwitchProjectMsg SwitchProject.Msg
     | SwitchBranchMsg SwitchBranch.Msg
+    | FetchProjectsFinished (WebData (List ProjectName))
+    | CloseModal
 
 
 type OutMsg
     = None
-    | ShowWelcomeScreen
 
 
 update : AppContext -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -121,8 +134,62 @@ update appContext msg model =
             in
             ( { model | leftPane = pane }, Cmd.map LeftPaneMsg paneCmd, None )
 
-        ShowChooseProject ->
-            ( model, Cmd.none, ShowWelcomeScreen )
+        FetchProjectsFinished projects ->
+            case model.modal of
+                SwitchProjectModal _ ->
+                    let
+                        modalData =
+                            projects
+                                |> RemoteData.map (\ps -> { projects = ps, query = "" })
+                    in
+                    ( { model | modal = SwitchProjectModal modalData }, Cmd.none, None )
+
+                _ ->
+                    ( model, Cmd.none, None )
+
+        CloseModal ->
+            ( { model | modal = NoModal }, Cmd.none, None )
+
+        SwitchProjectMsg switchProjectMsg ->
+            let
+                ( switchProject, switchProjectCmd, out ) =
+                    SwitchProject.update
+                        appContext
+                        switchProjectMsg
+                        model.switchProject
+
+                ( model_, cmd_ ) =
+                    case out of
+                        SwitchProject.None ->
+                            ( model, Cmd.none )
+
+                        SwitchProject.SwitchProjectRequest pn ->
+                            let
+                                workspaceContext =
+                                    { projectName = pn, branchRef = BranchRef.main_ }
+
+                                config =
+                                    AppContext.toCodeConfig appContext workspaceContext
+
+                                ( codebaseTree, codebaseTreeCmd ) =
+                                    CodebaseTree.init config
+
+                                ( leftPane, leftPaneCmd ) =
+                                    WorkspacePane.init appContext workspaceContext
+                            in
+                            ( { model
+                                | workspaceContext = workspaceContext
+                                , codebaseTree = codebaseTree
+                                , config = config
+                                , leftPane = leftPane
+                              }
+                            , Cmd.batch
+                                [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+                                , Cmd.map LeftPaneMsg leftPaneCmd
+                                ]
+                            )
+            in
+            ( { model_ | switchProject = switchProject }, Cmd.batch [ Cmd.map SwitchProjectMsg switchProjectCmd, cmd_ ], None )
 
         SwitchBranchMsg switchBranchMsg ->
             let
@@ -183,15 +250,11 @@ subscriptions model =
 -- VIEW
 
 
-titlebarLeft : SwitchBranch.Model -> WorkspaceContext -> List (Html Msg)
-titlebarLeft switchBranch workspaceContext =
-    let
-        projectName =
-            ProjectName.toString workspaceContext.projectName
-    in
-    [ Button.iconThenLabel ShowChooseProject Icon.pencilRuler projectName
-        |> Button.small
-        |> Button.view
+titlebarLeft : Model -> List (Html Msg)
+titlebarLeft { switchProject, switchBranch, workspaceContext } =
+    [ SwitchProject.toAnchoredOverlay workspaceContext.projectName switchProject
+        |> AnchoredOverlay.map SwitchProjectMsg
+        |> AnchoredOverlay.view
     , SwitchBranch.toAnchoredOverlay workspaceContext.branchRef switchBranch
         |> AnchoredOverlay.map SwitchBranchMsg
         |> AnchoredOverlay.view
@@ -235,7 +298,7 @@ view model =
             []
     in
     Window.window "workspace-screen"
-        |> Window.withTitlebarLeft (titlebarLeft model.switchBranch model.workspaceContext)
+        |> Window.withTitlebarLeft (titlebarLeft model)
         |> Window.withTitlebarRight titlebarRight
         |> Window.withFooterLeft footerLeft
         |> Window.withFooterRight footerRight

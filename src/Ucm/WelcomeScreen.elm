@@ -105,7 +105,7 @@ fetchProjects appContext =
             Decode.list <|
                 Decode.field "projectName" ProjectName.decode
     in
-    Api.projects
+    Api.projects Nothing
         |> HttpApi.toRequest decodeProjectList (RemoteData.fromResult >> FetchProjectsFinished)
         |> HttpApi.perform appContext.api
 

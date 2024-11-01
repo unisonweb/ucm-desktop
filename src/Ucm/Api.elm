@@ -18,11 +18,20 @@ import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
 
 
-projects : Endpoint
-projects =
+projects : Maybe String -> Endpoint
+projects query =
+    let
+        queryParams =
+            case query of
+                Just q ->
+                    [ string "prefix" q ]
+
+                Nothing ->
+                    []
+    in
     GET
         { path = [ "projects" ]
-        , queryParams = []
+        , queryParams = queryParams
         }
 
 

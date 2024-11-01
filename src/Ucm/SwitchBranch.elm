@@ -123,7 +123,7 @@ viewSuggestions branches =
                 Nothing
 
             else
-                Just (SearchBranchSheet.viewBranchList "Branches" branches)
+                Just (SearchBranchSheet.viewBranchList "Branches" (List.take 8 branches))
     in
     MaybeE.values [ suggestions ]
 
