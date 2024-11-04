@@ -3,6 +3,7 @@ module Ucm.AppContext exposing (..)
 import Browser.Navigation as Nav
 import Code.Config
 import Code.Perspective as Perspective
+import Http
 import Json.Decode exposing (Value)
 import Lib.HttpApi as HttpApi exposing (HttpApi)
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
@@ -10,11 +11,17 @@ import Ucm.Api as Api
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 
 
+type UCMConnectivity
+    = Connected
+    | NotConnected Http.Error
+
+
 type alias AppContext =
     { operatingSystem : OperatingSystem
     , basePath : String
     , api : HttpApi
     , navKey : Nav.Key
+    , ucmConnected : UCMConnectivity
     }
 
 
@@ -32,6 +39,7 @@ init flags navKey =
     , basePath = flags.basePath
     , api = HttpApi.httpApi False flags.apiUrl Nothing
     , navKey = navKey
+    , ucmConnected = Connected
     }
 
 

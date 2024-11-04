@@ -2,7 +2,10 @@ module Ucm.App exposing (..)
 
 import Browser
 import Html
-import Ucm.AppContext exposing (AppContext)
+import Lib.HttpApi as HttpApi exposing (HttpResult)
+import Lib.Util as Util
+import Ucm.Api as Api
+import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.WorkspaceScreen as WorkspaceScreen
@@ -40,7 +43,7 @@ init appContext workspaceContext _ =
                     ( WelcomeScreen welcome, Cmd.map WelcomeScreenMsg welcomeCmd )
     in
     ( { appContext = appContext, screen = screen }
-    , cmd
+    , Cmd.batch [ cmd, checkUcmConnectivity appContext ]
     )
 
 
@@ -54,6 +57,8 @@ type Msg
     | UrlChange Url
     | WelcomeScreenMsg WelcomeScreen.Msg
     | WorkspaceScreenMsg WorkspaceScreen.Msg
+    | CheckUCMConnectivity
+    | UCMConnectivityCheckFinished (HttpResult ())
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -104,8 +109,37 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        CheckUCMConnectivity ->
+            ( model, checkUcmConnectivity model.appContext )
+
+        UCMConnectivityCheckFinished res ->
+            let
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    case res of
+                        Ok _ ->
+                            { appContext | ucmConnected = AppContext.Connected }
+
+                        Err e ->
+                            { appContext | ucmConnected = AppContext.NotConnected e }
+            in
+            ( { model | appContext = appContext_ }, Util.delayMsg 2000 CheckUCMConnectivity )
+
         _ ->
             ( model, Cmd.none )
+
+
+
+-- EFFECTS
+
+
+checkUcmConnectivity : AppContext -> Cmd Msg
+checkUcmConnectivity appContext =
+    Api.projects Nothing
+        |> HttpApi.toRequestWithEmptyResponse UCMConnectivityCheckFinished
+        |> HttpApi.perform appContext.api
 
 
 

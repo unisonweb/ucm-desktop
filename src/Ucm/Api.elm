@@ -1,4 +1,4 @@
-module Ucm.Api exposing (codebaseApiEndpointToEndpoint, projectBranches, projects)
+module Ucm.Api exposing (codebaseApiEndpointToEndpoint, pingUcm, projectBranches, projects)
 
 import Code.BranchRef as BranchRef
 import Code.CodebaseApi as CodebaseApi
@@ -16,6 +16,16 @@ import Maybe.Extra as MaybeE
 import Regex
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
+
+
+{-| Check connectivity to UCM by using the projects endpoint
+-}
+pingUcm : Endpoint
+pingUcm =
+    GET
+        { path = [ "projects" ]
+        , queryParams = []
+        }
 
 
 projects : Maybe String -> Endpoint
