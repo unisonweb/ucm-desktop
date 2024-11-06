@@ -23,6 +23,7 @@
             "elm-community/list-extra": "8.7.0",
             "elm-community/maybe-extra": "5.3.0",
             "elm-community/string-extra": "4.0.1",
+            "j-maas/elm-ordered-containers": "1.0.0",
             "krisajenkins/remotedata": "6.0.1",
             "mgold/elm-nonempty-list": "4.2.0",
             "noahzgordon/elm-color-extra": "1.0.2",
