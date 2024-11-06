@@ -20,3 +20,13 @@ toString ref =
 
         SearchResultsItemRef (SearchResultsRef r) ->
             r
+
+
+toHumanString : WorkspaceItemRef -> String
+toHumanString ref =
+    case ref of
+        DefinitionItemRef r ->
+            Reference.toHumanString r
+
+        SearchResultsItemRef (SearchResultsRef r) ->
+            r

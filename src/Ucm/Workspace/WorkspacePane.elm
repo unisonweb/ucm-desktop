@@ -13,7 +13,7 @@ import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
@@ -354,14 +354,20 @@ viewItem definitionSummaryTooltip item isFocused =
                         |> WorkspaceCard.withContent [ itemContent ]
                         |> Just
 
-                WorkspaceItem.Failure _ e ->
+                WorkspaceItem.Failure wsRef e ->
                     cardBase
-                        |> WorkspaceCard.withContent [ text (Util.httpErrorToString e) ]
+                        |> WorkspaceCard.withTitle ("Failed to load definition: " ++ WorkspaceItemRef.toHumanString wsRef)
+                        |> WorkspaceCard.withContent
+                            [ span [ class "error" ]
+                                [ span [ class "error_icon" ] [ Icon.view Icon.warn ]
+                                , text (Util.httpErrorToString e)
+                                ]
+                            ]
                         |> Just
 
                 _ ->
                     cardBase
-                        |> WorkspaceCard.withContent [ text "TODO" ]
+                        |> WorkspaceCard.withContent []
                         |> Just
     in
     card
