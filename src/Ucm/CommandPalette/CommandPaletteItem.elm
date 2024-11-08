@@ -1,7 +1,7 @@
 module Ucm.CommandPalette.CommandPaletteItem exposing (..)
 
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import UI.Click as Click exposing (Click)
 import UI.Icon as Icon exposing (Icon)
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut)
@@ -41,8 +41,8 @@ command icon label shortcut click =
         |> withKeyboardShortcut shortcut
 
 
-view : KeyboardShortcut.Model -> CommandPaletteItem msg -> Html msg
-view keyboardShortcut { icon, label, rightSide, click } =
+view : KeyboardShortcut.Model -> CommandPaletteItem msg -> Bool -> Html msg
+view keyboardShortcut { icon, label, rightSide, click } isSelected =
     let
         rightSide_ =
             case rightSide of
@@ -64,4 +64,9 @@ view keyboardShortcut { icon, label, rightSide, click } =
                 rightSide_
             ]
     in
-    Click.view [ class "command-palette-item" ] content click
+    Click.view
+        [ class "command-palette-item"
+        , classList [ ( "selected", isSelected ) ]
+        ]
+        content
+        click

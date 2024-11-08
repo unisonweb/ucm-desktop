@@ -15,6 +15,7 @@ import Html
 import Html.Attributes exposing (attribute, class, classList, id)
 import SplitPane
 import UI
+import UI.Modal as Modal exposing (Modal)
 
 
 
@@ -102,6 +103,7 @@ type alias Window msg =
     , leftSidebar : WindowSidebar msg
     , content : List (Html msg)
     , footer : WindowFooter msg
+    , modal : Maybe (Modal msg)
     }
 
 
@@ -116,6 +118,7 @@ window id_ =
     , leftSidebar = NoWindowSidebar
     , content = []
     , footer = NoWindowFooter
+    , modal = Nothing
     }
 
 
@@ -311,6 +314,11 @@ withLeftSidebar sidebar win =
     { win | leftSidebar = WindowSidebar { content = sidebar } }
 
 
+withModal : Modal msg -> Window msg -> Window msg
+withModal m win =
+    { win | modal = Just m }
+
+
 map : (fromMsg -> toMsg) -> Window fromMsg -> Window toMsg
 map f win =
     let
@@ -358,6 +366,7 @@ map f win =
     , leftSidebar = newLeftSidebar
     , content = map_ win.content
     , footer = newFooter
+    , modal = Maybe.map (Modal.map f) win.modal
     }
 
 
@@ -482,11 +491,20 @@ view toMsg model win =
                             SplitPane.view paneConfig sidebarPane mainPane model.splitPane
                     in
                     main_ [ class "window-content-shell" ] [ panes ]
+
+        modal =
+            case win.modal of
+                Just m ->
+                    Modal.view m
+
+                Nothing ->
+                    UI.nothing
     in
     { title = "UCM"
     , body =
         [ viewWindowTitlebar win.id win.titlebar
         , mainContent
         , viewWindowFooter win.id win.footer
+        , modal
         ]
     }
