@@ -23,6 +23,9 @@ import UI
 import UI.Button as Button
 import UI.Click as Click
 import UI.Icon as Icon
+import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
+import UI.KeyboardShortcut.Key exposing (Key(..))
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.TabList as TabList
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Workspace.WorkspaceCard as WorkspaceCard
@@ -39,13 +42,15 @@ import Ucm.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 type alias Model =
     { workspaceItems : WorkspaceItems
     , definitionSummaryTooltip : DefinitionSummaryTooltip.Model
+    , keyboardShortcut : KeyboardShortcut.Model
     }
 
 
 init : AppContext -> WorkspaceContext -> ( Model, Cmd Msg )
-init _ _ =
+init appContext _ =
     ( { workspaceItems = WorkspaceItems.init Nothing
       , definitionSummaryTooltip = DefinitionSummaryTooltip.init
+      , keyboardShortcut = KeyboardShortcut.init appContext.operatingSystem
       }
     , Cmd.none
     )
@@ -61,7 +66,9 @@ type Msg
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
     | OpenDependency Reference
+    | Keydown KeyboardEvent.KeyboardEvent
     | DefinitionSummaryTooltipMsg DefinitionSummaryTooltip.Msg
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 update : Config -> Msg -> Model -> ( Model, Cmd Msg )
@@ -138,6 +145,28 @@ update config msg model =
                 Nothing ->
                     openDefinition config model r
 
+        Keydown event ->
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect model.keyboardShortcut event.key
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+
+                ( nextModel, cmd ) =
+                    handleKeyboardShortcut
+                        { model | keyboardShortcut = keyboardShortcut }
+                        shortcut
+            in
+            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ] )
+
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
+
         DefinitionSummaryTooltipMsg tMsg ->
             let
                 ( definitionSummaryTooltip, tCmd ) =
@@ -210,6 +239,84 @@ openItem config ({ workspaceItems } as model) relativeToRef ref =
                 )
 
 
+handleKeyboardShortcut : Model -> KeyboardShortcut -> ( Model, Cmd Msg )
+handleKeyboardShortcut model shortcut =
+    let
+        scrollToCmd =
+            WorkspaceItems.focus
+                >> Maybe.map WorkspaceItem.reference
+                >> Maybe.map scrollToItem
+                >> Maybe.withDefault Cmd.none
+
+        nextDefinition =
+            let
+                next =
+                    WorkspaceItems.next model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next )
+
+        prevDefinitions =
+            let
+                prev =
+                    WorkspaceItems.prev model.workspaceItems
+            in
+            ( { model | workspaceItems = prev }, scrollToCmd prev )
+
+        moveDown =
+            let
+                next =
+                    WorkspaceItems.moveDown model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next )
+
+        moveUp =
+            let
+                next =
+                    WorkspaceItems.moveUp model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next )
+    in
+    case Debug.log "shortcut" shortcut of
+        Chord Shift ArrowDown ->
+            moveDown
+
+        Chord Shift ArrowUp ->
+            moveUp
+
+        Chord Shift (J _) ->
+            moveDown
+
+        Chord Shift (K _) ->
+            moveUp
+
+        Sequence _ ArrowDown ->
+            nextDefinition
+
+        Sequence _ (J _) ->
+            nextDefinition
+
+        Sequence _ ArrowUp ->
+            prevDefinitions
+
+        Sequence _ (K _) ->
+            prevDefinitions
+
+        Sequence _ (X _) ->
+            let
+                without =
+                    model.workspaceItems
+                        |> WorkspaceItems.focus
+                        |> Maybe.map (WorkspaceItem.reference >> WorkspaceItems.remove model.workspaceItems)
+                        |> Maybe.withDefault model.workspaceItems
+            in
+            ( { model | workspaceItems = without }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
 
 -- EFFECTS
 
@@ -237,6 +344,15 @@ scrollToItem ref =
             "workspac-item-" ++ WorkspaceItemRef.toString ref
     in
     ScrollTo.scrollTo NoOp "pane" targetId
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
 
 
 

@@ -91,6 +91,22 @@ update appContext msg model =
             ( model, Cmd.none, None )
 
 
+toggleSheet : AppContext -> Model -> ( Model, Cmd Msg )
+toggleSheet appContext model =
+    case model of
+        Closed ->
+            let
+                sheet =
+                    { sheet = SearchProjectSheet.init
+                    , projectSuggestions = Loading
+                    }
+            in
+            ( Open sheet, fetchProjects appContext )
+
+        Open _ ->
+            ( Closed, Cmd.none )
+
+
 
 -- EFFECTS
 

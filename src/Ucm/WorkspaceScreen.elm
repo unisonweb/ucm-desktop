@@ -10,6 +10,9 @@ import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
 import UI.Icon as Icon
+import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
+import UI.KeyboardShortcut.Key exposing (Key(..))
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Modal as Modal
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.CommandPalette as CommandPalette
@@ -36,6 +39,7 @@ type alias Model =
     , switchBranch : SwitchBranch.Model
     , modal : WorkspaceScreenModal
     , sidebarVisible : Bool
+    , keyboardShortcut : KeyboardShortcut.Model
     }
 
 
@@ -61,6 +65,7 @@ init appContext workspaceContext =
       , switchBranch = SwitchBranch.init
       , modal = NoModal
       , sidebarVisible = True
+      , keyboardShortcut = KeyboardShortcut.init appContext.operatingSystem
       }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
@@ -79,11 +84,13 @@ type Msg
     | ShowCommandPalette
     | CloseModal
     | ToggleSidebar
+    | Keydown KeyboardEvent.KeyboardEvent
     | CodebaseTreeMsg CodebaseTree.Msg
     | LeftPaneMsg WorkspacePane.Msg
     | SwitchProjectMsg SwitchProject.Msg
     | SwitchBranchMsg SwitchBranch.Msg
     | CommandPaletteMsg CommandPalette.Msg
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 type OutMsg
@@ -164,6 +171,69 @@ update appContext msg model =
 
         ToggleSidebar ->
             ( { model | sidebarVisible = not model.sidebarVisible }, Cmd.none, None )
+
+        Keydown event ->
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect model.keyboardShortcut event.key
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+
+                model_ =
+                    { model | keyboardShortcut = keyboardShortcut }
+
+                showCommandPalette =
+                    ( { model_ | modal = CommandPaletteModal (CommandPalette.init appContext CommandPalette.NoContext) }, Cmd.none )
+
+                toggleSidebar =
+                    ( { model_ | sidebarVisible = not model_.sidebarVisible }, Cmd.none )
+
+                ( nextModel, cmd ) =
+                    case ( model_.modal, shortcut ) of
+                        ( NoModal, Chord Ctrl (K _) ) ->
+                            showCommandPalette
+
+                        ( NoModal, Chord Meta (K _) ) ->
+                            showCommandPalette
+
+                        ( NoModal, Sequence _ ForwardSlash ) ->
+                            showCommandPalette
+
+                        ( NoModal, Sequence (Just (W _)) (S _) ) ->
+                            toggleSidebar
+
+                        ( NoModal, Chord Meta (B _) ) ->
+                            toggleSidebar
+
+                        ( NoModal, Chord Ctrl (B _) ) ->
+                            toggleSidebar
+
+                        ( NoModal, Sequence (Just (W _)) (P _) ) ->
+                            let
+                                ( switchProject, switchProjectCmd ) =
+                                    SwitchProject.toggleSheet appContext model.switchProject
+                            in
+                            ( { model_ | switchProject = switchProject }, Cmd.map SwitchProjectMsg switchProjectCmd )
+
+                        ( NoModal, Sequence (Just (W _)) (B _) ) ->
+                            let
+                                ( switchBranch, switchBranchCmd ) =
+                                    SwitchBranch.toggleSheet appContext model.workspaceContext.projectName model.switchBranch
+                            in
+                            ( { model_ | switchBranch = switchBranch }, Cmd.map SwitchBranchMsg switchBranchCmd )
+
+                        _ ->
+                            ( model_, Cmd.none )
+            in
+            ( nextModel, Cmd.batch [ Cmd.map KeyboardShortcutMsg kCmd, cmd ], None )
+
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, None )
 
         LeftPaneMsg workspacePaneMsg ->
             let
@@ -285,7 +355,20 @@ update appContext msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map WindowMsg (Window.subscriptions model.window)
+    let
+        activeSub =
+            case model.modal of
+                NoModal ->
+                    Sub.map LeftPaneMsg (WorkspacePane.subscriptions model.leftPane)
+
+                CommandPaletteModal m ->
+                    Sub.map CommandPaletteMsg (CommandPalette.subscriptions m)
+    in
+    Sub.batch
+        [ Sub.map WindowMsg (Window.subscriptions model.window)
+        , KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
+        , activeSub
+        ]
 
 
 

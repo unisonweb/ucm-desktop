@@ -287,6 +287,7 @@ view title suggestions footer_ model =
                 |> TextField.withHelpText "Find a contributor branch by prefixing their handle, ex: \"@unison\"."
                 |> TextField.withIconOrWorking Icon.search isSearching
                 |> TextField.withClear ClearSearch
+                |> TextField.withAutofocus
                 |> TextField.view
              )
                 :: content_

@@ -15,7 +15,9 @@ import Lib.Search as Search exposing (Search(..))
 import Lib.SearchResults as SearchResults
 import UI.Click as Click
 import UI.Icon as Icon
-import UI.KeyboardShortcut as KeyboardShortcut
+import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
+import UI.KeyboardShortcut.Key exposing (Key(..))
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Modal exposing (Modal)
 import Ucm.AppContext exposing (AppContext)
 import Ucm.CommandPalette.CommandPaletteItem as CommandPaletteItem exposing (CommandPaletteItem)
@@ -56,6 +58,8 @@ type Msg
     | SelectMatch Reference
     | PerformSearch
     | Close
+    | Keydown KeyboardEvent.KeyboardEvent
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 type OutMsg
@@ -112,6 +116,57 @@ update appContext config msg model =
         Close ->
             ( model, Cmd.none, CloseRequest )
 
+        Keydown event ->
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect model.keyboardShortcut event.key
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+
+                model_ =
+                    { model | keyboardShortcut = keyboardShortcut }
+
+                ( nextModel, out ) =
+                    case shortcut of
+                        Sequence _ ArrowUp ->
+                            let
+                                search =
+                                    Search.searchResultsCyclePrev model_.search
+                            in
+                            ( { model_ | search = search }, NoOut )
+
+                        Sequence _ ArrowDown ->
+                            let
+                                search =
+                                    Search.searchResultsCycleNext model_.search
+                            in
+                            ( { model_ | search = search }, NoOut )
+
+                        Sequence _ Enter ->
+                            let
+                                out_ =
+                                    model_.search
+                                        |> Search.searchResults
+                                        |> Maybe.andThen SearchResults.focus
+                                        |> Maybe.map FinderMatch.reference
+                                        |> Maybe.map SelectDefinition
+                                        |> Maybe.withDefault NoOut
+                            in
+                            ( model_, out_ )
+
+                        _ ->
+                            ( model_, NoOut )
+            in
+            ( nextModel, Cmd.batch [ Cmd.map KeyboardShortcutMsg kCmd ], out )
+
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, NoOut )
+
 
 
 -- EFFECTS
@@ -140,6 +195,14 @@ fetchDefinitionMatches appContext config query =
 
 
 -- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
+
+
+
 -- VIEW
 
 

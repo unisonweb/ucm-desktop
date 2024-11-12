@@ -285,6 +285,7 @@ view title suggestions footer_ model =
             ((TextField.fieldWithoutLabel UpdateSearchQuery "Search projects" query
                 |> TextField.withIconOrWorking Icon.search isSearching
                 |> TextField.withClear ClearSearch
+                |> TextField.withAutofocus
                 |> TextField.view
              )
                 :: content_

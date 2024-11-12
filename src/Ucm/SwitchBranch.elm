@@ -95,6 +95,24 @@ update appContext projectName msg model =
             ( model, Cmd.none, None )
 
 
+toggleSheet : AppContext -> ProjectName -> Model -> ( Model, Cmd Msg )
+toggleSheet appContext projectName model =
+    case model of
+        Closed ->
+            let
+                sheet =
+                    { sheet = SearchBranchSheet.init
+                    , branchSuggestions = Loading
+                    }
+            in
+            ( Open sheet
+            , fetchBranches appContext projectName
+            )
+
+        Open _ ->
+            ( Closed, Cmd.none )
+
+
 
 -- EFFECTS
 
