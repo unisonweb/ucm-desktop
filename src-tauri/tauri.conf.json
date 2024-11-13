@@ -15,7 +15,16 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "dmg": {
+        "background": "./images/dmg-background.png",
+        "windowSize": {
+          "width": 660,
+          "height": 400
+        }
+      }
+    }
   },
   "productName": "UCM",
   "mainBinaryName": "UCM",
