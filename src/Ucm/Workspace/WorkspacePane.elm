@@ -276,7 +276,7 @@ handleKeyboardShortcut model shortcut =
             in
             ( { model | workspaceItems = next }, scrollToCmd next )
     in
-    case Debug.log "shortcut" shortcut of
+    case shortcut of
         Chord Shift ArrowDown ->
             moveDown
 

@@ -12,12 +12,15 @@ import "ui-core/Lib/OnClickOutside";
 import "ui-core/Lib/EmbedKatex";
 import "ui-core/Lib/MermaidDiagram";
 import "ui-core/Lib/EmbedSvg";
+// @ts-ignore
 import detectOs from "ui-core/Lib/detectOs";
+// @ts-ignore
 import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
 import "./main.css";
 
 console.log("Starting UCM");
 
+// @ts-ignore
 import { Elm } from './Main.elm';
 
 type WorkspaceContext = {
