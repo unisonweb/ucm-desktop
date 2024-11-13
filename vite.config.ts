@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+// @ts-ignore
 import elmPlugin from 'vite-plugin-elm'
 import path from "path";
 
@@ -12,6 +13,10 @@ export default defineConfig(async () => ({
     alias: {
       "ui-core": path.resolve(__dirname, UI_CORE_SRC)
     },
+  },
+
+  build: {
+    target: "esnext"
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
