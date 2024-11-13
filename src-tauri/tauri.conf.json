@@ -26,8 +26,8 @@
       }
     }
   },
-  "productName": "UCM",
-  "mainBinaryName": "UCM",
+  "productName": "UCM Desktop",
+  "mainBinaryName": "ucm-desktop",
   "version": "0.1.0",
   "identifier": "com.ucm-desktop.app",
   "app": {
