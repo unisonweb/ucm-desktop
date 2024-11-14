@@ -1,5 +1,5 @@
 # ucm-desktop
-A desktop top app companion to the UCM CLI. A.k.a. Graphical UCM.
+A desktop app companion to the UCM CLI. A.k.a. Graphical UCM.
 
 ---
 
