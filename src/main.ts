@@ -27,7 +27,7 @@ type WorkspaceContext = {
   projectName: string;
   branchRef: string
 }
-
+/*
 console.log("Loading Store");
 const store = await Store.load('settings.json');
 console.log("Store loaded");
@@ -41,6 +41,7 @@ const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
 
 // you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
 unlisten();
+*/
 
 // ELM STUFF
 
@@ -48,7 +49,7 @@ const flags = {
   operatingSystem: detectOs(window.navigator),
   basePath: "",
   apiUrl: "http://127.0.0.1:4444/asdf/api",
-  workspaceContext: workspaceContexts[0],
+  workspaceContext: undefined, // workspaceContexts[0],
 };
 
 preventDefaultGlobalKeyboardEvents();
@@ -58,12 +59,13 @@ const app = Elm.Main.init({ flags });
 console.log("Elm app started");
 
 if (app.ports) {
-  app.ports.saveWorkspaceContext?.subscribe(async (workspaceContext: WorkspaceContext) => {
+  app.ports.saveWorkspaceContext?.subscribe(async (_workspaceContext: WorkspaceContext) => {
+    /*
     console.log("saving contexts", workspaceContext);
     try {
       await store.set("workspace-contexts", [workspaceContext])
     } catch (ex) {
       console.error(ex);
-    }
+    }*/
   });
 }
