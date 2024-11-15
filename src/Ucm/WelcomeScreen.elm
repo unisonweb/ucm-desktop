@@ -141,8 +141,8 @@ isMatch s (ProjectName handle slug) =
     String.startsWith (removeAt s) handle_ || String.startsWith s slug_
 
 
-view : Model -> Browser.Document Msg
-view model =
+view : AppContext -> Model -> Browser.Document Msg
+view _ model =
     let
         viewProjectOption p =
             Click.onClick (SelectProject p BranchRef.main_)

@@ -5,7 +5,8 @@ import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
 import Html exposing (Html, div)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, title)
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
@@ -18,6 +19,7 @@ import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.CommandPalette as CommandPalette
 import Ucm.SwitchBranch as SwitchBranch
 import Ucm.SwitchProject as SwitchProject
+import Ucm.UcmConnectivity as UcmConnectivity exposing (UcmConnectivity)
 import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane
 import Window
@@ -405,8 +407,8 @@ viewLeftSidebar codebaseTree =
     ]
 
 
-view : Model -> Browser.Document Msg
-view model =
+view : AppContext -> Model -> Browser.Document Msg
+view appContext model =
     let
         window =
             Window.window "workspace-screen"
@@ -428,7 +430,7 @@ view model =
             ]
 
         footerRight =
-            []
+            [ UcmConnectivity.view appContext.ucmConnectivity ]
 
         window__ =
             case model.modal of

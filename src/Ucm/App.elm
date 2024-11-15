@@ -5,7 +5,8 @@ import Html
 import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.Util as Util
 import Ucm.Api as Api
-import Ucm.AppContext as AppContext exposing (AppContext)
+import Ucm.AppContext exposing (AppContext)
+import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.WorkspaceScreen as WorkspaceScreen
@@ -117,12 +118,12 @@ update msg model =
                 appContext_ =
                     case res of
                         Ok _ ->
-                            { appContext | ucmConnected = AppContext.Connected }
+                            { appContext | ucmConnectivity = Connected }
 
                         Err e ->
-                            { appContext | ucmConnected = AppContext.NotConnected e }
+                            { appContext | ucmConnectivity = NotConnected e }
             in
-            ( { model | appContext = appContext_ }, Util.delayMsg 2000 CheckUCMConnectivity )
+            ( { model | appContext = appContext_ }, Util.delayMsg 5000 CheckUCMConnectivity )
 
         _ ->
             ( model, Cmd.none )
@@ -169,10 +170,10 @@ view model =
     case model.screen of
         WelcomeScreen m ->
             m
-                |> WelcomeScreen.view
+                |> WelcomeScreen.view model.appContext
                 |> mapDocument WelcomeScreenMsg
 
         WorkspaceScreen m ->
             m
-                |> WorkspaceScreen.view
+                |> WorkspaceScreen.view model.appContext
                 |> mapDocument WorkspaceScreenMsg

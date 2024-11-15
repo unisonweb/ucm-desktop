@@ -1,0 +1,28 @@
+.ucm-connectivity {
+  position: relative;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.25rem;
+}
+
+.ucm-connectivity_error {
+  background: var(--u-color_critical_element);
+
+  & .icon {
+    color: var(--u-color_critical_icon-on-element);
+    margin-top: -4px;
+  }
+}
+
+.tooltip-trigger:has(.ucm-connectivity) .tooltip-bubble {
+  margin-right: -1.75rem;
+  margin-bottom: -0.65rem;
+}
+
+.tooltip-trigger:has(.ucm-connectivity) .tooltip-bubble p {
+  margin: 0;
+}
