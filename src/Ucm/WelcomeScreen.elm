@@ -184,7 +184,7 @@ view _ model =
         welcomeHeader =
             header [ class "welcome-header" ]
                 [ div [ class "app-logo" ]
-                    [ img [ src "/src/assets/app-icon.png", alt "UCM App Icon", class "app-icon" ] []
+                    [ img [ src "/app-icon.png", alt "UCM App Icon", class "app-icon" ] []
                     , div []
                         [ h2 [] [ text "Unison Codebase Manager" ]
 

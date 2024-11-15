@@ -29,10 +29,12 @@ try {
     branchRef: string
   }
   console.log("Loading Store");
-  const store = await Store.load('settings.json');
+  const store = await Store.load("settings.json");
   console.log("Store loaded");
 
-  const workspaceContexts = (await store.get<Array<WorkspaceContext>>('workspace-contexts') || []);
+  const workspaceContexts = (await store.get<Array<WorkspaceContext>>("workspace-contexts") || []);
+
+  await store.delete("workspace-contexts");
 
   const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
     console.log("TODO");
