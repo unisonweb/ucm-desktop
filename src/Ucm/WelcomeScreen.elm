@@ -187,7 +187,9 @@ view _ model =
                     [ img [ src "/src/assets/app-icon.png", alt "UCM App Icon", class "app-icon" ] []
                     , div []
                         [ h2 [] [ text "Unison Codebase Manager" ]
-                        , p [ class "unison-version" ] [ text "Version: release/0.5.26 (built on 2024-09-05)" ]
+
+                        -- TODO: insert UCM version
+                        -- , p [ class "unison-version" ] [ text "Version: release/0.5.26 (built on 2024-09-05)" ]
                         ]
                     ]
                 , TextField.fieldWithoutLabel UpdateSearchQuery "Search projects" model.searchQuery
