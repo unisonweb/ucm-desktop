@@ -23,49 +23,74 @@ console.log("Starting UCM");
 // @ts-ignore
 import { Elm } from './Main.elm';
 
-type WorkspaceContext = {
-  projectName: string;
-  branchRef: string
-}
-/*
-console.log("Loading Store");
-const store = await Store.load('settings.json');
-console.log("Store loaded");
+try {
+  type WorkspaceContext = {
+    projectName: string;
+    branchRef: string
+  }
+  console.log("Loading Store");
+  const store = await Store.load('settings.json');
+  console.log("Store loaded");
 
-const workspaceContexts = (await store.get<Array<WorkspaceContext>>('workspace-contexts') || []);
+  const workspaceContexts = (await store.get<Array<WorkspaceContext>>('workspace-contexts') || []);
 
-const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
-  console.log("TODO");
-  ev.preventDefault();
-});
-
-// you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
-unlisten();
-*/
-
-// ELM STUFF
-
-const flags = {
-  operatingSystem: detectOs(window.navigator),
-  basePath: "",
-  apiUrl: "http://127.0.0.1:4444/asdf/api",
-  workspaceContext: undefined, // workspaceContexts[0],
-};
-
-preventDefaultGlobalKeyboardEvents();
-
-console.log("Starting Elm app");
-const app = Elm.Main.init({ flags });
-console.log("Elm app started");
-
-if (app.ports) {
-  app.ports.saveWorkspaceContext?.subscribe(async (_workspaceContext: WorkspaceContext) => {
-    /*
-    console.log("saving contexts", workspaceContext);
-    try {
-      await store.set("workspace-contexts", [workspaceContext])
-    } catch (ex) {
-      console.error(ex);
-    }*/
+  const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
+    console.log("TODO");
+    ev.preventDefault();
   });
+
+  // you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
+  unlisten();
+
+  // ELM STUFF
+
+  const flags = {
+    operatingSystem: detectOs(window.navigator),
+    basePath: "",
+    apiUrl: "http://127.0.0.1:4444/asdf/api",
+    workspaceContext: workspaceContexts[0],
+  };
+
+  preventDefaultGlobalKeyboardEvents();
+
+  console.log("Starting Elm app");
+  const app = Elm.Main.init({ flags });
+  console.log("Elm app started");
+
+  if (app.ports) {
+    app.ports.saveWorkspaceContext?.subscribe(async (workspaceContext: WorkspaceContext) => {
+      console.log("saving contexts", workspaceContext);
+      try {
+        await store.set("workspace-contexts", [workspaceContext])
+      } catch (ex) {
+        console.error(ex);
+      }
+    });
+  }
+}
+catch (ex) {
+  console.error(ex);
+
+  const $body = document.querySelector("body");
+  const $err = document.createElement("div");
+  $err.className = "app-error";
+  const $errHeader = document.createElement("h2");
+  $errHeader.innerHTML = "Could not start application";
+  $err.appendChild($errHeader);
+  const $errMessage = document.createElement("p");
+
+  if ($body) {
+    if (typeof ex === "string") {
+      $errMessage.innerHTML = ex;
+    }
+    else if (ex instanceof Error) {
+      $errMessage.innerHTML = ex.message
+    }
+    else {
+      $errMessage.innerHTML = `An unknown error occured: ${ex}`;
+    }
+
+    $err.appendChild($errMessage);
+    $body.appendChild($err);
+  }
 }

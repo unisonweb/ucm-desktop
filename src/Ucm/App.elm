@@ -9,7 +9,6 @@ import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.WorkspaceScreen as WorkspaceScreen
-import Url exposing (Url)
 
 
 type Screen
@@ -23,8 +22,8 @@ type alias Model =
     }
 
 
-init : AppContext -> Maybe WorkspaceContext -> Url -> ( Model, Cmd Msg )
-init appContext workspaceContext _ =
+init : AppContext -> Maybe WorkspaceContext -> ( Model, Cmd Msg )
+init appContext workspaceContext =
     let
         ( screen, cmd ) =
             case workspaceContext of
@@ -53,8 +52,6 @@ init appContext workspaceContext _ =
 
 type Msg
     = NoOp
-    | UrlRequest Browser.UrlRequest
-    | UrlChange Url
     | WelcomeScreenMsg WelcomeScreen.Msg
     | WorkspaceScreenMsg WorkspaceScreen.Msg
     | CheckUCMConnectivity

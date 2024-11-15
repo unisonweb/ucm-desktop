@@ -1,6 +1,5 @@
 module Ucm.AppContext exposing (..)
 
-import Browser.Navigation as Nav
 import Code.Config
 import Code.Perspective as Perspective
 import Http
@@ -20,7 +19,6 @@ type alias AppContext =
     { operatingSystem : OperatingSystem
     , basePath : String
     , api : HttpApi
-    , navKey : Nav.Key
     , ucmConnected : UCMConnectivity
     }
 
@@ -33,12 +31,11 @@ type alias Flags =
     }
 
 
-init : Flags -> Nav.Key -> AppContext
-init flags navKey =
+init : Flags -> AppContext
+init flags =
     { operatingSystem = OS.fromString flags.operatingSystem
     , basePath = flags.basePath
     , api = HttpApi.httpApi False flags.apiUrl Nothing
-    , navKey = navKey
     , ucmConnected = Connected
     }
 

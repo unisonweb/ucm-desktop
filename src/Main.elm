@@ -13,8 +13,8 @@ import Url exposing (Url)
 -- PROGRAM
 
 
-appInit : AppContext.Flags -> Url -> Nav.Key -> ( App.Model, Cmd App.Msg )
-appInit flags url navKey =
+appInit : AppContext.Flags -> ( App.Model, Cmd App.Msg )
+appInit flags =
     let
         workspaceContext =
             flags.workspaceContext
@@ -22,18 +22,15 @@ appInit flags url navKey =
                 |> Result.withDefault Nothing
     in
     App.init
-        (AppContext.init flags navKey)
+        (AppContext.init flags)
         workspaceContext
-        url
 
 
 main : Program AppContext.Flags App.Model App.Msg
 main =
-    Browser.application
+    Browser.document
         { init = appInit
-        , update = App.update
         , view = App.view
+        , update = App.update
         , subscriptions = App.subscriptions
-        , onUrlRequest = App.UrlRequest
-        , onUrlChange = App.UrlChange
         }
