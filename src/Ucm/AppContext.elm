@@ -31,7 +31,7 @@ init flags =
     { operatingSystem = OS.fromString flags.operatingSystem
     , basePath = flags.basePath
     , api = HttpApi.httpApi False flags.apiUrl Nothing
-    , ucmConnectivity = Connected
+    , ucmConnectivity = Connecting
     }
 
 

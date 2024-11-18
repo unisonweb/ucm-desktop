@@ -5,21 +5,44 @@ import Html.Attributes exposing (class)
 import Http
 import UI
 import UI.Icon as Icon
+import UI.StatusIndicator as StatusIndicator
 import UI.Tooltip as Tooltip
 
 
+
+{-
+
+   UCM Connectivity State Machine
+   ==============================
+
+          Init
+            ◎
+            │
+            ├────────────────┐
+      ┌─────▼──────┐  ┌──────•─────────┐
+      │ Connecting •──▶ NeverConnected │
+      └─────•──────┘  └────────────────┘
+            │
+            ├────────────────┐
+      ┌─────▼─────┐  ┌───────•────────┐
+      │ Connected •──▶ LostConnection │
+      └───────────┘  └────────────────┘
+
+
+-}
+
+
 type UcmConnectivity
-    = Connected
-    | NotConnected Http.Error
+    = Connecting
+    | NeverConnected Http.Error
+    | Connected
+    | LostConnection Http.Error
 
 
 view : UcmConnectivity -> Html msg
 view ucmConnectivity =
-    case ucmConnectivity of
-        Connected ->
-            UI.nothing
-
-        NotConnected err ->
+    let
+        handleErr err =
             let
                 ( errorTitle, errorMessage ) =
                     case err of
@@ -52,3 +75,16 @@ view ucmConnectivity =
                 |> Tooltip.withPosition Tooltip.Above
                 |> Tooltip.withArrow Tooltip.End
                 |> Tooltip.view icon
+    in
+    case ucmConnectivity of
+        Connecting ->
+            StatusIndicator.view StatusIndicator.working
+
+        NeverConnected err ->
+            handleErr err
+
+        Connected ->
+            UI.nothing
+
+        LostConnection err ->
+            handleErr err

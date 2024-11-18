@@ -74,6 +74,7 @@ catch (ex) {
   console.error(ex);
 
   const $body = document.querySelector("body");
+  const $errWrapper = document.createElement("div");
   const $err = document.createElement("div");
   $err.className = "app-error";
   const $errHeader = document.createElement("h2");
@@ -93,6 +94,7 @@ catch (ex) {
     }
 
     $err.appendChild($errMessage);
-    $body.appendChild($err);
+    $errWrapper.appendChild($err);
+    $body.appendChild($errWrapper);
   }
 }

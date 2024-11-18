@@ -1,9 +1,12 @@
 module Ucm.App exposing (..)
 
 import Browser
-import Html
+import Html exposing (br, code, div, h2, p, text)
+import Html.Attributes exposing (class)
 import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.Util as Util
+import UI.Button as Button
+import UI.Icon as Icon
 import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
@@ -43,7 +46,7 @@ init appContext workspaceContext =
                     ( WelcomeScreen welcome, Cmd.map WelcomeScreenMsg welcomeCmd )
     in
     ( { appContext = appContext, screen = screen }
-    , Cmd.batch [ cmd, checkUcmConnectivity appContext ]
+    , Cmd.batch [ cmd, checkInitialUcmConnectivity appContext ]
     )
 
 
@@ -56,6 +59,7 @@ type Msg
     | WelcomeScreenMsg WelcomeScreen.Msg
     | WorkspaceScreenMsg WorkspaceScreen.Msg
     | CheckUCMConnectivity
+    | InitialUCMConnectivityCheckFinished (HttpResult ())
     | UCMConnectivityCheckFinished (HttpResult ())
 
 
@@ -110,6 +114,21 @@ update msg model =
         CheckUCMConnectivity ->
             ( model, checkUcmConnectivity model.appContext )
 
+        InitialUCMConnectivityCheckFinished res ->
+            let
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    case res of
+                        Ok _ ->
+                            { appContext | ucmConnectivity = Connected }
+
+                        Err e ->
+                            { appContext | ucmConnectivity = NeverConnected e }
+            in
+            ( { model | appContext = appContext_ }, Cmd.none )
+
         UCMConnectivityCheckFinished res ->
             let
                 appContext =
@@ -121,7 +140,7 @@ update msg model =
                             { appContext | ucmConnectivity = Connected }
 
                         Err e ->
-                            { appContext | ucmConnectivity = NotConnected e }
+                            { appContext | ucmConnectivity = LostConnection e }
             in
             ( { model | appContext = appContext_ }, Util.delayMsg 5000 CheckUCMConnectivity )
 
@@ -131,6 +150,13 @@ update msg model =
 
 
 -- EFFECTS
+
+
+checkInitialUcmConnectivity : AppContext -> Cmd Msg
+checkInitialUcmConnectivity appContext =
+    Api.projects Nothing
+        |> HttpApi.toRequestWithEmptyResponse InitialUCMConnectivityCheckFinished
+        |> HttpApi.perform appContext.api
 
 
 checkUcmConnectivity : AppContext -> Cmd Msg
@@ -167,13 +193,49 @@ mapDocument f document =
 
 view : Model -> Browser.Document Msg
 view model =
-    case model.screen of
-        WelcomeScreen m ->
-            m
-                |> WelcomeScreen.view model.appContext
-                |> mapDocument WelcomeScreenMsg
+    let
+        view_ =
+            case model.screen of
+                WelcomeScreen m ->
+                    m
+                        |> WelcomeScreen.view model.appContext
+                        |> mapDocument WelcomeScreenMsg
 
-        WorkspaceScreen m ->
-            m
-                |> WorkspaceScreen.view model.appContext
-                |> mapDocument WorkspaceScreenMsg
+                WorkspaceScreen m ->
+                    m
+                        |> WorkspaceScreen.view model.appContext
+                        |> mapDocument WorkspaceScreenMsg
+    in
+    case model.appContext.ucmConnectivity of
+        Connecting ->
+            view_
+
+        NeverConnected _ ->
+            let
+                apiUrl =
+                    HttpApi.baseApiUrl model.appContext.api
+                        |> String.replace "/api/" ""
+            in
+            { title = "UCM Desktop | Couldn't connect to the UCM CLI"
+            , body =
+                [ div []
+                    [ div [ class "app-error" ]
+                        [ h2 [] [ text "Couldn't connect to the UCM CLI" ]
+                        , p []
+                            [ text "Please make sure UCM is running on the right port like so: "
+                            , br [] []
+                            , code [] [ text apiUrl ]
+                            ]
+                        , Button.iconThenLabel CheckUCMConnectivity Icon.refresh "Try again"
+                            |> Button.emphasized
+                            |> Button.view
+                        ]
+                    ]
+                ]
+            }
+
+        Connected ->
+            view_
+
+        LostConnection _ ->
+            view_
