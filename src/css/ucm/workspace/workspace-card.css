@@ -1,13 +1,15 @@
 .workspace-card {
   --c-workspace-card_border: var(--u-color_border_subdued);
   --c-workspace-card_background: var(--u-color_container_faded);
+  --c-workspace-card_width: calc(var(--readable-column-width-medium) + 2rem);
+  --c-width_doc_inner-content: var(--c-workspace-card_width);
 
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: 0;
   width: 100%;
-  max-width: calc(var(--readable-column-width-medium) + 2rem);
+  max-width: var(--c-workspace-card_width);
 
   & .workspace-card_titlebar {
     display: flex;

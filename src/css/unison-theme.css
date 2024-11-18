@@ -123,7 +123,8 @@
   /* [x] */ --u-color_critical_element_subdued: var(--color-pink-0-25pct);
   /* [x] */ --u-color_critical_text-on-element_subdued: var(--color-pink-4);
 
-  --u-color_info_container_subdued: var(--color-blue-5);
+  --u-color_info_container_subdued: var(--color-blue-1-25pct);
+
   --u-color_info_text: var(--color-blue-2);
   --u-color_info_text_emphasized: var(--color-blue-1);
   --u-color_info_icon: var(--color-blue-3);
@@ -219,3 +220,4 @@
 .anchored-overlay {
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
+
