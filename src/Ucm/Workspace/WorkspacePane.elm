@@ -11,13 +11,15 @@ import Code.Definition.Term as Term
 import Code.Definition.Type as Type
 import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
 import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
-import Html exposing (Html, div, span, text)
+import Html exposing (Html, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
+import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import UI
 import UI.Button as Button
@@ -28,6 +30,7 @@ import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.TabList as TabList
 import Ucm.AppContext exposing (AppContext)
+import Ucm.ContextualTag as ContextualTag
 import Ucm.Workspace.WorkspaceCard as WorkspaceCard
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
@@ -386,6 +389,50 @@ definitionItemName defItem =
             info.name
 
 
+definitionItemToLib : WorkspaceItem.DefinitionItem -> Maybe ProjectDependency
+definitionItemToLib defItem =
+    let
+        fqnToLib fqn =
+            case fqn |> FQN.segments |> NEL.toList of
+                "lib" :: _ :: "lib" :: _ ->
+                    Nothing
+
+                "lib" :: libName :: _ ->
+                    Just (ProjectDependency.fromString libName)
+
+                _ ->
+                    Nothing
+
+        toLib info =
+            case info.namespace of
+                Just n ->
+                    fqnToLib n
+
+                Nothing ->
+                    let
+                        f n acc =
+                            if MaybeE.isJust acc then
+                                acc
+
+                            else
+                                fqnToLib n
+                    in
+                    List.foldl f Nothing info.otherNames
+    in
+    case defItem of
+        WorkspaceItem.TermItem (Term.Term _ _ { info }) ->
+            toLib info
+
+        WorkspaceItem.TypeItem (Type.Type _ _ { info }) ->
+            toLib info
+
+        WorkspaceItem.AbilityConstructorItem (AbilityConstructor.AbilityConstructor _ { info }) ->
+            toLib info
+
+        WorkspaceItem.DataConstructorItem (DataConstructor.DataConstructor _ { info }) ->
+            toLib info
+
+
 viewDefinitionItemSource : DefinitionSummaryTooltip.Model -> WorkspaceItem.DefinitionItem -> Html Msg
 viewDefinitionItemSource definitionSummaryTooltip defItem =
     let
@@ -419,6 +466,13 @@ definitionItemTabs wsRef =
     }
 
 
+viewLibraryTag : ProjectDependency -> Html msg
+viewLibraryTag dep =
+    ContextualTag.contextualTag Icon.book (ProjectDependency.toString dep)
+        |> ContextualTag.decorativePurple
+        |> ContextualTag.view
+
+
 viewItem : DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
 viewItem definitionSummaryTooltip item isFocused =
     let
@@ -447,6 +501,12 @@ viewItem definitionSummaryTooltip item isFocused =
                             else
                                 c
 
+                        lib =
+                            defItem
+                                |> definitionItemToLib
+                                |> Maybe.map viewLibraryTag
+                                |> Maybe.withDefault UI.nothing
+
                         itemContent =
                             case ( state.activeTab, WorkspaceItem.docs defItem ) of
                                 ( WorkspaceItem.DocsTab docFoldToggles, Just docs ) ->
@@ -459,7 +519,7 @@ viewItem definitionSummaryTooltip item isFocused =
                                     viewDefinitionItemSource definitionSummaryTooltip defItem
                     in
                     cardBase
-                        |> WorkspaceCard.withTitle (FQN.toString (definitionItemName defItem))
+                        |> WorkspaceCard.withTitlebarLeft [ lib, strong [] [ text (FQN.toString (definitionItemName defItem)) ] ]
                         |> WorkspaceCard.withTitlebarRight
                             [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
                                 |> Button.subdued

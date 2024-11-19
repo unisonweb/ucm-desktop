@@ -24,6 +24,13 @@
     font-size: var(--font-size-medium);
     color: var(--u-color_text_subdued);
 
+    & .workspace-card_titlebar_left {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
     & .workspace-card_title {
       font-weight: bold;
     }
