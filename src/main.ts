@@ -34,7 +34,7 @@ try {
 
   const workspaceContexts = (await store.get<Array<WorkspaceContext>>("workspace-contexts") || []);
 
-  await store.delete("workspace-contexts");
+  // await store.delete("workspace-contexts");
 
   const unlisten = await getCurrentWindow().onCloseRequested(async (ev) => {
     console.log("TODO");
