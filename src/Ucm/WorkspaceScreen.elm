@@ -5,8 +5,7 @@ import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
 import Html exposing (Html, div)
-import Html.Attributes exposing (class, title)
-import Lib.Util as Util
+import Html.Attributes exposing (class)
 import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
@@ -19,9 +18,9 @@ import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.CommandPalette as CommandPalette
 import Ucm.SwitchBranch as SwitchBranch
 import Ucm.SwitchProject as SwitchProject
-import Ucm.UcmConnectivity as UcmConnectivity exposing (UcmConnectivity)
+import Ucm.UcmConnectivity as UcmConnectivity
 import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
-import Ucm.Workspace.WorkspacePane as WorkspacePane
+import Ucm.Workspace.WorkspacePanes as WorkspacePanes
 import Window
 
 
@@ -35,8 +34,7 @@ type alias Model =
     , codebaseTree : CodebaseTree.Model
     , config : Code.Config.Config
     , window : Window.Model
-    , leftPane : WorkspacePane.Model
-    , rightPane : Maybe WorkspacePane.Model
+    , panes : WorkspacePanes.Model
     , switchProject : SwitchProject.Model
     , switchBranch : SwitchBranch.Model
     , modal : WorkspaceScreenModal
@@ -54,15 +52,14 @@ init appContext workspaceContext =
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init config
 
-        ( leftPane, leftPaneCmd ) =
-            WorkspacePane.init appContext workspaceContext
+        ( panes, panesCmd ) =
+            WorkspacePanes.init appContext workspaceContext
     in
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
       , config = config
       , window = Window.init
-      , leftPane = leftPane
-      , rightPane = Nothing
+      , panes = panes
       , switchProject = SwitchProject.init
       , switchBranch = SwitchBranch.init
       , modal = NoModal
@@ -71,7 +68,7 @@ init appContext workspaceContext =
       }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
-        , Cmd.map LeftPaneMsg leftPaneCmd
+        , Cmd.map WorkspacePanesMsg panesCmd
         ]
     )
 
@@ -86,9 +83,10 @@ type Msg
     | ShowCommandPalette
     | CloseModal
     | ToggleSidebar
+    | ToggleRightPane
     | Keydown KeyboardEvent.KeyboardEvent
     | CodebaseTreeMsg CodebaseTree.Msg
-    | LeftPaneMsg WorkspacePane.Msg
+    | WorkspacePanesMsg WorkspacePanes.Msg
     | SwitchProjectMsg SwitchProject.Msg
     | SwitchBranchMsg SwitchBranch.Msg
     | CommandPaletteMsg CommandPalette.Msg
@@ -116,14 +114,11 @@ update appContext msg model =
                     case outMsg of
                         CodebaseTree.OpenDefinition ref ->
                             let
-                                ( leftPane, paneCmd ) =
-                                    WorkspacePane.openDefinition
-                                        model.config
-                                        model_.leftPane
-                                        ref
+                                ( panes, panesCmd ) =
+                                    WorkspacePanes.openDefinition model.config model.panes ref
                             in
-                            ( { model_ | leftPane = leftPane }
-                            , Cmd.batch [ cmd_, Cmd.map LeftPaneMsg paneCmd ]
+                            ( { model_ | panes = panes }
+                            , Cmd.batch [ cmd_, Cmd.map WorkspacePanesMsg panesCmd ]
                             )
 
                         _ ->
@@ -145,26 +140,23 @@ update appContext msg model =
                         ( palette, cpCmd, out ) =
                             CommandPalette.update appContext model.config cpMsg m
 
-                        ( leftPane, paneCmd, modal ) =
+                        ( panes, panesCmd, modal ) =
                             case out of
                                 CommandPalette.CloseRequest ->
-                                    ( model.leftPane, Cmd.none, NoModal )
+                                    ( model.panes, Cmd.none, NoModal )
 
                                 CommandPalette.SelectDefinition ref ->
                                     let
-                                        ( leftPane_, paneCmd_ ) =
-                                            WorkspacePane.openDefinition
-                                                model.config
-                                                model.leftPane
-                                                ref
+                                        ( panes_, panesCmd_ ) =
+                                            WorkspacePanes.openDefinition model.config model.panes ref
                                     in
-                                    ( leftPane_, Cmd.map LeftPaneMsg paneCmd_, NoModal )
+                                    ( panes_, panesCmd_, NoModal )
 
                                 _ ->
-                                    ( model.leftPane, Cmd.none, CommandPaletteModal palette )
+                                    ( model.panes, Cmd.none, CommandPaletteModal palette )
                     in
-                    ( { model | leftPane = leftPane, modal = modal }
-                    , Cmd.batch [ Cmd.map CommandPaletteMsg cpCmd, paneCmd ]
+                    ( { model | panes = panes, modal = modal }
+                    , Cmd.batch [ Cmd.map CommandPaletteMsg cpCmd, Cmd.map WorkspacePanesMsg panesCmd ]
                     , None
                     )
 
@@ -173,6 +165,13 @@ update appContext msg model =
 
         ToggleSidebar ->
             ( { model | sidebarVisible = not model.sidebarVisible }, Cmd.none, None )
+
+        ToggleRightPane ->
+            let
+                panes =
+                    WorkspacePanes.toggleRightPane model.panes
+            in
+            ( { model | panes = panes }, Cmd.none, None )
 
         Keydown event ->
             let
@@ -237,16 +236,6 @@ update appContext msg model =
             in
             ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, None )
 
-        LeftPaneMsg workspacePaneMsg ->
-            let
-                ( pane, paneCmd ) =
-                    WorkspacePane.update
-                        model.config
-                        workspacePaneMsg
-                        model.leftPane
-            in
-            ( { model | leftPane = pane }, Cmd.map LeftPaneMsg paneCmd, None )
-
         ShowCommandPalette ->
             ( { model | modal = CommandPaletteModal (CommandPalette.init appContext CommandPalette.NoContext) }
             , Cmd.none
@@ -280,18 +269,18 @@ update appContext msg model =
                                 ( codebaseTree, codebaseTreeCmd ) =
                                     CodebaseTree.init config
 
-                                ( leftPane, leftPaneCmd ) =
-                                    WorkspacePane.init appContext workspaceContext
+                                ( panes, panesCmd ) =
+                                    WorkspacePanes.init appContext workspaceContext
                             in
                             ( { model
                                 | workspaceContext = workspaceContext
                                 , codebaseTree = codebaseTree
                                 , config = config
-                                , leftPane = leftPane
+                                , panes = panes
                               }
                             , Cmd.batch
                                 [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
-                                , Cmd.map LeftPaneMsg leftPaneCmd
+                                , Cmd.map WorkspacePanesMsg panesCmd
                                 , WorkspaceContext.save workspaceContext
                                 ]
                             )
@@ -329,23 +318,30 @@ update appContext msg model =
                                 ( codebaseTree, codebaseTreeCmd ) =
                                     CodebaseTree.init config
 
-                                ( leftPane, leftPaneCmd ) =
-                                    WorkspacePane.init appContext workspaceContext
+                                ( panes, panesCmd ) =
+                                    WorkspacePanes.init appContext workspaceContext
                             in
                             ( { model
                                 | workspaceContext = workspaceContext
                                 , codebaseTree = codebaseTree
                                 , config = config
-                                , leftPane = leftPane
+                                , panes = panes
                               }
                             , Cmd.batch
                                 [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
-                                , Cmd.map LeftPaneMsg leftPaneCmd
+                                , Cmd.map WorkspacePanesMsg panesCmd
                                 , WorkspaceContext.save workspaceContext
                                 ]
                             )
             in
             ( { model_ | switchBranch = switchBranch }, Cmd.batch [ Cmd.map SwitchBranchMsg switchBranchCmd, cmd_ ], None )
+
+        WorkspacePanesMsg wspMsg ->
+            let
+                ( panes, panesCmd ) =
+                    WorkspacePanes.update model.config wspMsg model.panes
+            in
+            ( { model | panes = panes }, Cmd.map WorkspacePanesMsg panesCmd, None )
 
         NoOp ->
             ( model, Cmd.none, None )
@@ -361,7 +357,7 @@ subscriptions model =
         activeSub =
             case model.modal of
                 NoModal ->
-                    Sub.map LeftPaneMsg (WorkspacePane.subscriptions model.leftPane)
+                    Sub.map WorkspacePanesMsg (WorkspacePanes.subscriptions model.panes)
 
                 CommandPaletteModal m ->
                     Sub.map CommandPaletteMsg (CommandPalette.subscriptions m)
@@ -391,6 +387,10 @@ titlebarLeft { switchProject, switchBranch, workspaceContext } =
 titlebarRight : List (Html Msg)
 titlebarRight =
     [ Button.icon ShowCommandPalette Icon.search
+        |> Button.small
+        |> Button.subdued
+        |> Button.view
+    , Button.icon ToggleRightPane Icon.windowSplit
         |> Button.small
         |> Button.subdued
         |> Button.view
@@ -441,11 +441,14 @@ view appContext model =
                     Window.withModal
                         (m |> CommandPalette.view |> Modal.map CommandPaletteMsg)
                         window_
+
+        content =
+            [ Html.map WorkspacePanesMsg (WorkspacePanes.view model.panes) ]
     in
     window__
         |> Window.withFooterLeft footerLeft
         |> Window.withFooterRight footerRight
         |> Window.withTitlebarLeft (titlebarLeft model)
         |> Window.withTitlebarRight titlebarRight
-        |> Window.withContent [ Html.map LeftPaneMsg (WorkspacePane.view model.leftPane) ]
+        |> Window.withContent content
         |> Window.view WindowMsg model.window
