@@ -190,6 +190,12 @@ update appContext msg model =
                 toggleSidebar =
                     ( { model_ | sidebarVisible = not model_.sidebarVisible }, Cmd.none )
 
+                focusLeft =
+                    ( { model_ | panes = WorkspacePanes.focusLeft model_.panes }, Cmd.none )
+
+                focusRight =
+                    ( { model_ | panes = WorkspacePanes.focusRight model_.panes }, Cmd.none )
+
                 ( nextModel, cmd ) =
                     case ( model_.modal, shortcut ) of
                         ( NoModal, Chord Ctrl (K _) ) ->
@@ -209,6 +215,18 @@ update appContext msg model =
 
                         ( NoModal, Chord Ctrl (B _) ) ->
                             toggleSidebar
+
+                        ( NoModal, Sequence (Just (W _)) ArrowLeft ) ->
+                            focusLeft
+
+                        ( NoModal, Sequence (Just (W _)) (H _) ) ->
+                            focusLeft
+
+                        ( NoModal, Sequence (Just (W _)) ArrowRight ) ->
+                            focusRight
+
+                        ( NoModal, Sequence (Just (W _)) (L _) ) ->
+                            focusRight
 
                         ( NoModal, Sequence (Just (W _)) (P _) ) ->
                             let

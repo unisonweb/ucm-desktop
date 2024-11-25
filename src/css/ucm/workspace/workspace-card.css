@@ -10,6 +10,7 @@
   padding: 0;
   width: 100%;
   max-width: var(--c-workspace-card_width);
+  z-index: var(--layer-base);
 
   & .workspace-card_titlebar {
     display: flex;

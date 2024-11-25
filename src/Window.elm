@@ -482,8 +482,7 @@ view toMsg model win =
                         splitter =
                             { attributes = [ class "window-sidebar_resize-handle" ]
                             , children =
-                                [ div [ class "window-sidebar_resize-handle_sidebar-side" ] []
-                                , div [ class "window-sidebar_resize-handle_main-pane-side" ] []
+                                [ div [ class "window-sidebar_resize-handle_main-pane-side" ] []
                                 ]
                             }
 
