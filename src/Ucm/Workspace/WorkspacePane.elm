@@ -15,7 +15,7 @@ import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Html exposing (Html, div, span, strong, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
@@ -552,9 +552,9 @@ viewItem definitionSummaryTooltip item isFocused =
         |> Maybe.withDefault UI.nothing
 
 
-view : Model -> Html Msg
-view model =
-    div [ class "workspace-pane" ]
+view : Bool -> Model -> Html Msg
+view isFocused model =
+    div [ class "workspace-pane", classList [ ( "workspace-pane_focused", isFocused ) ] ]
         (model.workspaceItems
             |> WorkspaceItems.mapToList (viewItem model.definitionSummaryTooltip)
         )

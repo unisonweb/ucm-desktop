@@ -104,6 +104,38 @@ toggleRightPane model =
     { model | focusedPane = focus }
 
 
+focusRight : Model -> Model
+focusRight model =
+    let
+        focus =
+            case model.focusedPane of
+                LeftPaneFocus { rightPaneVisible } ->
+                    if rightPaneVisible then
+                        RightPaneFocus
+
+                    else
+                        model.focusedPane
+
+                _ ->
+                    model.focusedPane
+    in
+    { model | focusedPane = focus }
+
+
+focusLeft : Model -> Model
+focusLeft model =
+    let
+        focus =
+            case model.focusedPane of
+                LeftPaneFocus _ ->
+                    model.focusedPane
+
+                RightPaneFocus ->
+                    LeftPaneFocus { rightPaneVisible = True }
+    in
+    { model | focusedPane = focus }
+
+
 openDefinition : Config -> Model -> Reference -> ( Model, Cmd Msg )
 openDefinition config model ref =
     case model.focusedPane of
@@ -150,11 +182,11 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        left =
-            Html.map LeftPaneMsg (WorkspacePane.view model.left)
+        left isFocused =
+            Html.map LeftPaneMsg (WorkspacePane.view isFocused model.left)
 
-        right =
-            Html.map RightPaneMsg (WorkspacePane.view model.right)
+        right isFocused =
+            Html.map RightPaneMsg (WorkspacePane.view isFocused model.right)
 
         paneConfig =
             SplitPane.createViewConfig
@@ -165,19 +197,16 @@ view model =
 
         splitter =
             { attributes = [ class "workspace-panes_resize-handle" ]
-            , children =
-                [ div [ class "workspace-panes_left" ] []
-                , div [ class "workspace-panes_right" ] []
-                ]
+            , children = []
             }
     in
     case model.focusedPane of
         LeftPaneFocus { rightPaneVisible } ->
             if rightPaneVisible then
-                SplitPane.view paneConfig left right model.splitPane
+                div [ class "workspace-panes" ] [ SplitPane.view paneConfig (left True) (right False) model.splitPane ]
 
             else
-                left
+                div [ class "workspace-panes_single-pane" ] [ left True ]
 
         RightPaneFocus ->
-            SplitPane.view paneConfig left right model.splitPane
+            div [ class "workspace-panes" ] [ SplitPane.view paneConfig (left False) (right True) model.splitPane ]

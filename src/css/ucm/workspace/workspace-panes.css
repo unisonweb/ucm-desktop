@@ -1,3 +1,10 @@
+.workspace-panes, .workspace-panes_single-pane {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
 .workspace-panes_resize-handle {
   width: 1.5rem;
   z-index: 1;
@@ -20,4 +27,8 @@
 
 .workspace-panes_resize-handle:hover::before {
   background: var(--u-color_focus-border);
+}
+
+.workspace-panes .workspace-card {
+  max-width: 100% !important;
 }
