@@ -3,6 +3,7 @@ module Ucm.ContextualTag exposing (..)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import UI.Icon as Icon exposing (Icon)
+import UI.Tooltip as Tooltip
 
 
 type TagColor
@@ -15,6 +16,7 @@ type alias ContextualTag msg =
     { icon : Icon msg
     , label : Html msg
     , color : TagColor
+    , tooltipText : Maybe String
     }
 
 
@@ -32,6 +34,7 @@ contextualTag_ icon label =
     { icon = icon
     , label = label
     , color = Subdued
+    , tooltipText = Nothing
     }
 
 
@@ -54,6 +57,11 @@ decorativeBlue tag =
     { tag | color = DecorativeBlue }
 
 
+withTooltipText : String -> ContextualTag msg -> ContextualTag msg
+withTooltipText text tag =
+    { tag | tooltipText = Just text }
+
+
 
 -- VIEW
 
@@ -71,7 +79,19 @@ view tag =
 
                 DecorativeBlue ->
                     "decorative-blue"
+
+        tag_ =
+            div
+                [ class "contextual-tag", class color ]
+                [ Icon.view tag.icon, tag.label ]
     in
-    div
-        [ class "contextual-tag", class color ]
-        [ Icon.view tag.icon, tag.label ]
+    case tag.tooltipText of
+        Just t ->
+            Tooltip.text t
+                |> Tooltip.tooltip
+                |> Tooltip.below
+                |> Tooltip.withArrow Tooltip.Start
+                |> Tooltip.view tag_
+
+        Nothing ->
+            tag_
