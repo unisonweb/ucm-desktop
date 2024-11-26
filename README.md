@@ -19,7 +19,7 @@ UCM_TOKEN=asdf UCM_PORT=4444 ucm headless --allow-cors-host tauri://localhost
 ```
 
 If on Windows, use this command instead:
-```powershell
+```bash
  $env:UCM_TOKEN="asdf"; $env:UCM_PORT="4444"; ucm headless --allow-cors-host https://tauri.localhost
 ```
 
