@@ -19,8 +19,8 @@ UCM_TOKEN=asdf UCM_PORT=4444 ucm headless --allow-cors-host tauri://localhost
 ```
 
 If on Windows, use this command instead:
-```bash
-UCM_TOKEN=asdf UCM_PORT=4444 ucm headless --allow-cors-host https://tauri.localhost
+```powershell
+ $env:UCM_TOKEN="asdf"; $env:UCM_PORT="4444"; ucm headless --allow-cors-host https://tauri.localhost
 ```
 
 Then start the UCM Desktop app as you would normally.
