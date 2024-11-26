@@ -28,7 +28,3 @@
 .workspace-panes_resize-handle:hover::before {
   background: var(--u-color_focus-border);
 }
-
-.workspace-panes .workspace-card {
-  max-width: 100% !important;
-}
