@@ -43,9 +43,16 @@ body:has(.window-footer) {
 }
 
 .window-titlebar {
-  padding-left: 4.5rem;
+  padding-left: 0.5rem;
   border-bottom: 1px solid var(--u-color_chrome_border);
   background: var(--u-color_chrome_emphasized)
+}
+
+.macos .window-titlebar {
+  /* 4rem is the distance of the right edge of the traffic control to the very
+   * left edge of the window. The 1px accounts for the border), and 0.75 is the
+   * spacing between the traffic controls and other titlebar controls. */
+  padding-left: calc(calc(4rem - 1px) + 0.75rem);
 }
 
 .window-titlebar.window-titlebar_transparent {
