@@ -59,6 +59,11 @@ try {
   const app = Elm.Main.init({ flags });
   console.log("Elm app started");
 
+  console.log(flags.operatingSystem);
+  if (flags.operatingSystem === "macOS") {
+    document.querySelector("body")?.classList.add("macos");
+  }
+
   if (app.ports) {
     app.ports.saveWorkspaceContext?.subscribe(async (workspaceContext: WorkspaceContext) => {
       console.log("saving contexts", workspaceContext);
