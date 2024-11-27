@@ -7,7 +7,9 @@ import Code.ProjectNameListing as ProjectNameListing
 import Code.ProjectSlug as ProjectSlug
 import Html
     exposing
-        ( div
+        ( br
+        , code
+        , div
         , h2
         , header
         , img
@@ -16,9 +18,11 @@ import Html
         , text
         )
 import Html.Attributes exposing (alt, class, src)
+import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.UserHandle as UserHandle
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.Button as Button
 import UI.Card as Card
@@ -142,7 +146,7 @@ isMatch s (ProjectName handle slug) =
 
 
 view : AppContext -> Model -> Browser.Document Msg
-view _ model =
+view appContext model =
     let
         viewProjectOption p =
             Click.onClick (SelectProject p BranchRef.main_)
@@ -163,8 +167,28 @@ view _ model =
                 Loading ->
                     div [ class "projects" ] [ text "Loading" ]
 
-                Failure _ ->
-                    div [ class "projects" ] [ text "Error" ]
+                Failure err ->
+                    case err of
+                        Http.NetworkError ->
+                            let
+                                apiUrl =
+                                    HttpApi.baseApiUrl appContext.api
+                                        |> String.replace "/api/" ""
+                            in
+                            div [ class "app-error" ]
+                                [ h2 [] [ text "Couldn't connect to the UCM CLI" ]
+                                , p []
+                                    [ text "Please make sure UCM is running on the right port like so: "
+                                    , br [] []
+                                    , code [] [ text apiUrl ]
+                                    ]
+                                ]
+
+                        _ ->
+                            div [ class "app-error" ]
+                                [ h2 [] [ text "Couldn't load projects" ]
+                                , p [] [ text (Util.httpErrorToString err) ]
+                                ]
 
                 Success projects ->
                     let
