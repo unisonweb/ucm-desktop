@@ -158,11 +158,11 @@
   --u-color_positive_text-on-element_subdued: var(--u-color_text);
   --u-color_positive_icon-on-element_subdued: var(--color-green-1);
 
-  --u-color_working_element: var(--color-purple-5);
-  --u-color_working_text-on-element: var(--color-purple-2);
-  --u-color_working_icon-on-element: var(--color-purple-2);
-  --u-color_working_element_subdued: var(--color-gray-lighten-60);
-  --u-color_working_text-on-element_subdued: var(--u-color_text);
+  /* [x] */ --u-color_working_element: var(--color-purple-5);
+  /* [x] */ --u-color_working_text-on-element: var(--color-purple-2);
+  /* [x] */ --u-color_working_icon-on-element: var(--color-purple-2);
+  /* [x] */ --u-color_working_element_subdued: var(--color-gray-base);
+  /* [x] */ --u-color_working_text-on-element_subdued: var(--u-color_text);
 
   --u-color_chrome: var(--color-gray-darken-20);
   --u-color_chrome_subdued: var(--color-gray-darken-30);
