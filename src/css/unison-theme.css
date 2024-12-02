@@ -127,6 +127,7 @@
   /* [x] */ --u-color_critical_icon-on-element: var(--color-gray-lighten-100);
   /* [x] */ --u-color_critical_element_subdued: var(--color-pink-0-25pct);
   /* [x] */ --u-color_critical_text-on-element_subdued: var(--color-pink-4);
+  /* [x] */ --u-color_critical_border-on-element_subdued: var(--color-pink-1-25pct);
 
   /* [x] */ --u-color_info_container_subdued: var(--color-blue-1-25pct);
   --u-color_info_text: var(--color-blue-2);

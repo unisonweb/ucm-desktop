@@ -13,6 +13,7 @@
   font-size: var(--font-size-base);
   border-radius: var(--border-radius-base);
   padding: 2rem;
+  border: 1px solid var(--u-color_critical_border-on-element_subdued);
 }
 
 .app-error h2 {
