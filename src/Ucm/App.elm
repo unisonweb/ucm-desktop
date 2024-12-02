@@ -7,6 +7,7 @@ import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.Util as Util
 import UI.Button as Button
 import UI.Icon as Icon
+import UI.StatusBanner as StatusBanner
 import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
@@ -58,8 +59,10 @@ type Msg
     = NoOp
     | WelcomeScreenMsg WelcomeScreen.Msg
     | WorkspaceScreenMsg WorkspaceScreen.Msg
-    | CheckUCMConnectivity
+    | ReCheckUCMConnectivity
+    | PerformReCheckUCMConnectivity
     | InitialUCMConnectivityCheckFinished (HttpResult ())
+    | CheckUCMConnectivity
     | UCMConnectivityCheckFinished (HttpResult ())
 
 
@@ -111,23 +114,64 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        CheckUCMConnectivity ->
-            ( model, checkUcmConnectivity model.appContext )
+        ReCheckUCMConnectivity ->
+            let
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    { appContext | ucmConnectivity = Connecting }
+            in
+            -- Delay the actual check to give the user feedback when they click the button
+            ( { model | appContext = appContext_ }, Util.delayMsg 750 PerformReCheckUCMConnectivity )
+
+        PerformReCheckUCMConnectivity ->
+            let
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    { appContext | ucmConnectivity = Connecting }
+            in
+            ( { model | appContext = appContext_ }, checkInitialUcmConnectivity appContext_ )
 
         InitialUCMConnectivityCheckFinished res ->
             let
                 appContext =
                     model.appContext
 
-                appContext_ =
+                ( appContext_, screen, cmd ) =
                     case res of
                         Ok _ ->
-                            { appContext | ucmConnectivity = Connected }
+                            let
+                                ( screen_, screenCmd ) =
+                                    case model.screen of
+                                        WelcomeScreen _ ->
+                                            let
+                                                ( welcome, welcomeCmd ) =
+                                                    WelcomeScreen.init appContext
+                                            in
+                                            ( WelcomeScreen welcome, Cmd.map WelcomeScreenMsg welcomeCmd )
+
+                                        WorkspaceScreen wss ->
+                                            let
+                                                ( workspace, wsCmd ) =
+                                                    WorkspaceScreen.init appContext wss.workspaceContext
+                                            in
+                                            ( WorkspaceScreen workspace, Cmd.map WorkspaceScreenMsg wsCmd )
+                            in
+                            ( { appContext | ucmConnectivity = Connected }
+                            , screen_
+                            , Cmd.batch [ Util.delayMsg 5000 CheckUCMConnectivity, screenCmd ]
+                            )
 
                         Err e ->
-                            { appContext | ucmConnectivity = NeverConnected e }
+                            ( { appContext | ucmConnectivity = NeverConnected e }, model.screen, Cmd.none )
             in
-            ( { model | appContext = appContext_ }, Cmd.none )
+            ( { model | appContext = appContext_, screen = screen }, cmd )
+
+        CheckUCMConnectivity ->
+            ( model, checkUcmConnectivity model.appContext )
 
         UCMConnectivityCheckFinished res ->
             let
@@ -208,7 +252,9 @@ view model =
     in
     case model.appContext.ucmConnectivity of
         Connecting ->
-            view_
+            { title = "UCM Desktop | Connecting..."
+            , body = [ div [ class "connecting" ] [ StatusBanner.working "Connecting..." ] ]
+            }
 
         NeverConnected _ ->
             let
@@ -226,7 +272,7 @@ view model =
                             , br [] []
                             , code [] [ text apiUrl ]
                             ]
-                        , Button.iconThenLabel CheckUCMConnectivity Icon.refresh "Try again"
+                        , Button.iconThenLabel ReCheckUCMConnectivity Icon.refresh "Try again"
                             |> Button.emphasized
                             |> Button.view
                         ]

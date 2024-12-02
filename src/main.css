@@ -8,3 +8,13 @@
 @import "./css/ucm/command-palette-modal.css";
 @import "./css/ucm/ucm-connectivity.css";
 @import "./css/ucm/contextual-tag.css";
+
+.connecting {
+  margin: 16rem auto;
+  width: 32rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
