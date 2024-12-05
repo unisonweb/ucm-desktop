@@ -55,6 +55,14 @@ body:has(.window-footer) {
   padding-left: calc(calc(4rem - 1px) + 0.75rem);
 }
 
+.windows .window-titlebar,
+.linux .window-titlebar {
+  /* 5rem is the distance of the left edge of the traffic control to the very
+   * right edge of the window. The 1px accounts for the border), and 0.75 is the
+   * spacing between the traffic controls and other titlebar controls. */
+  padding-right: calc(calc(5rem - 1px) + 0.75rem);
+}
+
 .window-titlebar.window-titlebar_transparent {
   border: 0;
   background: transparent;
@@ -79,7 +87,7 @@ body:has(.window-footer) {
   width: 100%;
 
   & .window-sidebar_inner-sidebar {
-    padding: 1rem 1.125rem;
+    padding: 0.5rem 0.75rem;
     -webkit-user-select: none;
     user-select: none;
   }
