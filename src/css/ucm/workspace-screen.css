@@ -17,6 +17,10 @@
   gap: 0.5rem;
 }
 
+.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .namespace-content {
+  margin-left: 0.5rem;
+}
+
 .window-sidebar_inner-sidebar .codebase-tree .namespace-tree .namespace-content > div {
   display: flex;
   flex-direction: column;

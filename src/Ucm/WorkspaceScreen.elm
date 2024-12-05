@@ -464,9 +464,9 @@ view appContext model =
             [ Html.map WorkspacePanesMsg (WorkspacePanes.view model.panes) ]
     in
     window__
-        |> Window.withFooterLeft footerLeft
-        |> Window.withFooterRight footerRight
         |> Window.withTitlebarLeft (titlebarLeft model)
         |> Window.withTitlebarRight titlebarRight
+        |> Window.withFooterLeft footerLeft
+        |> Window.withFooterRight footerRight
         |> Window.withContent content
         |> Window.view WindowMsg model.window

@@ -17,9 +17,18 @@
     }
   </script>
   <style>
-    body {
-      /* color-gray-darken-30 */
-      background: #18181c;
+    @media (prefers-color-scheme: light) {
+      body {
+        /* color-gray-lighten-100 */
+        background: #ffffff;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        /* color-gray-darken-30 */
+        background: #18181c;
+      }
     }
   </style>
 </head>

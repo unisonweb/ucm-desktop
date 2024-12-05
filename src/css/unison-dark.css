@@ -1,4 +1,4 @@
-:root {
+body.unison-dark {
   /*
 
   --u-color_[sentiment]_[target]_[emphasis]_[state]
@@ -201,28 +201,26 @@
   --color-syntax-monochrome-subtle: var(--u-color_text_subdued);
   --color-syntax-monochrome-base: var(--u-color_text);
   --color-syntax-monochrome-em: var(--u-color_text);
-}
 
-/* Shadows */
-:root {
+  /* Shadows */
   --u-shadow: var(--color-gray-darken-30-20pct);
 }
 
 /* TODO: these component overwrites shouldn't be needed... */
-.definition-doc {
+.unison-dark .definition-doc {
   --color-doc-bg: transparent;
   --color-doc-focus-bg: transparent;
 }
 
-.definition-doc .copyable-source .copy-on-click {
+.unison-dark .definition-doc .copyable-source .copy-on-click {
   background: transparent;
 }
 
-.tooltip {
+.unison-dark .tooltip {
   --color-tooltip-border: var(--u-color_border);
 }
 
-.anchored-overlay {
+.unison-dark .anchored-overlay {
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
 

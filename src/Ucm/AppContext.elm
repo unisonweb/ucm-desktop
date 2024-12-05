@@ -15,6 +15,7 @@ type alias AppContext =
     , basePath : String
     , api : HttpApi
     , ucmConnectivity : UcmConnectivity
+    , theme : String
     }
 
 
@@ -23,6 +24,7 @@ type alias Flags =
     , basePath : String
     , apiUrl : String
     , workspaceContext : Value
+    , theme : String
     }
 
 
@@ -32,6 +34,7 @@ init flags =
     , basePath = flags.basePath
     , api = HttpApi.httpApi False flags.apiUrl Nothing
     , ucmConnectivity = Connecting
+    , theme = flags.theme
     }
 
 
