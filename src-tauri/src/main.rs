@@ -10,10 +10,10 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_decorum::init())
         .setup(|app| {
-          let main_window = app.get_webview_window("main").unwrap();
-          main_window.create_overlay_titlebar().unwrap();
-
           #[cfg(target_os = "macos")] {
+            let main_window = app.get_webview_window("main").unwrap();
+            main_window.create_overlay_titlebar().unwrap();
+
             // 11 instead of 12 to account for left border
             main_window.set_traffic_lights_inset(11.0, 16.0).unwrap();
           }
