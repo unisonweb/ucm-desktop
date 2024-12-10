@@ -38,7 +38,7 @@ try {
   const flags = {
     operatingSystem: detectOs(window.navigator),
     basePath: "",
-    apiUrl: "http://127.0.0.1:4444/asdf/api",
+    apiUrl: "http://127.0.0.1:5858/codebase/api",
     workspaceContext: appSettings.workspaceContexts[0],
     theme: appSettings.theme
   };
