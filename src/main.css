@@ -1,4 +1,5 @@
-@import "./css/unison-theme.css";
+@import "./css/unison-dark.css";
+@import "./css/unison-light.css";
 @import "./css/app-error.css";
 @import "./css/window.css";
 @import "./css/ucm/search-project-sheet.css";
