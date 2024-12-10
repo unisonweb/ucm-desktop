@@ -12,15 +12,10 @@ The goal is a UI that looks like this:
 ---
 
 ## Running 
-UCM desktop requires the UCM CLI to be running on a specific port and with a
-specific UCM token
+UCM desktop requires the UCM CLI to be running, simply start it with the `ucm`
+command:
 ```bash
-UCM_TOKEN=asdf UCM_PORT=4444 ucm --allow-cors-host tauri://localhost
-```
-
-If on Windows (PowerShell), use this command instead:
-```bash
-$env:UCM_TOKEN="asdf"; $env:UCM_PORT="4444"; ucm --allow-cors-host http://tauri.localhost
+ucm
 ```
 
 Then start the UCM Desktop app as you would normally.
@@ -29,7 +24,7 @@ Then start the UCM Desktop app as you would normally.
 When running for development start UCM like so:
 
 ```bash
-UCM_TOKEN=asdf UCM_PORT=4444 ucm --allow-cors-host http://localhost:1420
+ucm --allow-cors-host http://localhost:1420
 ```
 
 Then start the app with:
