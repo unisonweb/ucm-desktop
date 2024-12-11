@@ -30,8 +30,7 @@
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "ryan-haskell/date-format": "1.0.0",
             "stoeffel/set-extra": "1.2.3",
-            "wernerdegroot/listzipper": "4.0.0",
-            "whale9490/elm-split-pane": "1.0.0"
+            "wernerdegroot/listzipper": "4.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",

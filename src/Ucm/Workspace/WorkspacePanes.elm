@@ -4,7 +4,7 @@ import Code.Config exposing (Config)
 import Code.Definition.Reference exposing (Reference)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import SplitPane
+import SplitPane.SplitPane as SplitPane
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.Workspace.WorkspacePane as WorkspacePane

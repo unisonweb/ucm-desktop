@@ -13,7 +13,7 @@ import Html
         , text
         )
 import Html.Attributes exposing (attribute, class, classList, id)
-import SplitPane
+import SplitPane.SplitPane as SplitPane
 import UI
 import UI.Modal as Modal exposing (Modal)
 
