@@ -382,6 +382,15 @@ windowDraggability =
     attribute "data-tauri-drag-region" "1"
 
 
+{-| Normally, this would happen automatically, but when the Elm app mounts it
+removes all previous HTML from <body> (where the Decorum plugin would normally
+add a titlebar for Windows)
+-}
+windowControls : Attribute msg
+windowControls =
+    attribute "data-tauri-decorum-tb" "1"
+
+
 
 -- VIEW
 
@@ -418,6 +427,7 @@ viewWindowTitlebar id_ titlebar_ =
     header
         [ id (id_ ++ "_window-titlebar")
         , windowDraggability
+        , windowControls
         , class "window-control-bar window-titlebar"
         , classList
             [ ( "window-titlebar_transparent", transparent )
