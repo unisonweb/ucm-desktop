@@ -35,13 +35,15 @@
     "windows": [
       {
         "decorations": true,
-        "title": "UCM",
+        "title": "UCM Desktop",
         "fullscreen": false,
         "resizable": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "width": 1024,
-        "height": 768
+        "height": 768,
+        "useHttpsScheme": true,
+        "center": true
       }
     ],
     "security": {
