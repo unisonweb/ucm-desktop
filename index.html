@@ -6,16 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UCM | Unison Codebase Manager</title>
   <script type="module" src="/src/main.ts" defer></script>
-  <script type="text/javascript">
-    const pathSegments = location.pathname.split("/").filter((p) => p !== "");
-
-    if (pathSegments.length >= 2) {
-      const basePath = pathSegments.slice(0, 2).join("/");
-      const newBase = document.createElement("base");
-      newBase.setAttribute("href", "/" + basePath + "/");
-      document.getElementsByTagName("head")[0].appendChild(newBase);
-    }
-  </script>
   <style>
     @media (prefers-color-scheme: light) {
       body {
