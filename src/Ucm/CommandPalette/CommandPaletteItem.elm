@@ -17,7 +17,7 @@ type alias CommandPaletteItem msg =
     { icon : Icon msg
     , label : Html msg
     , rightSide : RightSide msg
-    , click : Click msg
+    , click : Maybe (Click msg)
     }
 
 
@@ -26,13 +26,27 @@ item icon label click =
     { icon = icon
     , label = label
     , rightSide = None
-    , click = click
+    , click = Just click
     }
 
 
+item_ : Icon msg -> Html msg -> CommandPaletteItem msg
+item_ icon label =
+    { icon = icon
+    , label = label
+    , rightSide = None
+    , click = Nothing
+    }
+
+
+withClick : Click msg -> CommandPaletteItem msg -> CommandPaletteItem msg
+withClick click i =
+    { i | click = Just click }
+
+
 withKeyboardShortcut : KeyboardShortcut -> CommandPaletteItem msg -> CommandPaletteItem msg
-withKeyboardShortcut shortcut item_ =
-    { item_ | rightSide = Shortcut shortcut }
+withKeyboardShortcut shortcut i =
+    { i | rightSide = Shortcut shortcut }
 
 
 command : Icon msg -> String -> KeyboardShortcut -> Click msg -> CommandPaletteItem msg
@@ -64,9 +78,18 @@ view keyboardShortcut { icon, label, rightSide, click } isSelected =
                 rightSide_
             ]
     in
-    Click.view
-        [ class "command-palette-item"
-        , classList [ ( "selected", isSelected ) ]
-        ]
-        content
-        click
+    case click of
+        Just c ->
+            Click.view
+                [ class "command-palette-item"
+                , classList [ ( "selected", isSelected ) ]
+                ]
+                content
+                c
+
+        Nothing ->
+            div
+                [ class "command-palette-item"
+                , classList [ ( "selected", isSelected ) ]
+                ]
+                content
