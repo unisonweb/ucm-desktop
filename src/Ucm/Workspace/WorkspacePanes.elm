@@ -67,17 +67,33 @@ update config msg model =
     case msg of
         LeftPaneMsg workspacePaneMsg ->
             let
-                ( leftPane, leftPaneCmd ) =
+                ( leftPane, leftPaneCmd, out ) =
                     WorkspacePane.update config workspacePaneMsg model.left
+
+                focusedPane =
+                    case ( out, model.focusedPane ) of
+                        ( WorkspacePane.RequestFocus, RightPaneFocus ) ->
+                            LeftPaneFocus { rightPaneVisible = True }
+
+                        _ ->
+                            model.focusedPane
             in
-            ( { model | left = leftPane }, Cmd.map LeftPaneMsg leftPaneCmd )
+            ( { model | left = leftPane, focusedPane = focusedPane }, Cmd.map LeftPaneMsg leftPaneCmd )
 
         RightPaneMsg workspacePaneMsg ->
             let
-                ( rightPane, rightPaneCmd ) =
-                    WorkspacePane.update config workspacePaneMsg model.right
+                ( rightPane, rightPaneCmd, out ) =
+                    WorkspacePane.update config workspacePaneMsg model.left
+
+                focusedPane =
+                    case ( out, model.focusedPane ) of
+                        ( WorkspacePane.RequestFocus, LeftPaneFocus _ ) ->
+                            RightPaneFocus
+
+                        _ ->
+                            model.focusedPane
             in
-            ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
+            ( { model | right = rightPane, focusedPane = focusedPane }, Cmd.map RightPaneMsg rightPaneCmd )
 
         SplitPaneMsg paneMsg ->
             ( { model
