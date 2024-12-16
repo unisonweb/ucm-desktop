@@ -83,7 +83,7 @@ update config msg model =
         RightPaneMsg workspacePaneMsg ->
             let
                 ( rightPane, rightPaneCmd, out ) =
-                    WorkspacePane.update config workspacePaneMsg model.left
+                    WorkspacePane.update config workspacePaneMsg model.right
 
                 focusedPane =
                     case ( out, model.focusedPane ) of
@@ -154,6 +154,10 @@ focusLeft model =
 
 openDefinition : Config -> Model -> Reference -> ( Model, Cmd Msg )
 openDefinition config model ref =
+    let
+        x =
+            Debug.log "focused" model.focusedPane
+    in
     case model.focusedPane of
         LeftPaneFocus _ ->
             let
