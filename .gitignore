@@ -3,5 +3,6 @@ repl-temp-*
 node_modules
 .DS_Store
 .unisonHistory
+.jj
 target/
 dist

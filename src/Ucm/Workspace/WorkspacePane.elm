@@ -16,6 +16,7 @@ import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Html exposing (Html, div, span, strong, text)
 import Html.Attributes exposing (class, classList)
+import Html.Events exposing (onClick)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
@@ -65,6 +66,7 @@ init appContext _ =
 
 type Msg
     = NoOp
+    | Focus
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
@@ -74,9 +76,17 @@ type Msg
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
-update : Config -> Msg -> Model -> ( Model, Cmd Msg )
+type OutMsg
+    = NoOut
+    | RequestFocus
+
+
+update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update config msg model =
     case msg of
+        Focus ->
+            ( model, Cmd.none, RequestFocus )
+
         FetchDefinitionItemFinished dRef (Ok defItem) ->
             let
                 workspaceItemRef =
@@ -102,6 +112,7 @@ update config msg model =
                         )
               }
             , Cmd.none
+            , NoOut
             )
 
         FetchDefinitionItemFinished dRef (Err e) ->
@@ -117,6 +128,7 @@ update config msg model =
                         (WorkspaceItem.Failure workspaceItemRef e)
               }
             , Cmd.none
+            , NoOut
             )
 
         CloseWorkspaceItem ref ->
@@ -125,6 +137,7 @@ update config msg model =
                     WorkspaceItems.remove model.workspaceItems ref
               }
             , Cmd.none
+            , NoOut
             )
 
         ChangeDefinitionItemTab wsRef newTab ->
@@ -135,18 +148,22 @@ update config msg model =
                         wsRef
                         model.workspaceItems
             in
-            ( { model | workspaceItems = workspaceItems_ }, Cmd.none )
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
         OpenDependency r ->
-            case WorkspaceItems.focus model.workspaceItems of
-                Just item ->
-                    openReference config
-                        model
-                        (WorkspaceItem.reference item)
-                        (WorkspaceItemRef.DefinitionItemRef r)
+            let
+                ( m, c ) =
+                    case WorkspaceItems.focus model.workspaceItems of
+                        Just item ->
+                            openReference config
+                                model
+                                (WorkspaceItem.reference item)
+                                (WorkspaceItemRef.DefinitionItemRef r)
 
-                Nothing ->
-                    openDefinition config model r
+                        Nothing ->
+                            openDefinition config model r
+            in
+            ( m, c, NoOut )
 
         Keydown event ->
             let
@@ -161,14 +178,14 @@ update config msg model =
                         { model | keyboardShortcut = keyboardShortcut }
                         shortcut
             in
-            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ] )
+            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], NoOut )
 
         KeyboardShortcutMsg kMsg ->
             let
                 ( keyboardShortcut, cmd ) =
                     KeyboardShortcut.update kMsg model.keyboardShortcut
             in
-            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, NoOut )
 
         DefinitionSummaryTooltipMsg tMsg ->
             let
@@ -177,10 +194,11 @@ update config msg model =
             in
             ( { model | definitionSummaryTooltip = definitionSummaryTooltip }
             , Cmd.map DefinitionSummaryTooltipMsg tCmd
+            , NoOut
             )
 
         _ ->
-            ( model, Cmd.none )
+            ( model, Cmd.none, NoOut )
 
 
 
@@ -555,7 +573,7 @@ viewItem definitionSummaryTooltip item isFocused =
 
 view : Bool -> Model -> Html Msg
 view isFocused model =
-    div [ class "workspace-pane", classList [ ( "workspace-pane_focused", isFocused ) ] ]
+    div [ onClick Focus, class "workspace-pane", classList [ ( "workspace-pane_focused", isFocused ) ] ]
         (model.workspaceItems
             |> WorkspaceItems.mapToList (viewItem model.definitionSummaryTooltip)
         )
