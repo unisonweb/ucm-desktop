@@ -154,10 +154,6 @@ focusLeft model =
 
 openDefinition : Config -> Model -> Reference -> ( Model, Cmd Msg )
 openDefinition config model ref =
-    let
-        x =
-            Debug.log "focused" model.focusedPane
-    in
     case model.focusedPane of
         LeftPaneFocus _ ->
             let
