@@ -13,9 +13,13 @@ The goal is a UI that looks like this:
 
 ## Running 
 UCM desktop requires the UCM CLI to be running, simply start it with the `ucm`
-command:
+command (Mac/Linux):
 ```bash
-ucm
+UCM_TOKEN=codebase UCM_PORT=5858 ucm --allow-cors-host tauri://localhost
+```
+Windows (Powershell):
+```
+$env:UCM_TOKEN="codebase"; $env:UCM_PORT="5858"; ucm --allow-cors-host http://tauri.localhost
 ```
 
 Then start the UCM Desktop app as you would normally.
@@ -24,7 +28,7 @@ Then start the UCM Desktop app as you would normally.
 When running for development start UCM like so:
 
 ```bash
-ucm --allow-cors-host http://localhost:1420
+UCM_TOKEN=codebase UCM_PORT=5858 ucm --allow-cors-host http://localhost:1420
 ```
 
 Then start the app with:
