@@ -1,6 +1,8 @@
 # UCM Desktop
 A desktop app companion to the UCM CLI. A.k.a. Graphical UCM.
 
+![Alt](https://repobeats.axiom.co/api/embed/7b52b08fc59e1ae837f2fb4fbe95eac194262da5.svg "Repobeats analytics image")
+
 ---
 
 This is currently an unreleased work in progress.
