@@ -206,6 +206,10 @@ body.unison-dark {
   --u-shadow: var(--color-gray-darken-30-20pct);
 }
 
+.unison-dark .button.subdued {
+  --color-button-default-text: var(--u-color_text);
+}
+
 /* TODO: these component overwrites shouldn't be needed... */
 .unison-dark .definition-doc {
   --color-doc-bg: transparent;
@@ -224,3 +228,6 @@ body.unison-dark {
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
 
+.unison-dark .action-menu {
+  --c-color_action-menu_sheet_border: var(--u-color_border);
+}

@@ -206,21 +206,28 @@ body.unison-light {
   --u-shadow: var(--color-gray-darken-30-20pct);
 }
 
+.unison-light .button.subdued {
+  --color-button-default-text: var(--u-color_text);
+}
+
 /* TODO: these component overwrites shouldn't be needed... */
-.unison-dark .definition-doc {
+.unison-light .definition-doc {
   --color-doc-bg: transparent;
   --color-doc-focus-bg: transparent;
 }
 
-.unison-dark .definition-doc .copyable-source .copy-on-click {
+.unison-light .definition-doc .copyable-source .copy-on-click {
   background: transparent;
 }
 
-.unison-dark .tooltip {
+.unison-light .tooltip {
   --color-tooltip-border: var(--u-color_border);
 }
 
-.unison-dark .anchored-overlay {
+.unison-light .anchored-overlay {
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
 
+.unison-light .action-menu {
+  --c-color_action-menu_sheet_border: var(--u-color_border);
+}
