@@ -85,12 +85,6 @@ body:has(.window-footer) {
   }
 }
 
-/* prevents a tiny white box in the corner that appears when both horizontal
- * and vertical scrollbars are visible */
-.window-sidebar::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
 .window-sidebar_resize-handle {
   --c-window_sidebar_resize-handle_width: 0.5rem;
   height: 100%;

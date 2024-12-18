@@ -10,12 +10,23 @@
 @import "./css/ucm/ucm-connectivity.css";
 @import "./css/ucm/contextual-tag.css";
 
+/* prevents a tiny white box in the corner that appears when both horizontal
+ * and vertical scrollbars are visible. <body> gets special treatment since's
+ * transparent will be ontop of "nothing" and again show a white box. */
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-corner {
+  background: var(--u-color_background);
+}
+
 .connecting {
-    margin: 16rem auto;
-    width: 32rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
+  margin: 16rem auto;
+  width: 32rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
