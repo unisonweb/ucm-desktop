@@ -230,11 +230,11 @@ view appContext model =
         |> Window.withTitlebarRight
             [ Button.iconThenLabel_ Link.docs Icon.graduationCap "Unison Docs"
                 |> Button.small
-                |> Button.outlined
+                |> Button.subdued
                 |> Button.view
             , Button.iconThenLabel_ Link.share Icon.browse "Find libraries on Unison Share"
                 |> Button.small
-                |> Button.outlined
+                |> Button.subdued
                 |> Button.view
             ]
         |> Window.withoutTitlebarBorder

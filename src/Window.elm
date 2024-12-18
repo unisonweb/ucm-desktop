@@ -1,4 +1,4 @@
-module Window exposing (..)
+port module Window exposing (..)
 
 import Browser
 import Html
@@ -15,7 +15,12 @@ import Html
 import Html.Attributes exposing (attribute, class, classList, id)
 import SplitPane.SplitPane as SplitPane
 import UI
+import UI.ActionMenu as ActionMenu
+import UI.Button as Button
+import UI.Click as Click
+import UI.Icon as Icon
 import UI.Modal as Modal exposing (Modal)
+import Ucm.Link as Link
 
 
 
@@ -24,6 +29,7 @@ import UI.Modal as Modal exposing (Modal)
 
 type alias Model =
     { splitPane : SplitPane.State
+    , isSettingsMenuOpen : Bool
     }
 
 
@@ -32,6 +38,7 @@ init =
     { splitPane =
         SplitPane.init SplitPane.Horizontal
             |> SplitPane.configureSplitter (SplitPane.px 256 Nothing)
+    , isSettingsMenuOpen = False
     }
 
 
@@ -41,6 +48,10 @@ init =
 
 type Msg
     = SplitPaneMsg SplitPane.Msg
+    | ToggleSettingsMenu
+    | ChangeTheme String
+    | ReloadApp
+    | ResetToFactorySettings
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -55,6 +66,31 @@ update msg model =
               }
             , Cmd.none
             )
+
+        ToggleSettingsMenu ->
+            ( { model | isSettingsMenuOpen = not model.isSettingsMenuOpen }, Cmd.none )
+
+        ChangeTheme theme ->
+            ( model, saveTheme theme )
+
+        ReloadApp ->
+            ( model, reloadApp () )
+
+        ResetToFactorySettings ->
+            ( model, clearSettings () )
+
+
+
+-- PORTS
+
+
+port saveTheme : String -> Cmd msg
+
+
+port reloadApp : () -> Cmd msg
+
+
+port clearSettings : () -> Cmd msg
 
 
 
@@ -395,8 +431,8 @@ windowControls =
 -- VIEW
 
 
-viewWindowTitlebar : String -> WindowTitlebar msg -> Html msg
-viewWindowTitlebar id_ titlebar_ =
+viewWindowTitlebar : Html msg -> String -> WindowTitlebar msg -> Html msg
+viewWindowTitlebar settingsMenu id_ titlebar_ =
     let
         { left, center, right, transparent, border } =
             case titlebar_ of
@@ -411,7 +447,7 @@ viewWindowTitlebar id_ titlebar_ =
                 WindowTitlebar cfg ->
                     { left = cfg.left
                     , center = cfg.center
-                    , right = cfg.right
+                    , right = cfg.right ++ [ settingsMenu ]
                     , transparent = False
                     , border = cfg.border
                     }
@@ -419,7 +455,7 @@ viewWindowTitlebar id_ titlebar_ =
                 TextWindowTitlebar cfg ->
                     { left = []
                     , center = [ text cfg.label ]
-                    , right = []
+                    , right = [ settingsMenu ]
                     , transparent = False
                     , border = cfg.border
                     }
@@ -460,6 +496,27 @@ viewWindowFooter id_ footer_ =
 view : (Msg -> msg) -> Model -> Window msg -> Browser.Document msg
 view toMsg model win =
     let
+        settingsMenu =
+            ActionMenu.items
+                (ActionMenu.titleItem "Theme")
+                [ ActionMenu.optionItem Icon.computer "System" (Click.onClick (ChangeTheme "system"))
+                , ActionMenu.optionItem Icon.sun "Unison Light" (Click.onClick (ChangeTheme "unison-light"))
+                , ActionMenu.optionItem Icon.moon "Unison Dark" (Click.onClick (ChangeTheme "unison-dark"))
+                , ActionMenu.dividerItem
+                , ActionMenu.titleItem "Resources"
+                , ActionMenu.optionItem Icon.graduationCap "Unison Docs" Link.docs
+                , ActionMenu.optionItem Icon.browse "Unison Share" Link.share
+                , ActionMenu.dividerItem
+                , ActionMenu.titleItem "Debug"
+                , ActionMenu.optionItem Icon.refresh "Reload" (Click.onClick ReloadApp)
+                , ActionMenu.optionItem Icon.x "Reset to factory settings" (Click.onClick ResetToFactorySettings)
+                ]
+                |> ActionMenu.fromIconButton ToggleSettingsMenu Icon.cog
+                |> ActionMenu.withButtonColor Button.Subdued
+                |> ActionMenu.shouldBeOpen model.isSettingsMenuOpen
+                |> ActionMenu.view
+                |> Html.map toMsg
+
         mainContent =
             case win.leftSidebar of
                 NoWindowSidebar ->
@@ -509,9 +566,9 @@ view toMsg model win =
                 Nothing ->
                     UI.nothing
     in
-    { title = "UCM"
+    { title = "Unison Codebase Manager"
     , body =
-        [ viewWindowTitlebar win.id win.titlebar
+        [ viewWindowTitlebar settingsMenu win.id win.titlebar
         , mainContent
         , viewWindowFooter win.id win.footer
         , modal

@@ -44,8 +44,8 @@ async function init(appSettings: AppSettings.AppSettings): Promise<Menu> {
         action: async (_) => window.location.reload()
       }),
       await MenuItem.new({
-        id: "clear-app-settings",
-        text: "Clear App Settings",
+        id: "reset-to-factory-settings",
+        text: "Reset to factory settings",
         action: async (_) => {
           await AppSettings.clear();
           window.location.reload();

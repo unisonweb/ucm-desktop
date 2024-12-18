@@ -29,14 +29,17 @@ try {
 
   // -- AppSettings -----------------------------------------------------------
   const appSettings = await AppSettings.init();
+  const operatingSystem = detectOs(window.navigator);
 
   // -- WindowMenu ------------------------------------------------------------
-  const menu = await WindowMenu.init(appSettings);
-  WindowMenu.mount(menu);
+  if (operatingSystem && operatingSystem === "macOS") {
+    const menu = await WindowMenu.init(appSettings);
+    WindowMenu.mount(menu);
+  }
 
   // -- Elm -------------------------------------------------------------------
   const flags = {
-    operatingSystem: detectOs(window.navigator),
+    operatingSystem: operatingSystem,
     basePath: "",
     apiUrl: "http://127.0.0.1:5858/codebase/api",
     workspaceContext: appSettings.workspaceContexts[0],
@@ -54,9 +57,14 @@ try {
     app.ports.saveTheme?.subscribe(async (theme: Theme.Theme) => {
       appSettings.theme = theme
       AppSettings.save(appSettings);
+      Theme.mount(theme);
     });
 
-    app.ports.clearSettings?.subscribe(AppSettings.clear);
+    app.ports.reloadApp?.subscribe((_: unknown) => window.location.reload());
+    app.ports.clearSettings?.subscribe((_: unknown) => {
+      AppSettings.clear();
+      window.location.reload();
+    });
   }
 
   // -- CSS env classes -------------------------------------------------------

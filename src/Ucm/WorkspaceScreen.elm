@@ -39,6 +39,7 @@ type alias Model =
     , switchBranch : SwitchBranch.Model
     , modal : WorkspaceScreenModal
     , sidebarVisible : Bool
+    , settingsMenuVisible : Bool
     , keyboardShortcut : KeyboardShortcut.Model
     }
 
@@ -64,6 +65,7 @@ init appContext workspaceContext =
       , switchBranch = SwitchBranch.init
       , modal = NoModal
       , sidebarVisible = True
+      , settingsMenuVisible = False
       , keyboardShortcut = KeyboardShortcut.init appContext.operatingSystem
       }
     , Cmd.batch

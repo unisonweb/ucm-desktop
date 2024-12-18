@@ -17,6 +17,7 @@
             "elm/parser": "1.1.0",
             "elm/regex": "1.0.0",
             "elm/svg": "1.0.1",
+            "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "elm-community/html-extra": "3.4.0",
             "elm-community/json-extra": "4.3.0",
@@ -36,7 +37,6 @@
             "elm/bytes": "1.0.8",
             "elm/file": "1.0.5",
             "elm/random": "1.0.0",
-            "elm/time": "1.0.0",
             "elm/virtual-dom": "1.0.3",
             "fredcy/elm-parseint": "2.0.1"
         }
