@@ -63,6 +63,12 @@
     padding: 0.75rem;
     max-width: min(calc(var(--c-workspace-card_width) - 1.5rem), 100%);
   }
+
+  & .workspace-card_loading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .workspace-card.card {
