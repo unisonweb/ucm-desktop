@@ -29,6 +29,7 @@ import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
 import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
+import UI.Placeholder as Placeholder
 import UI.TabList as TabList
 import Ucm.AppContext exposing (AppContext)
 import Ucm.ContextualTag as ContextualTag
@@ -500,8 +501,18 @@ viewItem definitionSummaryTooltip item isFocused =
 
         card =
             case item of
-                WorkspaceItem.Loading _ ->
-                    Nothing
+                WorkspaceItem.Loading ref ->
+                    cardBase
+                        |> WorkspaceCard.withTitlebarLeft [ text (WorkspaceItemRef.toHumanString ref) ]
+                        |> WorkspaceCard.withContent
+                            [ div [ class "workspace-card_loading" ]
+                                [ Placeholder.text |> Placeholder.withLength Placeholder.Medium |> Placeholder.view
+                                , Placeholder.text |> Placeholder.withLength Placeholder.Huge |> Placeholder.view
+                                , Placeholder.text |> Placeholder.withLength Placeholder.Large |> Placeholder.view
+                                , Placeholder.text |> Placeholder.withLength Placeholder.Medium |> Placeholder.view
+                                , Placeholder.text |> Placeholder.withLength Placeholder.Small |> Placeholder.view
+                                ]
+                            ]
 
                 WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem state defItem) ->
                     let
@@ -547,7 +558,11 @@ viewItem definitionSummaryTooltip item isFocused =
                             ]
                         |> withTabList
                         |> WorkspaceCard.withContent [ itemContent ]
-                        |> Just
+
+                WorkspaceItem.Success _ _ ->
+                    {- TODO -}
+                    cardBase
+                        |> WorkspaceCard.withContent []
 
                 WorkspaceItem.Failure wsRef e ->
                     cardBase
@@ -558,17 +573,10 @@ viewItem definitionSummaryTooltip item isFocused =
                                 , text (Util.httpErrorToString e)
                                 ]
                             ]
-                        |> Just
-
-                _ ->
-                    cardBase
-                        |> WorkspaceCard.withContent []
-                        |> Just
     in
     card
-        |> Maybe.map (WorkspaceCard.withFocus isFocused)
-        |> Maybe.map WorkspaceCard.view
-        |> Maybe.withDefault UI.nothing
+        |> WorkspaceCard.withFocus isFocused
+        |> WorkspaceCard.view
 
 
 view : Bool -> Model -> Html Msg
