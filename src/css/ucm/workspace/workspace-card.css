@@ -8,8 +8,7 @@
   flex-direction: column;
   gap: 0;
   padding: 0;
-  width: max(max-content, 100%);
-  min-width: max-content;
+  width: var(--c-workspace-card_width);
   z-index: var(--layer-base);
 
   & .workspace-card_titlebar {

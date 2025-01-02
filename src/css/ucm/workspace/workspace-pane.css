@@ -3,8 +3,8 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.75rem;
-  width: 100%;
   overflow: auto;
+  width: min(var(--c-workspace-card_width), 100%);
 
   & .error {
     display: flex;
