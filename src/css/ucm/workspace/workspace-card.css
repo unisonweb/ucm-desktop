@@ -2,7 +2,7 @@
   --c-workspace-card_border: var(--u-color_border_subdued);
   --c-workspace-card_background: var(--u-color_container_faded);
   --c-workspace-card_width: calc(var(--readable-column-width-medium) + 2rem);
-  --c-width_doc_inner-content: var(--c-workspace-card_width);
+
 
   display: flex;
   flex-direction: column;
@@ -61,7 +61,7 @@
     flex-direction: column;
     gap: 0;
     padding: 0.75rem;
-    max-width: min(calc(var(--c-workspace-card_width) - 1.5rem), 100%);
+    width: 100%;
   }
 
   & .workspace-card_loading {
@@ -89,5 +89,21 @@
   & .tab-list {
     --c-color_tabs_border: var(--color-card-border);
     background: var(--u-color_container);
+  }
+}
+
+.workspace-card .definition-doc {
+  --c-width_doc_inner-content: 100%;
+  --c-width_doc_source: 100%;
+}
+
+@container workspace-pane (max-width: 968px) {
+  /* TODO: these are the styles from ui-core. This container query probably
+   * belongs there showhow */
+  .workspace-card aside {
+    position: relative;
+    right: auto;
+    width: auto;
+    margin: 1.5rem 1.5rem 1.5rem 1.5rem;
   }
 }

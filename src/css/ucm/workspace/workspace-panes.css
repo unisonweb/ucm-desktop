@@ -30,6 +30,18 @@
 }
 
 .workspace-panes .workspace-card {
-  width: 100%;
-  min-width: max-content;
+  --c-workspace-card_width: 100%;
+}
+
+/* TODO: these are the styles from ui-core. Would be better if it were more
+ * dynamic somehow */
+.workspace-panes .workspace-card aside {
+  position: relative;
+  right: auto;
+  width: auto;
+  margin: 1.5rem 1.5rem 1.5rem 1.5rem;
+}
+
+.workspace-panes .workspace-card_main-content:has(>.rich) {
+  overflow-x: auto;
 }
