@@ -20,6 +20,7 @@ import UI.Button as Button
 import UI.Click as Click
 import UI.Icon as Icon
 import UI.Modal as Modal exposing (Modal)
+import UI.Tooltip as Tooltip
 import Ucm.Link as Link
 
 
@@ -447,7 +448,15 @@ viewWindowTitlebar settingsMenu id_ titlebar_ =
                 WindowTitlebar cfg ->
                     { left = cfg.left
                     , center = cfg.center
-                    , right = cfg.right ++ [ settingsMenu ]
+                    , right =
+                        cfg.right
+                            ++ [ Tooltip.text "Settings"
+                                    |> Tooltip.tooltip
+                                    |> Tooltip.below
+                                    |> Tooltip.withArrow Tooltip.End
+                                    |> Tooltip.view
+                                        settingsMenu
+                               ]
                     , transparent = False
                     , border = cfg.border
                     }
@@ -470,9 +479,9 @@ viewWindowTitlebar settingsMenu id_ titlebar_ =
             , ( "window-titlebar_borderless", not border )
             ]
         ]
-        [ div [ class "window-control-bar-group" ] left
-        , div [ class "window-control-bar-group" ] center
-        , div [ class "window-control-bar-group" ] right
+        [ div [ class "window-control-bar-group window-titlebar_left" ] left
+        , div [ class "window-control-bar-group window-titlebar_center" ] center
+        , div [ class "window-control-bar-group window-titlebar_right" ] right
         ]
 
 
@@ -487,9 +496,9 @@ viewWindowFooter id_ footer_ =
                 [ id (id_ ++ "_window-footer")
                 , class "window-control-bar window-footer"
                 ]
-                [ div [ class "window-control-bar-group" ] left
-                , div [ class "window-control-bar-group" ] center
-                , div [ class "window-control-bar-group" ] right
+                [ div [ class "window-control-bar-group window-footer_left" ] left
+                , div [ class "window-control-bar-group window-footer_center" ] center
+                , div [ class "window-control-bar-group window-footer_right" ] right
                 ]
 
 
@@ -505,11 +514,11 @@ view toMsg model win =
                 , ActionMenu.dividerItem
                 , ActionMenu.titleItem "Resources"
                 , ActionMenu.optionItem Icon.graduationCap "Unison Docs" Link.docs
-                , ActionMenu.optionItem Icon.browse "Unison Share" Link.share
+                , ActionMenu.optionItem Icon.browse "Unison Share (libraries)" Link.share
                 , ActionMenu.dividerItem
                 , ActionMenu.titleItem "Debug"
-                , ActionMenu.optionItem Icon.refresh "Reload" (Click.onClick ReloadApp)
-                , ActionMenu.optionItem Icon.x "Reset to factory settings" (Click.onClick ResetToFactorySettings)
+                , ActionMenu.optionItem Icon.refresh "Reload app" (Click.onClick ReloadApp)
+                , ActionMenu.optionItem Icon.factory "Reset to factory settings" (Click.onClick ResetToFactorySettings)
                 ]
                 |> ActionMenu.fromIconButton ToggleSettingsMenu Icon.cog
                 |> ActionMenu.withButtonColor Button.Subdued
