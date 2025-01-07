@@ -517,7 +517,7 @@ view toMsg model win =
                 , ActionMenu.optionItem Icon.browse "Unison Share (libraries)" Link.share
                 , ActionMenu.dividerItem
                 , ActionMenu.titleItem "Debug"
-                , ActionMenu.optionItem Icon.refresh "Reload app" (Click.onClick ReloadApp)
+                , ActionMenu.optionItem Icon.restartCircle "Restart app" (Click.onClick ReloadApp)
                 , ActionMenu.optionItem Icon.factory "Reset to factory settings" (Click.onClick ResetToFactorySettings)
                 ]
                 |> ActionMenu.fromIconButton ToggleSettingsMenu Icon.cog

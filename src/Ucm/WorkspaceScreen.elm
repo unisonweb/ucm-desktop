@@ -493,7 +493,7 @@ footerLeft model =
             )
     , tooltip "Refresh codebase" Nothing
         |> Tooltip.view
-            (Button.icon RefreshCodebase Icon.refresh
+            (Button.icon RefreshCodebase Icon.restartCircle
                 |> Button.small
                 |> Button.subdued
                 |> Button.view
