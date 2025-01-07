@@ -36,6 +36,13 @@ body:has(.window-footer) {
   padding: 0.5rem 0.5rem;
 }
 
+.window-control-bar .label-with-shortcut {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
 .window-control-bar-group {
   display: flex;
   flex-direction: row;
@@ -45,7 +52,22 @@ body:has(.window-footer) {
 .window-titlebar {
   padding-left: 0.5rem;
   border-bottom: 1px solid var(--u-color_chrome_border);
-  background: var(--u-color_chrome_emphasized)
+  background: var(--u-color_chrome_emphasized);
+
+  & .window-titlebar_right {
+    position: relative;
+
+    & .tooltip {
+      margin-top: 0.7rem;
+      margin-left: 1.8rem;
+    }
+  }
+
+  & .window-titlebar_right:has(.action-menu_sheet) {
+    & .tooltip {
+      display: none;
+    }
+  }
 }
 
 .macos .window-titlebar {
@@ -112,4 +134,13 @@ body:has(.window-footer) {
 .window-footer {
   border-top: 1px solid var(--u-color_chrome_border);
   background: var(--u-color_chrome);
+
+  & .window-footer_left {
+    position: relative;
+
+    & .tooltip {
+      margin-top: 0.75rem;
+      margin-left: -0.3rem;
+    }
+  }
 }

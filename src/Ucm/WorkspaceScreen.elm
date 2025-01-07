@@ -4,16 +4,17 @@ import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
-import UI.KeyboardShortcut.Key exposing (Key(..))
+import UI.KeyboardShortcut.Key as Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Modal as Modal
+import UI.Tooltip as Tooltip
 import Ucm.AppContext as AppContext exposing (AppContext)
 import Ucm.CommandPalette as CommandPalette
 import Ucm.SwitchBranch as SwitchBranch
@@ -86,6 +87,7 @@ type Msg
     | CloseModal
     | ToggleSidebar
     | ToggleRightPane
+    | RefreshCodebase
     | Keydown KeyboardEvent.KeyboardEvent
     | CodebaseTreeMsg CodebaseTree.Msg
     | WorkspacePanesMsg WorkspacePanes.Msg
@@ -175,6 +177,18 @@ update appContext msg model =
             in
             ( { model | panes = panes }, Cmd.none, None )
 
+        RefreshCodebase ->
+            let
+                ( codebaseTree, codebaseTreeCmd ) =
+                    CodebaseTree.init model.config
+            in
+            ( { model
+                | codebaseTree = codebaseTree
+              }
+            , Cmd.map CodebaseTreeMsg codebaseTreeCmd
+            , None
+            )
+
         Keydown event ->
             let
                 ( keyboardShortcut, kCmd ) =
@@ -191,6 +205,9 @@ update appContext msg model =
 
                 toggleSidebar =
                     ( { model_ | sidebarVisible = not model_.sidebarVisible }, Cmd.none )
+
+                toggleSplitPanes =
+                    ( { model_ | panes = WorkspacePanes.toggleRightPane model_.panes }, Cmd.none )
 
                 focusLeft =
                     ( { model_ | panes = WorkspacePanes.focusLeft model_.panes }, Cmd.none )
@@ -217,6 +234,9 @@ update appContext msg model =
 
                         ( NoModal, Chord Ctrl (B _) ) ->
                             toggleSidebar
+
+                        ( NoModal, Sequence (Just (W _)) (R _) ) ->
+                            toggleSplitPanes
 
                         ( NoModal, Sequence (Just (W _)) ArrowLeft ) ->
                             focusLeft
@@ -393,6 +413,21 @@ subscriptions model =
 -- VIEW
 
 
+controlBarTooltip : Model -> String -> Maybe KeyboardShortcut.KeyboardShortcut -> Tooltip.Tooltip msg
+controlBarTooltip model label shortcut =
+    let
+        content =
+            case shortcut of
+                Just s ->
+                    Tooltip.rich
+                        (div [ class "label-with-shortcut" ] [ text label, KeyboardShortcut.view model.keyboardShortcut s ])
+
+                Nothing ->
+                    Tooltip.text label
+    in
+    Tooltip.tooltip content
+
+
 titlebarLeft : Model -> List (Html Msg)
 titlebarLeft { switchProject, switchBranch, workspaceContext } =
     [ SwitchProject.toAnchoredOverlay workspaceContext.projectName switchProject
@@ -404,16 +439,65 @@ titlebarLeft { switchProject, switchBranch, workspaceContext } =
     ]
 
 
-titlebarRight : List (Html Msg)
-titlebarRight =
-    [ Button.icon ShowCommandPalette Icon.search
-        |> Button.small
-        |> Button.subdued
-        |> Button.view
-    , Button.icon ToggleRightPane Icon.windowSplit
-        |> Button.small
-        |> Button.subdued
-        |> Button.view
+titlebarRight : Model -> List (Html Msg)
+titlebarRight model =
+    let
+        tooltip label shortcut =
+            controlBarTooltip model label (Just shortcut)
+                |> Tooltip.below
+                |> Tooltip.withArrow Tooltip.End
+    in
+    [ tooltip "Search" (KeyboardShortcut.single Key.ForwardSlash)
+        |> Tooltip.view
+            (Button.icon ShowCommandPalette Icon.search
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            )
+    , tooltip "Toggle split panes" (KeyboardShortcut.Sequence (Just (Key.W Key.Lower)) (Key.R Key.Lower))
+        |> Tooltip.view
+            (Button.icon ToggleRightPane Icon.windowSplit
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            )
+    ]
+
+
+footerLeft : Model -> List (Html Msg)
+footerLeft model =
+    let
+        sidebarIcon =
+            if model.sidebarVisible then
+                Icon.leftSidebarOff
+
+            else
+                Icon.leftSidebarOn
+
+        tooltip label shortcut =
+            controlBarTooltip model label shortcut
+                |> Tooltip.above
+                |> Tooltip.withArrow Tooltip.Start
+
+        toggleSidebarSequence =
+            KeyboardShortcut.Sequence
+                (Just (Key.W Key.Lower))
+                (Key.S Key.Lower)
+    in
+    [ tooltip "Toggle sidebar" (Just toggleSidebarSequence)
+        |> Tooltip.view
+            (Button.icon ToggleSidebar sidebarIcon
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            )
+    , tooltip "Refresh codebase" Nothing
+        |> Tooltip.view
+            (Button.icon RefreshCodebase Icon.refresh
+                |> Button.small
+                |> Button.subdued
+                |> Button.view
+            )
     ]
 
 
@@ -433,21 +517,12 @@ view appContext model =
         window =
             Window.window "workspace-screen"
 
-        ( sidebarIcon, window_ ) =
+        window_ =
             if model.sidebarVisible then
-                ( Icon.leftSidebarOff
-                , Window.withLeftSidebar (viewLeftSidebar model.codebaseTree) window
-                )
+                Window.withLeftSidebar (viewLeftSidebar model.codebaseTree) window
 
             else
-                ( Icon.leftSidebarOn, window )
-
-        footerLeft =
-            [ Button.icon ToggleSidebar sidebarIcon
-                |> Button.small
-                |> Button.subdued
-                |> Button.view
-            ]
+                window
 
         footerRight =
             [ UcmConnectivity.view appContext.ucmConnectivity ]
@@ -467,8 +542,8 @@ view appContext model =
     in
     window__
         |> Window.withTitlebarLeft (titlebarLeft model)
-        |> Window.withTitlebarRight titlebarRight
-        |> Window.withFooterLeft footerLeft
+        |> Window.withTitlebarRight (titlebarRight model)
+        |> Window.withFooterLeft (footerLeft model)
         |> Window.withFooterRight footerRight
         |> Window.withContent content
         |> Window.view WindowMsg model.window
