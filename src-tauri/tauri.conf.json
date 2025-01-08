@@ -28,7 +28,7 @@
   },
   "productName": "UCM Desktop",
   "mainBinaryName": "ucm-desktop",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "identifier": "com.ucm-desktop.app",
   "app": {
     "withGlobalTauri": true,
