@@ -72,6 +72,7 @@ type Msg
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
     | OpenDependency Reference
+    | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | Keydown KeyboardEvent.KeyboardEvent
     | DefinitionSummaryTooltipMsg DefinitionSummaryTooltip.Msg
     | KeyboardShortcutMsg KeyboardShortcut.Msg
@@ -165,6 +166,26 @@ update config msg model =
                             openDefinition config model r
             in
             ( m, c, NoOut )
+
+        ToggleDocFold wsRef foldId ->
+            let
+                updateState state =
+                    case state.activeTab of
+                        WorkspaceItem.DocsTab toggles ->
+                            { activeTab =
+                                WorkspaceItem.DocsTab (Doc.toggleFold toggles foldId)
+                            }
+
+                        _ ->
+                            state
+
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        updateState
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
         Keydown event ->
             let
@@ -541,7 +562,7 @@ viewItem definitionSummaryTooltip item isFocused =
                             case ( state.activeTab, WorkspaceItem.docs defItem ) of
                                 ( WorkspaceItem.DocsTab docFoldToggles, Just docs ) ->
                                     Doc.view (syntaxConfig definitionSummaryTooltip)
-                                        (always NoOp)
+                                        (ToggleDocFold wsRef)
                                         docFoldToggles
                                         docs
 
