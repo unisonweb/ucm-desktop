@@ -69,6 +69,7 @@ type Msg
     = NoOp
     | Focus
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
+    | Refetch WorkspaceItemRef
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
     | OpenDependency Reference
@@ -88,6 +89,24 @@ update config msg model =
     case msg of
         Focus ->
             ( model, Cmd.none, RequestFocus )
+
+        Refetch ref ->
+            let
+                ( model_, cmd ) =
+                    case ref of
+                        SearchResultsItemRef _ ->
+                            ( model, Cmd.none )
+
+                        DefinitionItemRef dRef ->
+                            let
+                                nextWorkspaceItems =
+                                    WorkspaceItems.replace model.workspaceItems ref (WorkspaceItem.Loading ref)
+                            in
+                            ( { model | workspaceItems = nextWorkspaceItems }
+                            , HttpApi.perform config.api (fetchDefinition config dRef)
+                            )
+            in
+            ( model_, cmd, NoOut )
 
         FetchDefinitionItemFinished dRef (Ok defItem) ->
             let
@@ -588,10 +607,20 @@ viewItem definitionSummaryTooltip item isFocused =
                 WorkspaceItem.Failure wsRef e ->
                     cardBase
                         |> WorkspaceCard.withTitle ("Failed to load definition: " ++ WorkspaceItemRef.toHumanString wsRef)
+                        |> WorkspaceCard.withTitlebarRight
+                            [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
+                                |> Button.subdued
+                                |> Button.small
+                                |> Button.view
+                            ]
                         |> WorkspaceCard.withContent
-                            [ span [ class "error" ]
-                                [ span [ class "error_icon" ] [ Icon.view Icon.warn ]
-                                , text (Util.httpErrorToString e)
+                            [ div [ class "workspace-card_error" ]
+                                [ span [ class "error" ]
+                                    [ span [ class "error_icon" ] [ Icon.view Icon.warn ]
+                                    , text (Util.httpErrorToString e)
+                                    ]
+                                , Button.iconThenLabel (Refetch wsRef) Icon.refresh "Try again"
+                                    |> Button.view
                                 ]
                             ]
     in

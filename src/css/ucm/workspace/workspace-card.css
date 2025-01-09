@@ -64,6 +64,12 @@
     width: 100%;
   }
 
+  & .workspace-card_error {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   & .workspace-card_loading {
     display: flex;
     flex-direction: column;
