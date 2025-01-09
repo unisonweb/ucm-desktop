@@ -8,6 +8,7 @@ import Lib.Util as Util
 import UI.Button as Button
 import UI.Icon as Icon
 import UI.StatusBanner as StatusBanner
+import UI.StatusIndicator as StatusIndicator
 import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
@@ -265,15 +266,15 @@ view model =
             { title = "UCM Desktop | Couldn't connect to the UCM CLI"
             , body =
                 [ div []
-                    [ div [ class "app-error" ]
-                        [ h2 [] [ text "Couldn't connect to the UCM CLI" ]
+                    [ div [ class "app-message" ]
+                        [ h2 [] [ StatusIndicator.view StatusIndicator.working, text "Waiting on the UCM CLI" ]
                         , p []
                             [ text "Please make sure UCM is running on the right port like so: "
                             , br [] []
                             , code [] [ text apiUrl ]
                             ]
-                        , Button.iconThenLabel ReCheckUCMConnectivity Icon.refresh "Try again"
-                            |> Button.emphasized
+                        , Button.iconThenLabel ReCheckUCMConnectivity Icon.plug "Connect to the UCM CLI"
+                            |> Button.large
                             |> Button.view
                         ]
                     ]
