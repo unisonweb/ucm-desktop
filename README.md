@@ -15,13 +15,7 @@ indeed editing capabilities.
 ---
 
 ## Running 
-UCM desktop requires the UCM CLI to be running, simply start it with the `ucm`
-command:
-```bash
-ucm
-```
-
-Then start the UCM Desktop app as you would normally.
+[UCM the CLI](https://github.com/unisonweb/unison) needs to be running for the desktop app to connect to it. Simply start `ucm` however you usually do.
 
 ## Running for development
 When running for development start UCM like so:
