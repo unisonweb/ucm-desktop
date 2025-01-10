@@ -1,0 +1,4 @@
+# Require approval from Share team when editing repository workflows
+# This helps prevent users from sneaking in malicious changes to CI workflows.
+
+/.github/ @unisoncomputing/share
