@@ -63,3 +63,12 @@
     color: var(--u-color_icon);
   }
 }
+
+#terminal-pane {
+  border-top: 1px solid var(--u-color_border);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+}

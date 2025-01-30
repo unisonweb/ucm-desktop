@@ -15,6 +15,9 @@ import "./main.css";
 import * as AppError from "./Ucm/AppError";
 import * as AppSettings from "./Ucm/AppSettings";
 import * as Theme from "./Ucm/Theme";
+import "@xterm/xterm/css/xterm.css";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from 'xterm-addon-fit';
 
 // @ts-ignore
 import { Elm } from './Main.elm';
@@ -31,6 +34,21 @@ try {
   // -- AppSettings -----------------------------------------------------------
   const appSettings = AppSettings.init();
   const operatingSystem = detectOs(window.navigator);
+
+  // -- Terminal -----------------------------------------------------------
+  const terminal = new Terminal({
+    // fontFamily: "Fira Code var",
+    theme: {
+      background: "#18181c" //--color-gray-darken-30 
+    }
+  });
+  terminal.onData(data => window.electronAPI.ptyInput(data));
+
+  window.electronAPI.onPtyOutput((output) => {
+    terminal.write(output);
+  });
+  const fitAddon = new FitAddon();
+  terminal.loadAddon(fitAddon);
 
   // -- Elm -------------------------------------------------------------------
   const flags = {
@@ -59,6 +77,14 @@ try {
     app.ports.clearSettings?.subscribe(() => {
       AppSettings.clear();
       window.location.reload();
+    });
+
+    app.ports.openTerminal?.subscribe((targetId) => {
+      const target = document.getElementById(targetId);
+      if (target) {
+        terminal.open(target);
+        fitAddon.fit();
+      }
     });
   }
 
