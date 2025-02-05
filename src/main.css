@@ -31,3 +31,7 @@ body::-webkit-scrollbar-corner {
   align-items: center;
   flex-shrink: 0;
 }
+
+.button {
+  app-region: no-drag;
+}

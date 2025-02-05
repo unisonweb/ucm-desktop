@@ -53,6 +53,7 @@ body:has(.window-footer) {
   padding-left: 0.5rem;
   border-bottom: 1px solid var(--u-color_chrome_border);
   background: var(--u-color_chrome_emphasized);
+  app-region: drag;
 
   & .window-titlebar_right {
     position: relative;

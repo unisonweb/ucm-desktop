@@ -3,8 +3,7 @@ port module Window exposing (..)
 import Browser
 import Html
     exposing
-        ( Attribute
-        , Html
+        ( Html
         , aside
         , div
         , footer
@@ -12,7 +11,7 @@ import Html
         , main_
         , text
         )
-import Html.Attributes exposing (attribute, class, classList, id)
+import Html.Attributes exposing (class, classList, id)
 import SplitPane.SplitPane as SplitPane
 import UI
 import UI.ActionMenu as ActionMenu
@@ -408,27 +407,6 @@ map f win =
 
 
 
--- HELPERS
-
-
-{-| A HTML attribute to enable window draggability for Tauri.
-Used for titlebars
--}
-windowDraggability : Attribute msg
-windowDraggability =
-    attribute "data-tauri-drag-region" "1"
-
-
-{-| Normally, this would happen automatically, but when the Elm app mounts it
-removes all previous HTML from <body> (where the Decorum plugin would normally
-add a titlebar for Windows)
--}
-windowControls : Attribute msg
-windowControls =
-    attribute "data-tauri-decorum-tb" "1"
-
-
-
 -- VIEW
 
 
@@ -471,8 +449,6 @@ viewWindowTitlebar settingsMenu id_ titlebar_ =
     in
     header
         [ id (id_ ++ "_window-titlebar")
-        , windowDraggability
-        , windowControls
         , class "window-control-bar window-titlebar"
         , classList
             [ ( "window-titlebar_transparent", transparent )

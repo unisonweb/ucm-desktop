@@ -1,5 +1,3 @@
-export type Theme = "unison-light" | "unison-dark" | "system";
-
 function listenToSystemChange() {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
     if (matches) {
@@ -11,7 +9,7 @@ function listenToSystemChange() {
   })
 }
 
-function systemToActual(): Promise<Theme> {
+function systemToActual() {
   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
     return Promise.resolve("unison-dark");
   }
@@ -23,11 +21,11 @@ function systemToActual(): Promise<Theme> {
   }
 }
 
-function equals(a: Theme, b: Theme): boolean {
+function equals(a, b) {
   return a === b;
 }
 
-function prettyName(theme: Theme): string {
+function prettyName(theme) {
   if (theme === "unison-light") {
     return "Unison Light";
   }
@@ -39,7 +37,7 @@ function prettyName(theme: Theme): string {
   }
 }
 
-async function mount(theme: Theme) {
+async function mount(theme) {
   let theme_ = theme;
 
   console.log("Setting theme:", theme);
