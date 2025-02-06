@@ -1,6 +1,5 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
-const CopyPlugin = require("copy-webpack-plugin");
 
 const API_URL = process.env.API_URL || "http://127.0.0.1:5858";
 
@@ -8,6 +7,12 @@ module.exports = {
   packagerConfig: {
     asar: true,
     icon: './icons/icon',
+    osxSign: {},
+    osxNotarize: {
+      appleId: process.env.APPLE_ID,
+      appleIdPassword: process.env.APPLE_PASSWORD,
+      teamId: process.env.APPLE_TEAM_ID
+    },
   },
   rebuildConfig: {},
   makers: [
