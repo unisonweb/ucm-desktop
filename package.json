@@ -1,37 +1,49 @@
 {
   "name": "ucm-desktop",
-  "private": true,
+  "productName": "UCM Destop",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Unison companion app",
+  "main": ".webpack/main",
   "scripts": {
-    "dev": "vite",
-    "start": "tauri dev",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
     "test": "elm-test",
     "ui-core-check-css": "ui-core-check-css",
     "ui-core-install": "ui-core-install",
     "ui-core-update": "ui-core-update",
     "postinstall": "ui-core-install"
   },
-  "dependencies": {
-    "@tauri-apps/api": "^2.0.0",
-    "@tauri-apps/plugin-shell": "^2.0.0",
-    "@tauri-apps/plugin-store": "^2.1.0"
-  },
   "devDependencies": {
+    "@electron-forge/cli": "^7.6.1",
+    "@electron-forge/maker-deb": "^7.6.1",
+    "@electron-forge/maker-rpm": "^7.6.1",
+    "@electron-forge/maker-squirrel": "^7.6.1",
+    "@electron-forge/maker-zip": "^7.6.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.1",
+    "@electron-forge/plugin-fuses": "^7.6.1",
+    "@electron-forge/plugin-webpack": "^7.6.1",
+    "@electron/fuses": "^1.8.0",
     "@octokit/core": "^4.0.5",
-    "@tauri-apps/cli": "^2.0.0",
     "@unison-lang/ui-core-scripts": "^1.1.9",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^6.11.0",
+    "electron": "34.0.2",
     "elm": "^0.19.1-6",
+    "elm-asset-webpack-loader": "^1.1.3",
     "elm-format": "^0.8.7",
     "elm-git-install": "^0.1.4",
     "elm-json": "^0.2.13",
     "elm-review": "^2.12.0",
     "elm-test": "^0.19.1-revision12",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1",
-    "vite-plugin-elm": "^3.0.1"
+    "elm-webpack-loader": "^8.0.0",
+    "node-loader": "^2.1.0",
+    "style-loader": "^3.3.4"
+  },
+  "keywords": [],
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
   }
 }

@@ -1,4 +1,4 @@
-function init(ex: Error | string | unknown): Element {
+function init(ex) {
   const $errWrapper = document.createElement("div");
 
   const $err = document.createElement("div");
@@ -24,7 +24,7 @@ function init(ex: Error | string | unknown): Element {
   return $errWrapper;
 }
 
-function mount($err: Element) {
+function mount($err) {
   const $body = document.querySelector("body");
   if ($body) {
     $body.appendChild($err);

@@ -7,7 +7,7 @@ on:
       - release
 
 jobs:
-  publish-tauri:
+  publish-electron:
     permissions:
       contents: write
     strategy:
@@ -40,17 +40,6 @@ jobs:
           node-version: lts/*
           cache: 'npm'
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
       - name: Install FrontEnd dependencies
         run: npm install
 
@@ -77,7 +66,7 @@ jobs:
           echo "CERT_ID=$CERT_ID" >> $GITHUB_ENV
           echo "Certificate imported."
           
-      - uses: tauri-apps/tauri-action@v0
+      - name: package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -93,3 +82,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+        run: npm run package
