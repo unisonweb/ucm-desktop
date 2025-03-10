@@ -1,11 +1,12 @@
-module Ucm.WorkspaceScreen exposing (..)
+port module Ucm.WorkspaceScreen exposing (..)
 
 import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, id)
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
@@ -72,6 +73,7 @@ init appContext workspaceContext =
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , Cmd.map WorkspacePanesMsg panesCmd
+        , Util.delayMsg 5000 OpenTerminal
         ]
     )
 
@@ -88,6 +90,7 @@ type Msg
     | ToggleSidebar
     | ToggleRightPane
     | RefreshCodebase
+    | OpenTerminal
     | Keydown KeyboardEvent.KeyboardEvent
     | CodebaseTreeMsg CodebaseTree.Msg
     | WorkspacePanesMsg WorkspacePanes.Msg
@@ -104,6 +107,9 @@ type OutMsg
 update : AppContext -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update appContext msg model =
     case msg of
+        OpenTerminal ->
+            ( model, openTerminal "terminal-pane", None )
+
         CodebaseTreeMsg codebaseTreeMsg ->
             let
                 ( codebaseTree, codebaseTreeCmd, outMsg ) =
@@ -388,6 +394,13 @@ update appContext msg model =
 
 
 
+-- PORTS
+
+
+port openTerminal : String -> Cmd msg
+
+
+
 -- SUBSCRIPTIONS
 
 
@@ -538,7 +551,10 @@ view appContext model =
                         window_
 
         content =
-            [ Html.map WorkspacePanesMsg (WorkspacePanes.view model.panes) ]
+            [ Html.map WorkspacePanesMsg
+                (WorkspacePanes.view model.panes)
+            , div [ id "terminal-pane" ] []
+            ]
     in
     window__
         |> Window.withTitlebarLeft (titlebarLeft model)
