@@ -11,6 +11,7 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
 import Http
 import Json.Decode as Decode exposing (field, index)
+import Lib.Decode.Helpers as DecodeH exposing (nonEmptyList)
 import Lib.Util as Util
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
@@ -142,7 +143,7 @@ decodeTypeDetails =
     Decode.map5 make
         (Type.decodeTypeCategory [ "defnTypeTag" ])
         (field "bestTypeName" FQN.decode)
-        (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
+        (field "typeNames" (DecodeH.nonEmptyList FQN.decode))
         (Type.decodeTypeSource [ "typeDefinition", "tag" ] [ "typeDefinition", "contents" ])
         (decodeDocs "typeDocs")
 
@@ -190,7 +191,7 @@ decodeTermDetails =
     Decode.map5 make
         (Term.decodeTermCategory [ "defnTermTag" ])
         (field "bestTermName" FQN.decode)
-        (field "termNames" (Util.decodeNonEmptyList FQN.decode))
+        (field "termNames" (DecodeH.nonEmptyList FQN.decode))
         (Term.decodeTermSource
             [ "termDefinition", "tag" ]
             [ "signature" ]
