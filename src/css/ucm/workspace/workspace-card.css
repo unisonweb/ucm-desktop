@@ -61,6 +61,9 @@
     gap: 0;
     padding: 0.75rem;
     width: 100%;
+
+    container-name: doc-container;
+    container-type: inline-size;
   }
 
   & .workspace-card_error {
@@ -97,15 +100,14 @@
   }
 }
 
-.workspace-card .definition-doc {
-  --c-width_doc_inner-content: 100%;
-  --c-width_doc_source: 100%;
+.workspace-card .definition-doc aside {
+  right: -16.5rem;
 }
 
 @container workspace-pane (max-width: 968px) {
   /* TODO: these are the styles from ui-core. This container query probably
    * belongs there showhow */
-  .workspace-card aside {
+  .workspace-card .definition-doc aside {
     position: relative;
     right: auto;
     width: auto;
