@@ -101,7 +101,7 @@ view viewConfig palette =
                 Just results_ ->
                     case results_ of
                         SearchResults.Empty ->
-                            UI.nothing
+                            div [ class "command-palette_no-matches" ] [ text "No matches" ]
 
                         SearchResults.SearchResults matches ->
                             div [ class "command-palette_sheet" ]

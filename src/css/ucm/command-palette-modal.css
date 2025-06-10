@@ -66,6 +66,15 @@
 
   }
 
+  & .command-palette_no-matches {
+    position: absolute;
+    right: 0.875rem;
+    top: 0.875rem;
+    color: var(--u-color_text_very-subdued);
+    font-size: var(--font-size-small);
+    font-style: italic;
+  }
+
   & .command-palette_sheet {
     display: flex;
     flex-direction: column;
