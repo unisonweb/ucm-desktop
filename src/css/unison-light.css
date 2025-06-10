@@ -100,10 +100,10 @@ body.unison-light {
   --u-color_element_subdued_selected: var(--color-gray-lighten-55);
 
   --u-color_element_emphasized: var(--color-gray-lighten-60);
-  /* [x] */ --u-color_text-on-element-emphasized: var(--color-gray-lighten-100);
-  /* [x] */ --u-color_icon-on-element-emphasized: var(--color-gray-lighten-50);
-  /* [x] */ --u-color_element_emphasized_hovered: var(--color-gray-darken-20);
-  --u-color_element_emphasized_selected: var(--color-gray-lighten-60);
+  --u-color_text-on-element-emphasized: var(--color-gray-darken-30);
+  --u-color_icon-on-element-emphasized: var(--color-gray-darken-10);
+  --u-color_element_emphasized_hovered: var(--color-gray-lighten-45);
+  --u-color_element_emphasized_selected: var(--color-gray-lighten-45);
 
   --u-color_element_decorative-purple: var(--color-purple-5);
   --u-color_border-on-element-decorative-purple: var(--color-purple-4);
