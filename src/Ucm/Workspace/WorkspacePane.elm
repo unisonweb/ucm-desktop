@@ -352,6 +352,11 @@ handleKeyboardShortcut paneId model shortcut =
         Chord Shift (K _) ->
             moveUp
 
+        Chord Shift (X _) ->
+            ( { model | workspaceItems = WorkspaceItems.empty }
+            , Cmd.none
+            )
+
         Sequence _ ArrowDown ->
             nextDefinition
 
