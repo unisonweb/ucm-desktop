@@ -25,7 +25,7 @@
     "@electron-forge/plugin-fuses": "^7.6.1",
     "@electron-forge/plugin-webpack": "^7.6.1",
     "@electron/fuses": "^1.8.0",
-    "@octokit/core": "^4.0.5",
+    "@octokit/core": "^7.0.2",
     "@unison-lang/ui-core-scripts": "^1.1.9",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "copy-webpack-plugin": "^13.0.0",
