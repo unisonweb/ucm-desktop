@@ -1,7 +1,7 @@
 {
   "name": "ucm-desktop",
   "productName": "UCM Destop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Unison companion app",
   "main": ".webpack/main",
   "scripts": {
@@ -24,6 +24,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.1",
     "@electron-forge/plugin-fuses": "^7.6.1",
     "@electron-forge/plugin-webpack": "^7.6.1",
+    "@electron-forge/publisher-github": "^7.8.1",
     "@electron/fuses": "^1.8.0",
     "@octokit/core": "^7.0.2",
     "@unison-lang/ui-core-scripts": "^1.1.9",
