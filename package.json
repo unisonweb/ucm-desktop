@@ -45,6 +45,7 @@
   },
   "keywords": [],
   "dependencies": {
+    "@electron-forge/maker-dmg": "^7.8.1",
     "electron-squirrel-startup": "^1.0.1"
   }
 }
