@@ -25,6 +25,11 @@ toString ref =
             r
 
 
+toDomString : WorkspaceItemRef -> String
+toDomString ref =
+    ref |> toString |> String.replace "." "__"
+
+
 toHumanString : WorkspaceItemRef -> String
 toHumanString ref =
     case ref of

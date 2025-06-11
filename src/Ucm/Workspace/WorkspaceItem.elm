@@ -11,8 +11,7 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
 import Http
 import Json.Decode as Decode exposing (field, index)
-import Lib.Decode.Helpers as DecodeH exposing (nonEmptyList)
-import Lib.Util as Util
+import Lib.Decode.Helpers as DecodeH
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import Ucm.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
