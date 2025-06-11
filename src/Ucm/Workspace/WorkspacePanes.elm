@@ -68,7 +68,7 @@ update config msg model =
         LeftPaneMsg workspacePaneMsg ->
             let
                 ( leftPane, leftPaneCmd, out ) =
-                    WorkspacePane.update config workspacePaneMsg model.left
+                    WorkspacePane.update config "workspace-pane_left" workspacePaneMsg model.left
 
                 focusedPane =
                     case ( out, model.focusedPane ) of
@@ -83,7 +83,7 @@ update config msg model =
         RightPaneMsg workspacePaneMsg ->
             let
                 ( rightPane, rightPaneCmd, out ) =
-                    WorkspacePane.update config workspacePaneMsg model.right
+                    WorkspacePane.update config "workspace-pane_right" workspacePaneMsg model.right
 
                 focusedPane =
                     case ( out, model.focusedPane ) of
@@ -158,14 +158,14 @@ openDefinition config model ref =
         LeftPaneFocus _ ->
             let
                 ( leftPane, leftPaneCmd ) =
-                    WorkspacePane.openDefinition config model.left ref
+                    WorkspacePane.openDefinition config "workspace-pane_left" model.left ref
             in
             ( { model | left = leftPane }, Cmd.map LeftPaneMsg leftPaneCmd )
 
         RightPaneFocus ->
             let
                 ( rightPane, rightPaneCmd ) =
-                    WorkspacePane.openDefinition config model.right ref
+                    WorkspacePane.openDefinition config "workspace-pane_right" model.right ref
             in
             ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
 
@@ -199,10 +199,10 @@ view : Model -> Html Msg
 view model =
     let
         left isFocused =
-            Html.map LeftPaneMsg (WorkspacePane.view isFocused model.left)
+            Html.map LeftPaneMsg (WorkspacePane.view "workspace-pane_left" isFocused model.left)
 
         right isFocused =
-            Html.map RightPaneMsg (WorkspacePane.view isFocused model.right)
+            Html.map RightPaneMsg (WorkspacePane.view "workspace-pane_right" isFocused model.right)
 
         paneConfig =
             SplitPane.createViewConfig

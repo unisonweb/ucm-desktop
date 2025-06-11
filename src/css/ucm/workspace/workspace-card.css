@@ -3,7 +3,6 @@
   --c-workspace-card_background: var(--u-color_container_faded);
   --c-workspace-card_width: calc(var(--readable-column-width-medium) + 2rem);
 
-
   display: flex;
   flex-direction: column;
   gap: 0;

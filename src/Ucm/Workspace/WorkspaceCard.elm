@@ -13,6 +13,7 @@ type alias WorkspaceCard msg =
     , tabList : Maybe (TabList msg)
     , content : List (Html msg)
     , hasFocus : Bool
+    , domId : Maybe String
     }
 
 
@@ -27,6 +28,7 @@ empty =
     , tabList = Nothing
     , content = []
     , hasFocus = False
+    , domId = Nothing
     }
 
 
@@ -68,6 +70,11 @@ withContent content card_ =
     { card_ | content = content }
 
 
+withDomId : String -> WorkspaceCard msg -> WorkspaceCard msg
+withDomId domId card_ =
+    { card_ | domId = Just domId }
+
+
 withTabList : TabList msg -> WorkspaceCard msg -> WorkspaceCard msg
 withTabList tabList card_ =
     { card_ | tabList = Just tabList }
@@ -103,6 +110,7 @@ map f card_ =
     , tabList = Maybe.map (TabList.map f) card_.tabList
     , content = map_ card_.content
     , hasFocus = card_.hasFocus
+    , domId = card_.domId
     }
 
 
@@ -111,7 +119,7 @@ map f card_ =
 
 
 view : WorkspaceCard msg -> Html msg
-view { titleLeft, titleRight, tabList, content, hasFocus } =
+view { titleLeft, titleRight, tabList, content, hasFocus, domId } =
     let
         className =
             if hasFocus then
@@ -131,8 +139,17 @@ view { titleLeft, titleRight, tabList, content, hasFocus } =
             , tabList |> Maybe.map TabList.view |> Maybe.withDefault UI.nothing
             , section [ class "workspace-card_main-content" ] content
             ]
+
+        card_ =
+            case domId of
+                Just domId_ ->
+                    Card.card cardContent
+                        |> Card.withDomId domId_
+
+                Nothing ->
+                    Card.card cardContent
     in
-    Card.card cardContent
+    card_
         |> Card.asContained
         |> Card.withClassName className
         |> Card.view

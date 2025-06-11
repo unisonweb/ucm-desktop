@@ -15,7 +15,7 @@ import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Html exposing (Html, div, span, strong, text)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.ScrollTo as ScrollTo
@@ -84,8 +84,8 @@ type OutMsg
     | RequestFocus
 
 
-update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update config msg model =
+update : Config -> String -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update config paneId msg model =
     case msg of
         Focus ->
             ( model, Cmd.none, RequestFocus )
@@ -177,12 +177,13 @@ update config msg model =
                     case WorkspaceItems.focus model.workspaceItems of
                         Just item ->
                             openReference config
+                                paneId
                                 model
                                 (WorkspaceItem.reference item)
                                 (WorkspaceItemRef.DefinitionItemRef r)
 
                         Nothing ->
-                            openDefinition config model r
+                            openDefinition config paneId model r
             in
             ( m, c, NoOut )
 
@@ -215,7 +216,7 @@ update config msg model =
                     KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
 
                 ( nextModel, cmd ) =
-                    handleKeyboardShortcut
+                    handleKeyboardShortcut paneId
                         { model | keyboardShortcut = keyboardShortcut }
                         shortcut
             in
@@ -246,23 +247,23 @@ update config msg model =
 -- HELPERS
 
 
-openDefinition : Config -> Model -> Reference -> ( Model, Cmd Msg )
-openDefinition config model ref =
-    openItem config model Nothing (DefinitionItemRef ref)
+openDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg )
+openDefinition config paneId model ref =
+    openItem config paneId model Nothing (DefinitionItemRef ref)
 
 
-open : Config -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg )
-open config model ref =
-    openItem config model Nothing ref
+open : Config -> String -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg )
+open config paneId model ref =
+    openItem config paneId model Nothing ref
 
 
-openReference : Config -> Model -> WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
-openReference config model relativeToRef ref =
-    openItem config model (Just relativeToRef) ref
+openReference : Config -> String -> Model -> WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
+openReference config paneId model relativeToRef ref =
+    openItem config paneId model (Just relativeToRef) ref
 
 
-openItem : Config -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
-openItem config ({ workspaceItems } as model) relativeToRef ref =
+openItem : Config -> String -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
+openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
     case ref of
         SearchResultsItemRef _ ->
             ( model, Cmd.none )
@@ -277,7 +278,7 @@ openItem config ({ workspaceItems } as model) relativeToRef ref =
                             WorkspaceItems.focusOn workspaceItems ref
                     in
                     ( { model | workspaceItems = nextWorkspaceItems }
-                    , scrollToItem ref
+                    , scrollToItem paneId ref
                     )
 
                 else
@@ -297,17 +298,17 @@ openItem config ({ workspaceItems } as model) relativeToRef ref =
                                 WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
                 in
                 ( { model | workspaceItems = nextWorkspaceItems }
-                , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config dRef), scrollToItem ref ]
+                , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config dRef), scrollToItem paneId ref ]
                 )
 
 
-handleKeyboardShortcut : Model -> KeyboardShortcut -> ( Model, Cmd Msg )
-handleKeyboardShortcut model shortcut =
+handleKeyboardShortcut : String -> Model -> KeyboardShortcut -> ( Model, Cmd Msg )
+handleKeyboardShortcut paneId model shortcut =
     let
         scrollToCmd =
             WorkspaceItems.focus
                 >> Maybe.map WorkspaceItem.reference
-                >> Maybe.map scrollToItem
+                >> Maybe.map (scrollToItem paneId)
                 >> Maybe.withDefault Cmd.none
 
         nextDefinition =
@@ -399,13 +400,15 @@ fetchDefinition config ref =
             (FetchDefinitionItemFinished ref)
 
 
-scrollToItem : WorkspaceItemRef -> Cmd Msg
-scrollToItem ref =
+scrollToItem : String -> WorkspaceItemRef -> Cmd Msg
+scrollToItem paneId ref =
     let
         targetId =
-            "workspac-item-" ++ WorkspaceItemRef.toString ref
+            "workspace-card_" ++ WorkspaceItemRef.toDomString ref
     in
-    ScrollTo.scrollTo NoOp "pane" targetId
+    -- Annoying magic number, but this is 0.75rem AKA 12px for scroll margin
+    -- `scroll-margin-top` does not work with Elm's way of setting the viewport
+    ScrollTo.scrollTo_ NoOp paneId targetId 12
 
 
 
@@ -539,6 +542,9 @@ viewItem definitionSummaryTooltip item isFocused =
         cardBase =
             WorkspaceCard.empty
 
+        domId =
+            "workspace-card_" ++ (item |> WorkspaceItem.reference |> WorkspaceItemRef.toDomString)
+
         card =
             case item of
                 WorkspaceItem.Loading ref ->
@@ -626,12 +632,18 @@ viewItem definitionSummaryTooltip item isFocused =
     in
     card
         |> WorkspaceCard.withFocus isFocused
+        |> WorkspaceCard.withDomId domId
         |> WorkspaceCard.view
 
 
-view : Bool -> Model -> Html Msg
-view isFocused model =
-    div [ onClick Focus, class "workspace-pane", classList [ ( "workspace-pane_focused", isFocused ) ] ]
+view : String -> Bool -> Model -> Html Msg
+view paneId isFocused model =
+    div
+        [ onClick Focus
+        , class "workspace-pane"
+        , id paneId
+        , classList [ ( "workspace-pane_focused", isFocused ) ]
+        ]
         (model.workspaceItems
             |> WorkspaceItems.mapToList (viewItem model.definitionSummaryTooltip)
         )
