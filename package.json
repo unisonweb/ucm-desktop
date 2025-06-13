@@ -1,6 +1,6 @@
 {
   "name": "ucm-desktop",
-  "productName": "UCM Destop",
+  "productName": "UCM Desktop",
   "version": "1.1.0",
   "description": "Unison companion app",
   "main": ".webpack/main",

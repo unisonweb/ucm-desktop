@@ -19,7 +19,10 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        authors: 'Unison Computing',
+        description: 'Companion app to the Unison programming language',
+      },
     },
     {
       name: '@electron-forge/maker-zip',
