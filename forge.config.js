@@ -26,7 +26,9 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-wix',
-      config: {},
+      config: {
+        manufacturer: 'Unison Computing'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
