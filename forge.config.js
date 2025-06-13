@@ -30,12 +30,10 @@ module.exports = {
         manufacturer: 'Unison Computing'
       },
     },
-    /*
     {
       name: '@electron-forge/maker-zip',
-      // platforms: ['darwin', 'linux'],
+      platforms: ['darwin', 'linux'],
     },
-    */
     {
       name: '@electron-forge/maker-deb',
       config: {},
