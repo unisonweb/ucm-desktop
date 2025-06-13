@@ -26,6 +26,7 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
+      executableName: "ucm-desktop",
       config: {},
     },
     {
