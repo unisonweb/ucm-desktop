@@ -1,12 +1,16 @@
 const rules = require('./webpack.rules');
 const path = require('path');
-const CopyPlugin = require("copy-webpack-plugin");
 
 const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 
 rules.push({
   test: /\.css$/,
   use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+});
+
+rules.push({
+  test: /\.(png|svg|jpg|jpeg|gif)$/i,
+  type: "asset/resource",
 });
 
 module.exports = {
@@ -21,15 +25,4 @@ module.exports = {
       "ui-core": path.resolve(__dirname, UI_CORE_SRC + "/"),
     },
   },
-
-  plugins: [
-    new CopyPlugin({
-      patterns: [
-        {
-          from: "src/assets/app-icon.png",
-          to: "app-icon.png",
-        },
-      ]
-    }),
-  ]
 };

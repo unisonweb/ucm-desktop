@@ -15,6 +15,11 @@ import "./main.css";
 import * as AppError from "./Ucm/AppError";
 import * as AppSettings from "./Ucm/AppSettings";
 import * as Theme from "./Ucm/Theme";
+import appIcon from "./assets/app-icon.png";
+
+const assets = {
+  appIcon,
+};
 
 // @ts-ignore
 import { Elm } from './Main.elm';
@@ -38,7 +43,8 @@ try {
     basePath: "",
     apiUrl: API_URL,
     workspaceContext: appSettings.workspaceContexts[0],
-    theme: appSettings.theme
+    theme: appSettings.theme,
+    assets,
   };
 
   const app = Elm.Main.init({ flags });

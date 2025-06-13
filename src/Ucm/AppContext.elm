@@ -10,12 +10,18 @@ import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
 import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 
 
+type alias Assets =
+    { appIcon : String
+    }
+
+
 type alias AppContext =
     { operatingSystem : OperatingSystem
     , basePath : String
     , api : HttpApi
     , ucmConnectivity : UcmConnectivity
     , theme : String
+    , assets : Assets
     }
 
 
@@ -25,6 +31,7 @@ type alias Flags =
     , apiUrl : String
     , workspaceContext : Value
     , theme : String
+    , assets : Assets
     }
 
 
@@ -35,6 +42,7 @@ init flags =
     , api = HttpApi.httpApi False flags.apiUrl Nothing
     , ucmConnectivity = Connecting
     , theme = flags.theme
+    , assets = flags.assets
     }
 
 
