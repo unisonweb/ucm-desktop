@@ -7,6 +7,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
     icon: './icons/icon',
+    executableName: "ucm-desktop",
     osxSign: {},
     osxNotarize: {
       appleId: process.env.APPLE_ID,
@@ -26,7 +27,6 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      executableName: "ucm-desktop",
       config: {},
     },
     {
