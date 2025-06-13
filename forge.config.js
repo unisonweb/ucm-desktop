@@ -31,7 +31,11 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        options: {
+          license: "MIT"
+        }
+      },
     },
     {
       name: '@electron-forge/maker-dmg',
