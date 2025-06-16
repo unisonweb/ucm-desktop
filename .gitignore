@@ -96,3 +96,6 @@ elm-stuff
 
 # Unison
 .unison*
+
+# LLM
+.claude
