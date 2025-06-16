@@ -1,11 +1,11 @@
 #about-modal {
-  --c-about-modal_background: var(--color-gray-darken-10);
+  --c-about-modal_background: var(--u-color_container);
 
   border-radius: var(--border-radius-base);
   border: 1px solid var(--u-color_border);
   box-shadow: 
-    0 0.25rem 0.25rem 0 var(--color-gray-darken-30-20pct),
-    0 0 0 1px var(--color-gray-darken-30));
+    0 0.25rem 0.25rem 0 var(--u-shadow),
+    0 0 0 1px var(--u-color_border));
   width: 14rem;
   background: var(--c-about-modal_background);
 
@@ -36,7 +36,7 @@
     content: " ";
     width: 7rem;
     height: 7rem;
-    background: radial-gradient(circle closest-side, var(--color-gray-base), var(--c-about-modal_background));
+    background: radial-gradient(circle closest-side, var(--u-highlight), var(--c-about-modal_background));
     opacity: 0.5;
     z-index: 0;
   }
