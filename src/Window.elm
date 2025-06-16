@@ -85,13 +85,13 @@ update msg model =
             ( { model | isSettingsMenuOpen = not model.isSettingsMenuOpen }, Cmd.none )
 
         ChangeTheme theme ->
-            ( model, saveTheme theme )
+            ( { model | isSettingsMenuOpen = False }, saveTheme theme )
 
         ReloadApp ->
             ( model, reloadApp () )
 
         ResetToFactorySettings ->
-            ( model, clearSettings () )
+            ( { model | isSettingsMenuOpen = False }, clearSettings () )
 
         ShowAboutModal ->
             ( { model | modal = AboutModal, isSettingsMenuOpen = False }, Cmd.none )

@@ -204,6 +204,7 @@ body.unison-dark {
 
   /* Shadows */
   --u-shadow: var(--color-gray-darken-30-20pct);
+  --u-highlight: var(--color-gray-base);
 }
 
 .unison-dark .button.subdued {
