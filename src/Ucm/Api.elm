@@ -34,7 +34,7 @@ projects query =
         queryParams =
             case query of
                 Just q ->
-                    [ string "prefix" q ]
+                    [ string "query" q ]
 
                 Nothing ->
                     []
@@ -51,7 +51,7 @@ projectBranches projectName query =
         queryParams =
             case query of
                 Just q ->
-                    [ string "prefix" q ]
+                    [ string "query" q ]
 
                 Nothing ->
                     []
