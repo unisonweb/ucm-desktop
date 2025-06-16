@@ -138,7 +138,8 @@ viewProjectList : String -> List ProjectName -> Html Msg
 viewProjectList title projects =
     section [ class "search-projects switch-project_project-list" ]
         [ h3 [] [ text title ]
-        , div [ class "search-project-sheet_project-list_items" ] (List.map viewProject projects)
+        , div [ class "search-project-sheet_project-list_items" ]
+            (projects |> List.take 8 |> List.map viewProject)
         ]
 
 

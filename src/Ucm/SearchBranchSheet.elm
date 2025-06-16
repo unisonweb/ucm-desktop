@@ -139,7 +139,8 @@ viewBranchList : String -> List BranchRef -> Html Msg
 viewBranchList title branches =
     section [ class "search-branch switch-branch_branch-list" ]
         [ h3 [] [ text title ]
-        , div [ class "search-branch-sheet_branch-list_items" ] (List.map viewBranch branches)
+        , div [ class "search-branch-sheet_branch-list_items" ]
+            (branches |> List.take 8 |> List.map viewBranch)
         ]
 
 
