@@ -16,6 +16,7 @@ import * as AppError from "./Ucm/AppError";
 import * as AppSettings from "./Ucm/AppSettings";
 import * as Theme from "./Ucm/Theme";
 import appIcon from "./assets/app-icon.png";
+import pack from "../package.json";
 
 const assets = {
   appIcon,
@@ -45,6 +46,7 @@ try {
     workspaceContext: appSettings.workspaceContexts[0],
     theme: appSettings.theme,
     assets,
+    version: pack.version,
   };
 
   const app = Elm.Main.init({ flags });

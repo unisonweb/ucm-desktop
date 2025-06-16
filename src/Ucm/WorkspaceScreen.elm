@@ -396,11 +396,11 @@ subscriptions model =
     let
         activeSub =
             case model.modal of
-                NoModal ->
-                    Sub.map WorkspacePanesMsg (WorkspacePanes.subscriptions model.panes)
-
                 CommandPaletteModal m ->
                     Sub.map CommandPaletteMsg (CommandPalette.subscriptions m)
+
+                _ ->
+                    Sub.map WorkspacePanesMsg (WorkspacePanes.subscriptions model.panes)
     in
     Sub.batch
         [ Sub.map WindowMsg (Window.subscriptions model.window)
@@ -525,7 +525,8 @@ view appContext model =
                 window
 
         footerRight =
-            [ UcmConnectivity.view appContext.ucmConnectivity ]
+            [ UcmConnectivity.view appContext.ucmConnectivity
+            ]
 
         window__ =
             case model.modal of
@@ -546,4 +547,4 @@ view appContext model =
         |> Window.withFooterLeft (footerLeft model)
         |> Window.withFooterRight footerRight
         |> Window.withContent content
-        |> Window.view WindowMsg model.window
+        |> Window.view appContext WindowMsg model.window

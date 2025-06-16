@@ -236,4 +236,4 @@ view appContext model =
             ]
         |> Window.withoutTitlebarBorder
         |> Window.withContent windowContent
-        |> Window.view WindowMsg model.window
+        |> Window.view appContext WindowMsg model.window
