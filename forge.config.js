@@ -102,7 +102,8 @@ module.exports = {
           owner: 'unisonweb',
           name: 'ucm-desktop'
         },
-        prerelease: true
+        prerelease: true,
+        force: true
       }
     }
   ]
