@@ -22,6 +22,7 @@ type alias AppContext =
     , ucmConnectivity : UcmConnectivity
     , theme : String
     , assets : Assets
+    , version : String
     }
 
 
@@ -32,6 +33,7 @@ type alias Flags =
     , workspaceContext : Value
     , theme : String
     , assets : Assets
+    , version : String
     }
 
 
@@ -43,6 +45,7 @@ init flags =
     , ucmConnectivity = Connecting
     , theme = flags.theme
     , assets = flags.assets
+    , version = flags.version
     }
 
 

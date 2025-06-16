@@ -7,19 +7,24 @@ import Html
         , aside
         , div
         , footer
+        , h2
         , header
+        , img
         , main_
+        , p
         , text
         )
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (alt, class, classList, id, src)
 import SplitPane.SplitPane as SplitPane
 import UI
 import UI.ActionMenu as ActionMenu
 import UI.Button as Button
 import UI.Click as Click
+import UI.Divider as Divider
 import UI.Icon as Icon
 import UI.Modal as Modal exposing (Modal)
 import UI.Tooltip as Tooltip
+import Ucm.AppContext exposing (AppContext)
 import Ucm.Link as Link
 
 
@@ -27,9 +32,15 @@ import Ucm.Link as Link
 -- MODEL
 
 
+type WindowModal
+    = NoModal
+    | AboutModal
+
+
 type alias Model =
     { splitPane : SplitPane.State
     , isSettingsMenuOpen : Bool
+    , modal : WindowModal
     }
 
 
@@ -39,6 +50,7 @@ init =
         SplitPane.init SplitPane.Horizontal
             |> SplitPane.configureSplitter (SplitPane.px 256 Nothing)
     , isSettingsMenuOpen = False
+    , modal = NoModal
     }
 
 
@@ -52,6 +64,8 @@ type Msg
     | ChangeTheme String
     | ReloadApp
     | ResetToFactorySettings
+    | ShowAboutModal
+    | CloseModal
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,6 +92,12 @@ update msg model =
 
         ResetToFactorySettings ->
             ( model, clearSettings () )
+
+        ShowAboutModal ->
+            ( { model | modal = AboutModal, isSettingsMenuOpen = False }, Cmd.none )
+
+        CloseModal ->
+            ( { model | modal = NoModal }, Cmd.none )
 
 
 
@@ -478,8 +498,25 @@ viewWindowFooter id_ footer_ =
                 ]
 
 
-view : (Msg -> msg) -> Model -> Window msg -> Browser.Document msg
-view toMsg model win =
+aboutModal : AppContext -> Modal Msg
+aboutModal appContext =
+    let
+        content =
+            div [ class "about" ]
+                [ img [ src appContext.assets.appIcon, alt "UCM App Icon", class "app-icon" ] []
+                , h2 [] [ text "UCM Desktop" ]
+                , p [] [ text "A companion app to the Unison programming language" ]
+                , div [ class "info" ] [ text ("Version: " ++ appContext.version) ]
+                , Divider.divider |> Divider.small |> Divider.view
+                , Button.button CloseModal "Close" |> Button.small |> Button.emphasized |> Button.view
+                , div [ class "copyright" ] [ text "© 2025 Unison Computing, PBC" ]
+                ]
+    in
+    Modal.modal "about-modal" CloseModal (Modal.content content)
+
+
+view : AppContext -> (Msg -> msg) -> Model -> Window msg -> Browser.Document msg
+view appContext toMsg model win =
     let
         settingsMenu =
             ActionMenu.items
@@ -495,6 +532,7 @@ view toMsg model win =
                 , ActionMenu.titleItem "Debug"
                 , ActionMenu.optionItem Icon.restartCircle "Restart app" (Click.onClick ReloadApp)
                 , ActionMenu.optionItem Icon.factory "Reset to factory settings" (Click.onClick ResetToFactorySettings)
+                , ActionMenu.optionItem Icon.unisonMark "About" (Click.onClick ShowAboutModal)
                 ]
                 |> ActionMenu.fromIconButton ToggleSettingsMenu Icon.cog
                 |> ActionMenu.withButtonColor Button.Subdued
@@ -544,11 +582,16 @@ view toMsg model win =
                     main_ [ class "window-content-shell" ] [ panes ]
 
         modal =
-            case win.modal of
-                Just m ->
+            case ( model.modal, win.modal ) of
+                ( AboutModal, _ ) ->
+                    aboutModal appContext
+                        |> Modal.map toMsg
+                        |> Modal.view
+
+                ( _, Just m ) ->
                     Modal.view m
 
-                Nothing ->
+                _ ->
                     UI.nothing
     in
     { title = "Unison Codebase Manager"
