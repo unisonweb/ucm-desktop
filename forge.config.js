@@ -36,13 +36,19 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        maintainer: "Unison Computing <hello@unison.cloud>",
+        categories: ["Development"],
+        homepage: "https://unison-lang.org",
+      },
     },
     {
       name: '@electron-forge/maker-rpm',
       config: {
         options: {
-          license: "MIT"
+          license: "MIT",
+          categories: ["Development"],
+          homepage: "https://unison-lang.org",
         }
       },
     },
