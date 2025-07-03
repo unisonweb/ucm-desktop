@@ -1,6 +1,28 @@
 import { app, BrowserWindow } from 'electron';
 import started from 'electron-squirrel-startup';
 
+const COLORS = {
+  grayLighten100: "rgba(255, 255, 255, 0)",
+  grayLighten60: "#fafafb",
+  grayLighten30: "#bdbfc6",
+  grayLighten20: "#818286",
+  grayDarken10: "#2d2e35",
+  grayDarken20: "#22232a",
+}
+
+const THEME = {
+  light: {
+    chrome: COLORS.grayLighten60,
+    chromeEmphasized: COLORS.grayLighten100,
+    icon: COLORS.grayLighten20
+  },
+  dark: {
+    chrome: COLORS.grayDarken20,
+    chromeEmphasized: COLORS.grayDarken10,
+    icon: COLORS.grayLighten30
+  },
+};
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -10,8 +32,8 @@ const createWindow = () => {
   // for Linux and Windows
   const titleBarOverlay = {
     titleBarOverlay: {
-      color: "#fafafb", // graylighten60
-      symbolColor: "#818286", // graylighten20
+      color: THEME.light.chromeEmphasized,
+      symbolColor: THEME.light.icon,
       height: 39
     }
   };
