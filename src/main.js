@@ -11,6 +11,7 @@ const createWindow = () => {
   const titleBarOverlay = {
     titleBarOverlay: {
       color: 'transparent',
+      // symbolColor: 'black',
       height: 40
     }
   };
