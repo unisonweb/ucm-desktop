@@ -42,6 +42,7 @@
     "elm-test": "^0.19.1-revision12",
     "elm-webpack-loader": "^8.0.0",
     "node-loader": "^2.1.0",
+    "png-to-ico": "^2.1.8",
     "style-loader": "^4.0.0"
   },
   "keywords": [],

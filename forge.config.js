@@ -22,12 +22,15 @@ module.exports = {
       config: {
         authors: 'Unison Computing',
         description: 'Companion app to the Unison programming language',
+        iconUrl: 'https://unison-lang.org/ucm-desktop-icon.ico',
+        setupIcon: './icons/icon.ico'
       },
     },
     {
       name: '@electron-forge/maker-wix',
       config: {
-        manufacturer: 'Unison Computing'
+        manufacturer: 'Unison Computing',
+        icon: "./icons/icon.png",
       },
     },
     {
@@ -40,6 +43,9 @@ module.exports = {
         maintainer: "Unison Computing <hello@unison.cloud>",
         categories: ["Development"],
         homepage: "https://unison-lang.org",
+        options: {
+          icon: "./icons/icon.png",
+        },
       },
     },
     {
@@ -49,6 +55,9 @@ module.exports = {
           license: "MIT",
           categories: ["Development"],
           homepage: "https://unison-lang.org",
+          options: {
+            icon: "./icons/icon.png",
+          },
         }
       },
     },

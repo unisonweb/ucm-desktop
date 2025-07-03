@@ -21,6 +21,7 @@ const createWindow = () => {
     width: 1024,
     height: 768,
     titleBarStyle: 'hidden',
+    icon: "../icons/icon.png",
     ...(process.platform !== 'darwin' ? titleBarOverlay : {}),
     trafficLightPosition: { x: 12, y: 12 },
     webPreferences: {
