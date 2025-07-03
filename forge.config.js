@@ -22,7 +22,7 @@ module.exports = {
       config: {
         authors: 'Unison Computing',
         description: 'Companion app to the Unison programming language',
-        iconUrl: 'https://unison-lang.org/ucm-desktop-icon.ico',
+        iconUrl: 'https://unison-lang.org/assets/ucm-desktop-icon.ico',
         setupIcon: './icons/icon.ico'
       },
     },
