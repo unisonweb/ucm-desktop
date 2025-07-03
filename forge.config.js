@@ -30,7 +30,7 @@ module.exports = {
       name: '@electron-forge/maker-wix',
       config: {
         manufacturer: 'Unison Computing',
-        icon: "./icons/icon.png",
+        icon: "./icons/icon.ico",
       },
     },
     {
