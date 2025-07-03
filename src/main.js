@@ -10,9 +10,9 @@ const createWindow = () => {
   // for Linux and Windows
   const titleBarOverlay = {
     titleBarOverlay: {
-      color: 'transparent',
-      // symbolColor: 'black',
-      height: 40
+      color: "#fafafb", // graylighten60
+      symbolColor: "#818286", // graylighten20
+      height: 39
     }
   };
 
