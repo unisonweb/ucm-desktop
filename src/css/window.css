@@ -71,12 +71,18 @@ body:has(.window-footer) {
   }
 }
 
-/* for windows and linux */
-.window-titlebar {
+.windows .window-titlebar {
   /* 7.375rem is the distance of the left edge of the traffic control to the
    * very right edge of the window. 0.75rem is the spacing between the traffic
    * controls and other titlebar controls. */
   padding-right: calc(7.375rem + 0.75rem);
+}
+
+.linux .window-titlebar {
+  /* 6rem is the distance of the left edge of the traffic control to the
+   * very right edge of the window. 0.75rem is the spacing between the traffic
+   * controls and other titlebar controls. */
+  padding-right: calc(6rem + 0.75rem);
 }
 
 .macos .window-titlebar {

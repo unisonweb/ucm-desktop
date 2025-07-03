@@ -7,12 +7,21 @@ if (started) {
 }
 
 const createWindow = () => {
+  // for Linux and Windows
+  const titleBarOverlay = {
+    titleBarOverlay: {
+      color: 'red',
+      symbolColor: 'blue',
+      height: 60
+    }
+  };
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1024,
     height: 768,
     titleBarStyle: 'hidden',
-    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
+    ...(process.platform !== 'darwin' ? titleBarOverlay : {}),
     trafficLightPosition: { x: 12, y: 12 },
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
