@@ -15,7 +15,7 @@
 }
 
 .app-message h2 {
-  color: var(--u-color_critical_text-on-element);
+  color: var(--u-color_text);
   font-size: 2rem;
   display: flex;
   flex-direction: row;
