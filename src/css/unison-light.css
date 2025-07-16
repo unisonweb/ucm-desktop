@@ -32,7 +32,8 @@ body.unison-light {
   --u-color_caret: var(--color-blue-2);
   --u-color_focus-border: var(--color-blue-2);
   --u-color_focus-outline: var(--color-blue-2-25pct);
-  /* [x] */ --u-color_backdrop: var(--color-gray-0-50pct);
+  /* [x] */
+  --u-color_backdrop: var(--color-gray-0-50pct);
   --u-color_scrollbar: var(--color-gray-6);
   --u-color_scrollbar-track: var(--color-transparent);
   --u-color_text: var(--color-gray-0);
@@ -44,7 +45,7 @@ body.unison-light {
   --u-color_icon_emphasized: var(--color-gray-3);
   --u-color_icon_hovered: var(--color-gray-3);
   --u-color_divider: var(--color-gray-6);
-  --u-color_border: var(--color-gray-6); 
+  --u-color_border: var(--color-gray-6);
   --u-color_border_hovered: var(--color-gray-5);
   --u-color_border_subdued: var(--color-gray-7);
   --u-color_border_emphasized: var(--color-gray-3);
@@ -73,19 +74,26 @@ body.unison-light {
   --u-color_icon-on-action-emphasized_hovered: var(--color-gray-10);
 
   --u-color_action_outlined: var(--color-transparent);
-  /* [x] */ --u-color_border-on-action-outlined: var(--color-gray-5);
-  /* [x] */ --u-color_text-on-action-outlined: var(--color-gray-3);
-  /* [x] */ --u-color_icon-on-action-outlined: var(--color-gray-4);
-  /* [x] */ --u-color_action_outlined_hovered: var(--color-transparent);
-  /* [x] */ --u-color_border-on-action-outlined_hovered: var(--color-gray-4);
-  /* [x] */ --u-color_text-on-action-outlined_hovered: var(--color-gray-0);
-  /* [x] */ --u-color_icon-on-action-outlined_hovered: var(--color-gray-0);
+  /* [x] */
+  --u-color_border-on-action-outlined: var(--color-gray-5);
+  /* [x] */
+  --u-color_text-on-action-outlined: var(--color-gray-3);
+  /* [x] */
+  --u-color_icon-on-action-outlined: var(--color-gray-4);
+  /* [x] */
+  --u-color_action_outlined_hovered: var(--color-transparent);
+  /* [x] */
+  --u-color_border-on-action-outlined_hovered: var(--color-gray-4);
+  /* [x] */
+  --u-color_text-on-action-outlined_hovered: var(--color-gray-0);
+  /* [x] */
+  --u-color_icon-on-action-outlined_hovered: var(--color-gray-0);
 
   --u-color_container: var(--color-gray-9);
   --u-color_container_faded: var(--color-gray-9);
   --u-color_container_hovered: var(--color-gray-11);
   --u-color_container_selected: var(--color-gray-11);
-  --u-color_container_subdued: var(--color-gray-lighten-5);
+  --u-color_container_subdued: var(--color-gray-9);
   --u-color_container_subdued_hovered: var(--color-gray-11);
   --u-color_container_subdued_selected: var(--color-gray-9);
 
@@ -134,15 +142,24 @@ body.unison-light {
   --u-color_info_text_emphasized: var(--color-blue-5);
   --u-color_info_icon: var(--color-blue-3);
   --u-color_info_icon_emphasized: var(--color-blue-2);
-  /* [x] */ --u-color_info_element: var(color-blue-2-25pct);
-  /* [x] */ --u-color_info_text-on-element: var(--u-color_text);
-  /* [x] */ --u-color_info_icon-on-element: var(--color-blue-2);
-  /* [x] */ --u-color_info_element_emphasized: var(--color-blue-2);
-  /* [x] */ --u-color_info_text-on-element_emphasized: var(--color-gray-11);
-  /* [x] */ --u-color_info_icon-on-element_emphasized: var(--color-gray-11);
-  /* [x] */ --u-color_info_element_subdued: var(--color-blue-0-25pct);
-  /* [x] */ --u-color_info_text-on-element_subdued: var(--u-color_text);
-  /* [x] */ --u-color_info_icon-on-element_subdued: var(--color-blue-2);
+  /* [x] */
+  --u-color_info_element: var(color-blue-2-25pct);
+  /* [x] */
+  --u-color_info_text-on-element: var(--u-color_text);
+  /* [x] */
+  --u-color_info_icon-on-element: var(--color-blue-2);
+  /* [x] */
+  --u-color_info_element_emphasized: var(--color-blue-2);
+  /* [x] */
+  --u-color_info_text-on-element_emphasized: var(--color-gray-11);
+  /* [x] */
+  --u-color_info_icon-on-element_emphasized: var(--color-gray-11);
+  /* [x] */
+  --u-color_info_element_subdued: var(--color-blue-0-25pct);
+  /* [x] */
+  --u-color_info_text-on-element_subdued: var(--u-color_text);
+  /* [x] */
+  --u-color_info_icon-on-element_subdued: var(--color-blue-2);
 
   --u-color_positive_text: var(--color-green-2);
   --u-color_positive_icon: var(--color-green-3);
@@ -159,11 +176,16 @@ body.unison-light {
   --u-color_positive_text-on-element_subdued: var(--u-color_text);
   --u-color_positive_icon-on-element_subdued: var(--color-green-1);
 
-  /* [x] */ --u-color_working_element: var(--color-purple-3);
-  /* [x] */ --u-color_working_text-on-element: var(--color-purple-2);
-  /* [x] */ --u-color_working_icon-on-element: var(--color-purple-5);
-  /* [x] */ --u-color_working_element_subdued: var(--color-gray-7);
-  /* [x] */ --u-color_working_text-on-element_subdued: var(--u-color_text);
+  /* [x] */
+  --u-color_working_element: var(--color-purple-3);
+  /* [x] */
+  --u-color_working_text-on-element: var(--color-purple-2);
+  /* [x] */
+  --u-color_working_icon-on-element: var(--color-purple-5);
+  /* [x] */
+  --u-color_working_element_subdued: var(--color-gray-7);
+  /* [x] */
+  --u-color_working_text-on-element_subdued: var(--u-color_text);
 
   --u-color_chrome: var(--color-gray-10);
   --u-color_chrome_subdued: var(--color-gray-9);
