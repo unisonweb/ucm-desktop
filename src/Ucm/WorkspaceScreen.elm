@@ -4,6 +4,7 @@ import Browser
 import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
+import Code.FullyQualifiedNameSet as FQNSet
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import RemoteData exposing (RemoteData(..))
@@ -506,7 +507,7 @@ viewLeftSidebar codebaseTree =
     -- TODO: this class should be controlled by Window
     [ div [ class "window-sidebar_inner-sidebar" ]
         [ Html.map CodebaseTreeMsg
-            (CodebaseTree.view { withPerspective = False } codebaseTree)
+            (CodebaseTree.view { withPerspective = False } FQNSet.empty codebaseTree)
         ]
     ]
 

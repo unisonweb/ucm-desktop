@@ -3,8 +3,8 @@
   --c-command-palette_selected: var(--u-color_element_emphasized_selected);
   --c-command-palette_hovered: var(--u-color_element_emphasized_hovered);
   --c-command-palette_border: var(--u-color_border);
-  --c-command-palette_shadow: var(--color-gray-darken-20pct);
-  --c-command-palette_outline: var(--color-gray-darken-30);
+  --c-command-palette_shadow: var(--color-gray-1-20pct);
+  --c-command-palette_outline: var(--color-gray-0);
   --c-command-palette_text: var(--u-color_text);
   --c-command-palette_icon: var(--u-color_icon_subdued);
 
