@@ -10,7 +10,6 @@
 @import "./css/ucm/command-palette-modal.css";
 @import "./css/ucm/about-modal.css";
 @import "./css/ucm/ucm-connectivity.css";
-@import "./css/ucm/contextual-tag.css";
 
 /* prevents a tiny white box in the corner that appears when both horizontal
  * and vertical scrollbars are visible. <body> gets special treatment since's

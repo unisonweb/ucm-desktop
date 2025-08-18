@@ -1,44 +1,44 @@
-const { FusesPlugin } = require('@electron-forge/plugin-fuses');
-const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const { FusesPlugin } = require("@electron-forge/plugin-fuses");
+const { FuseV1Options, FuseVersion } = require("@electron/fuses");
 
 const API_URL = process.env.API_URL || "http://127.0.0.1:5858";
 
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: './icons/icon',
+    icon: "./icons/icon",
     executableName: "ucm-desktop",
     osxSign: {},
     osxNotarize: {
       appleId: process.env.APPLE_ID,
       appleIdPassword: process.env.APPLE_PASSWORD,
-      teamId: process.env.APPLE_TEAM_ID
+      teamId: process.env.APPLE_TEAM_ID,
     },
   },
   rebuildConfig: {},
   makers: [
     {
-      name: '@electron-forge/maker-squirrel',
+      name: "@electron-forge/maker-squirrel",
       config: {
-        authors: 'Unison Computing',
-        description: 'Companion app to the Unison programming language',
-        iconUrl: 'https://unison-lang.org/assets/ucm-desktop-icon.ico',
-        setupIcon: './icons/icon.ico'
+        authors: "Unison Computing",
+        description: "Companion app to the Unison programming language",
+        iconUrl: "https://unison-lang.org/assets/ucm-desktop-icon.ico",
+        setupIcon: "./icons/icon.ico",
       },
     },
     {
-      name: '@electron-forge/maker-wix',
+      name: "@electron-forge/maker-wix",
       config: {
-        manufacturer: 'Unison Computing',
+        manufacturer: "Unison Computing",
         icon: "./icons/icon.ico",
       },
     },
     {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin', 'linux'],
+      name: "@electron-forge/maker-zip",
+      platforms: ["darwin", "linux"],
     },
     {
-      name: '@electron-forge/maker-deb',
+      name: "@electron-forge/maker-deb",
       config: {
         maintainer: "Unison Computing <hello@unison.cloud>",
         categories: ["Development"],
@@ -49,7 +49,7 @@ module.exports = {
       },
     },
     {
-      name: '@electron-forge/maker-rpm',
+      name: "@electron-forge/maker-rpm",
       config: {
         options: {
           license: "MIT",
@@ -58,39 +58,39 @@ module.exports = {
           options: {
             icon: "./icons/icon.png",
           },
-        }
+        },
       },
     },
     {
-      name: '@electron-forge/maker-dmg',
+      name: "@electron-forge/maker-dmg",
       config: {},
     },
   ],
   plugins: [
     {
-      name: '@electron-forge/plugin-auto-unpack-natives',
+      name: "@electron-forge/plugin-auto-unpack-natives",
       config: {},
     },
     {
-      name: '@electron-forge/plugin-webpack',
+      name: "@electron-forge/plugin-webpack",
       config: {
         devServer: {
           proxy: {
-            context: ['/codebase'],
+            context: ["/codebase"],
             target: API_URL,
             logLevel: "debug",
           },
         },
-        mainConfig: './webpack.main.config.js',
+        mainConfig: "./webpack.main.config.js",
         renderer: {
-          config: './webpack.renderer.config.js',
+          config: "./webpack.renderer.config.js",
           entryPoints: [
             {
-              html: './src/index.html',
-              js: './src/renderer.js',
-              name: 'main_window',
+              html: "./src/index.html",
+              js: "./src/renderer.js",
+              name: "main_window",
               preload: {
-                js: './src/preload.js',
+                js: "./src/preload.js",
               },
             },
           ],
@@ -111,15 +111,15 @@ module.exports = {
   ],
   publishers: [
     {
-      name: '@electron-forge/publisher-github',
+      name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: 'unisonweb',
-          name: 'ucm-desktop'
+          owner: "unisonweb",
+          name: "ucm-desktop",
         },
         prerelease: true,
-        force: true
-      }
-    }
-  ]
+        force: true,
+      },
+    },
+  ],
 };

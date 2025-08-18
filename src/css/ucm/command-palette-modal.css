@@ -12,9 +12,9 @@
   border-radius: var(--border-radius-base);
   border: 1px solid var(--c-command-palette_border);
   background: var(--c-command-palette_background);
-  box-shadow: 
+  box-shadow:
     0 0.25rem 0.25rem 0 var(--c-command-palette_shadow),
-    0 0 0 1px var(--c-command-palette_outline));
+    0 0 0 1px var(--c-command-palette_outline);
   width: 32rem;
 
   & .modal-content {
@@ -63,7 +63,6 @@
         box-shadow: none;
       }
     }
-
   }
 
   & .command-palette_no-matches {

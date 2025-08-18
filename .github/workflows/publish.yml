@@ -1,4 +1,4 @@
-name: 'publish'
+name: "publish"
 
 on:
   workflow_dispatch:
@@ -14,19 +14,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
-            forge_args: '--arch=arm64'
-          - platform: 'macos-latest'
-            forge_args: '--arch=x64'
-          - platform: 'ubuntu-22.04'
-            forge_args: '--arch=x64'
-          - platform: 'ubuntu-22.04'
-            forge_args: '--arch=arm64'
-          - platform: 'windows-latest'
-            forge_args: '--arch=x64'
+          - platform: "macos-latest"
+            forge_args: "--arch=arm64"
+          - platform: "macos-latest"
+            forge_args: "--arch=x64"
+          - platform: "ubuntu-22.04"
+            forge_args: "--arch=x64"
+          - platform: "ubuntu-22.04"
+            forge_args: "--arch=arm64"
+          - platform: "windows-latest"
+            forge_args: "--arch=x64"
 
     runs-on: ${{ matrix.platform }}
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -67,7 +67,7 @@ jobs:
           CERT_ID=$(echo "$CERT_INFO" | awk -F'"' '{print $2}')
           echo "CERT_ID=$CERT_ID" >> $GITHUB_ENV
           echo "Certificate imported."
-          
+
       - name: Build and publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-module Ucm.Workspace.WorkspaceItemRef exposing (..)
+module Code2.Workspace.WorkspaceItemRef exposing (..)
 
 import Code.Definition.Reference as Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN

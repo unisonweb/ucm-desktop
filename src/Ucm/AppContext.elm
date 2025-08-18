@@ -2,12 +2,12 @@ module Ucm.AppContext exposing (..)
 
 import Code.Config
 import Code.Perspective as Perspective
+import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Json.Decode exposing (Value)
 import Lib.HttpApi as HttpApi exposing (HttpApi)
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
 import Ucm.Api as Api
 import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 
 
 type alias Assets =

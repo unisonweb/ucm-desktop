@@ -1,4 +1,4 @@
-module Ucm.Workspace.WorkspaceItem exposing (..)
+module Code2.Workspace.WorkspaceItem exposing (..)
 
 import Code.Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
 import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
@@ -9,12 +9,12 @@ import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDe
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
+import Code2.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
 import Http
 import Json.Decode as Decode exposing (field, index)
 import Lib.Decode.Helpers as DecodeH
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
-import Ucm.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
 
 
 type alias WithDoc =

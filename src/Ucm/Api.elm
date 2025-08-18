@@ -11,10 +11,10 @@ import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.ProjectName as ProjectName exposing (ProjectName)
 import Code.Syntax as Syntax
 import Code.Version as Version
+import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Lib.HttpApi exposing (Endpoint(..))
 import Maybe.Extra as MaybeE
 import Regex
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Url.Builder exposing (QueryParameter, int, string)
 
 

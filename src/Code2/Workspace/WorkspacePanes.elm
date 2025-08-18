@@ -1,13 +1,13 @@
-module Ucm.Workspace.WorkspacePanes exposing (..)
+module Code2.Workspace.WorkspacePanes exposing (..)
 
 import Code.Config exposing (Config)
 import Code.Definition.Reference exposing (Reference)
+import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
+import Code2.Workspace.WorkspacePane as WorkspacePane
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import Lib.OperatingSystem exposing (OperatingSystem)
 import SplitPane.SplitPane as SplitPane
-import Ucm.AppContext exposing (AppContext)
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
-import Ucm.Workspace.WorkspacePane as WorkspacePane
 
 
 type FocusedPane
@@ -23,14 +23,14 @@ type alias Model =
     }
 
 
-init : AppContext -> WorkspaceContext -> ( Model, Cmd Msg )
-init appContext workspaceContext =
+init : OperatingSystem -> WorkspaceContext -> ( Model, Cmd Msg )
+init os workspaceContext =
     let
         ( leftPane, leftPaneCmd ) =
-            WorkspacePane.init appContext workspaceContext
+            WorkspacePane.init os workspaceContext
 
         ( rightPane, rightPaneCmd ) =
-            WorkspacePane.init appContext workspaceContext
+            WorkspacePane.init os workspaceContext
 
         splitPane =
             SplitPane.init SplitPane.Horizontal

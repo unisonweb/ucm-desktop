@@ -1,4 +1,4 @@
-module Ucm.Workspace.WorkspaceCard exposing (..)
+module Code2.Workspace.WorkspaceCard exposing (..)
 
 import Html exposing (Html, div, header, section, span, text)
 import Html.Attributes exposing (class)

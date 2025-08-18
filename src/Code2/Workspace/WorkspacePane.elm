@@ -1,4 +1,4 @@
-module Ucm.Workspace.WorkspacePane exposing (..)
+module Code2.Workspace.WorkspacePane exposing (..)
 
 import Code.CodebaseApi as CodebaseApi
 import Code.Config exposing (Config)
@@ -14,10 +14,16 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
+import Code2.Workspace.WorkspaceCard as WorkspaceCard
+import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
+import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
+import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Html exposing (Html, div, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
+import Lib.OperatingSystem exposing (OperatingSystem)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
 import List.Nonempty as NEL
@@ -25,19 +31,13 @@ import Maybe.Extra as MaybeE
 import UI
 import UI.Button as Button
 import UI.Click as Click
+import UI.ContextualTag as ContextualTag
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
 import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Placeholder as Placeholder
 import UI.TabList as TabList
-import Ucm.AppContext exposing (AppContext)
-import Ucm.ContextualTag as ContextualTag
-import Ucm.Workspace.WorkspaceCard as WorkspaceCard
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
-import Ucm.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
-import Ucm.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
-import Ucm.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
 
 
@@ -51,11 +51,11 @@ type alias Model =
     }
 
 
-init : AppContext -> WorkspaceContext -> ( Model, Cmd Msg )
-init appContext _ =
+init : OperatingSystem -> WorkspaceContext -> ( Model, Cmd Msg )
+init os _ =
     ( { workspaceItems = WorkspaceItems.init Nothing
       , definitionSummaryTooltip = DefinitionSummaryTooltip.init
-      , keyboardShortcut = KeyboardShortcut.init appContext.operatingSystem
+      , keyboardShortcut = KeyboardShortcut.init os
       }
     , Cmd.none
     )

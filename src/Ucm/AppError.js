@@ -10,11 +10,9 @@ function init(ex) {
 
   if (typeof ex === "string") {
     $errMessage.innerHTML = ex;
-  }
-  else if (ex instanceof Error) {
-    $errMessage.innerHTML = ex.message
-  }
-  else {
+  } else if (ex instanceof Error) {
+    $errMessage.innerHTML = ex.message;
+  } else {
     $errMessage.innerHTML = `An unknown error occured: ${ex}`;
   }
 
@@ -31,4 +29,4 @@ function mount($err) {
   }
 }
 
-export { init, mount }
+export { init, mount };

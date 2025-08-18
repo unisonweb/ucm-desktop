@@ -1,6 +1,7 @@
 module Ucm.App exposing (..)
 
 import Browser
+import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Html exposing (br, code, div, h2, p, text)
 import Html.Attributes exposing (class)
 import Lib.HttpApi as HttpApi exposing (HttpResult)
@@ -13,7 +14,6 @@ import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.UcmConnectivity exposing (UcmConnectivity(..))
 import Ucm.WelcomeScreen as WelcomeScreen exposing (OutMsg(..))
-import Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Ucm.WorkspaceScreen as WorkspaceScreen
 
 

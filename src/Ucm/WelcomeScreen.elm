@@ -5,6 +5,7 @@ import Code.BranchRef as BranchRef exposing (BranchRef)
 import Code.ProjectName as ProjectName exposing (ProjectName(..))
 import Code.ProjectNameListing as ProjectNameListing
 import Code.ProjectSlug as ProjectSlug
+import Code2.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Html
     exposing
         ( br
@@ -32,7 +33,6 @@ import UI.Icon as Icon
 import Ucm.Api as Api
 import Ucm.AppContext exposing (AppContext)
 import Ucm.Link as Link
-import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
 import Window
 
 

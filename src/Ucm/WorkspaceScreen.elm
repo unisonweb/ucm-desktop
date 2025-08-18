@@ -5,6 +5,8 @@ import Code.BranchRef as BranchRef
 import Code.CodebaseTree as CodebaseTree
 import Code.Config
 import Code.FullyQualifiedNameSet as FQNSet
+import Code2.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
+import Code2.Workspace.WorkspacePanes as WorkspacePanes
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import RemoteData exposing (RemoteData(..))
@@ -21,8 +23,6 @@ import Ucm.CommandPalette as CommandPalette
 import Ucm.SwitchBranch as SwitchBranch
 import Ucm.SwitchProject as SwitchProject
 import Ucm.UcmConnectivity as UcmConnectivity
-import Ucm.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceContext)
-import Ucm.Workspace.WorkspacePanes as WorkspacePanes
 import Window
 
 
@@ -56,7 +56,7 @@ init appContext workspaceContext =
             CodebaseTree.init config
 
         ( panes, panesCmd ) =
-            WorkspacePanes.init appContext workspaceContext
+            WorkspacePanes.init appContext.operatingSystem workspaceContext
     in
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
@@ -311,7 +311,7 @@ update appContext msg model =
                                     CodebaseTree.init config
 
                                 ( panes, panesCmd ) =
-                                    WorkspacePanes.init appContext workspaceContext
+                                    WorkspacePanes.init appContext.operatingSystem workspaceContext
                             in
                             ( { model
                                 | workspaceContext = workspaceContext
@@ -360,7 +360,7 @@ update appContext msg model =
                                     CodebaseTree.init config
 
                                 ( panes, panesCmd ) =
-                                    WorkspacePanes.init appContext workspaceContext
+                                    WorkspacePanes.init appContext.operatingSystem workspaceContext
                             in
                             ( { model
                                 | workspaceContext = workspaceContext

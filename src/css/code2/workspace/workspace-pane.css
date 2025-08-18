@@ -23,7 +23,6 @@
       justify-content: center;
       background: var(--u-color_critical_action);
 
-
       & .icon {
         color: var(--u-color_critical_text-on-action);
         margin-bottom: 3px;

@@ -23,11 +23,12 @@ const assets = {
 };
 
 // @ts-ignore
-import { Elm } from './Main.elm';
+import { Elm } from "./Main.elm";
 
 // In development, requests are proxied via the Webpack devServer to UCM.
 const UCM_API_URL = "http://127.0.0.1:5858/codebase/api";
-const API_URL = process.env.NODE_ENV === "development" ? "/codebase/api" : UCM_API_URL;
+const API_URL =
+  process.env.NODE_ENV === "development" ? "/codebase/api" : UCM_API_URL;
 
 try {
   console.log("-- Starting UCM Desktop -------------------------------------");
@@ -58,7 +59,7 @@ try {
     });
 
     app.ports.saveTheme?.subscribe(async (theme) => {
-      appSettings.theme = theme
+      appSettings.theme = theme;
       AppSettings.save(appSettings);
       Theme.mount(theme);
     });
@@ -74,12 +75,13 @@ try {
   // Set things like an OS specific class and the current theme
   // /!\ This sas to happen _after_ Elm.Main.init, otherwise <body> is overwritten.
   if (flags.operatingSystem) {
-    document.querySelector("body")?.classList.add(flags.operatingSystem.toLowerCase());
+    document
+      .querySelector("body")
+      ?.classList.add(flags.operatingSystem.toLowerCase());
   }
   Theme.mount(appSettings.theme);
   Theme.listenToSystemChange();
-}
-catch (ex) {
+} catch (ex) {
   console.error(ex);
   AppError.mount(AppError.init(ex));
 }

@@ -1,10 +1,10 @@
 module Main exposing (..)
 
 import Browser
+import Code2.Workspace.WorkspaceContext as WorkspaceContext
 import Json.Decode as Decode
 import Ucm.App as App
 import Ucm.AppContext as AppContext
-import Ucm.Workspace.WorkspaceContext as WorkspaceContext
 
 
 

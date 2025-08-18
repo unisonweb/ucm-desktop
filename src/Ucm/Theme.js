@@ -1,22 +1,21 @@
 function listenToSystemChange() {
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
-    if (matches) {
-      mount("unison-dark");
-    }
-    else {
-      mount("unison-light");
-    }
-  })
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", ({ matches }) => {
+      if (matches) {
+        mount("unison-dark");
+      } else {
+        mount("unison-light");
+      }
+    });
 }
 
 function systemToActual() {
   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
     return Promise.resolve("unison-dark");
-  }
-  else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+  } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
     return Promise.resolve("unison-light");
-  }
-  else {
+  } else {
     return Promise.resolve("unison-dark");
   }
 }
@@ -28,11 +27,9 @@ function equals(a, b) {
 function prettyName(theme) {
   if (theme === "unison-light") {
     return "Unison Light";
-  }
-  else if (theme === "unison-dark") {
+  } else if (theme === "unison-dark") {
     return "Unison Dark";
-  }
-  else {
+  } else {
     return "System";
   }
 }
@@ -55,4 +52,4 @@ async function mount(theme) {
   }
 }
 
-export { systemToActual, prettyName, equals, mount, listenToSystemChange }
+export { systemToActual, prettyName, equals, mount, listenToSystemChange };

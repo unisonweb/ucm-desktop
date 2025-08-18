@@ -1,4 +1,4 @@
-port module Ucm.Workspace.WorkspaceContext exposing (WorkspaceContext, decode, save)
+port module Code2.Workspace.WorkspaceContext exposing (WorkspaceContext, decode, save)
 
 import Code.BranchRef as BranchRef
 import Code.ProjectName as ProjectName exposing (ProjectName)

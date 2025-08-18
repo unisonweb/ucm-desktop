@@ -16,12 +16,12 @@
 -- equality when possible
 
 
-module Ucm.Workspace.WorkspaceItems exposing (..)
+module Code2.Workspace.WorkspaceItems exposing (..)
 
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
+import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import List
 import List.Extra as ListE
-import Ucm.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
-import Ucm.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 
 
 {-| This technically allows multiple of the same definition across the 3 fields.

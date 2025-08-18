@@ -1,6 +1,6 @@
-@import "./workspace/workspace-panes.css";
-@import "./workspace/workspace-pane.css";
-@import "./workspace/workspace-card.css";
+@import "../code2/workspace/workspace-panes.css";
+@import "../code2/workspace/workspace-pane.css";
+@import "../code2/workspace/workspace-card.css";
 
 #workspace-screen_window-content {
   display: flex;
@@ -17,11 +17,18 @@
   gap: 0.5rem;
 }
 
-.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .namespace-content {
+.window-sidebar_inner-sidebar
+  .codebase-tree
+  .namespace-tree
+  .namespace-content {
   margin-left: 0.5rem;
 }
 
-.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .namespace-content > div {
+.window-sidebar_inner-sidebar
+  .codebase-tree
+  .namespace-tree
+  .namespace-content
+  > div {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -40,12 +47,20 @@
   transition: color 0.2s;
 }
 
-.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) {
+.window-sidebar_inner-sidebar
+  .codebase-tree
+  .namespace-tree
+  .node.namespace:has(> .namespace-icon.expanded) {
   color: var(--u-color_text);
   font-weight: bold;
 }
 
-.window-sidebar_inner-sidebar .codebase-tree .namespace-tree .node.namespace:has(>.namespace-icon.expanded) .namespace-icon .icon {
+.window-sidebar_inner-sidebar
+  .codebase-tree
+  .namespace-tree
+  .node.namespace:has(> .namespace-icon.expanded)
+  .namespace-icon
+  .icon {
   color: var(--u-color_icon);
 }
 
