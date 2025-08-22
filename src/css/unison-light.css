@@ -107,7 +107,7 @@ body.unison-light {
   --u-color_element_subdued_hovered: var(--color-gray-9);
   --u-color_element_subdued_selected: var(--color-gray-9);
 
-  --u-color_element_emphasized: var(--color-gray-11);
+  --u-color_element_emphasized: var(--color-gray-9);
   --u-color_text-on-element-emphasized: var(--color-gray-0);
   --u-color_icon-on-element-emphasized: var(--color-gray-2);
   --u-color_element_emphasized_hovered: var(--color-gray-9);

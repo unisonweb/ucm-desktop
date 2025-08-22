@@ -1,5 +1,5 @@
 #command-palette-modal {
-  --c-command-palette_background: var(--u-color_element_emphasized);
+  --c-command-palette_background: var(--u-color_chrome_emphasized);
   --c-command-palette_selected: var(--u-color_element_emphasized_selected);
   --c-command-palette_hovered: var(--u-color_element_emphasized_hovered);
   --c-command-palette_border: var(--u-color_border);

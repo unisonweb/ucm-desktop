@@ -8,6 +8,7 @@ import Html
         , div
         , footer
         , h2
+        , h3
         , header
         , img
         , main_
@@ -22,6 +23,8 @@ import UI.Button as Button
 import UI.Click as Click
 import UI.Divider as Divider
 import UI.Icon as Icon
+import UI.KeyboardShortcut as KeyboardShortcut
+import UI.KeyboardShortcut.Key as Key
 import UI.Modal as Modal exposing (Modal)
 import UI.Tooltip as Tooltip
 import Ucm.AppContext exposing (AppContext)
@@ -35,6 +38,7 @@ import Ucm.Link as Link
 type WindowModal
     = NoModal
     | AboutModal
+    | KeyboardShortcutsModal
 
 
 type alias Model =
@@ -65,6 +69,7 @@ type Msg
     | ReloadApp
     | ResetToFactorySettings
     | ShowAboutModal
+    | ShowKeyboardShortcutsModal
     | CloseModal
 
 
@@ -92,6 +97,9 @@ update msg model =
 
         ResetToFactorySettings ->
             ( { model | isSettingsMenuOpen = False }, clearSettings () )
+
+        ShowKeyboardShortcutsModal ->
+            ( { model | modal = KeyboardShortcutsModal, isSettingsMenuOpen = False }, Cmd.none )
 
         ShowAboutModal ->
             ( { model | modal = AboutModal, isSettingsMenuOpen = False }, Cmd.none )
@@ -515,6 +523,76 @@ aboutModal appContext =
     Modal.modal "about-modal" CloseModal (Modal.content content)
 
 
+keyboardShortcutsModal : AppContext -> Modal Msg
+keyboardShortcutsModal appContext =
+    let
+        keyboardShortcut =
+            KeyboardShortcut.init appContext.operatingSystem
+
+        group title commands =
+            div [ class "group" ] [ h3 [] [ text title ], div [ class "commands" ] commands ]
+
+        command title shortcuts =
+            div [ class "command" ]
+                [ text title
+                , div [ class "instructions" ]
+                    [ KeyboardShortcut.viewShortcuts keyboardShortcut shortcuts
+                    ]
+                ]
+
+        single key1 =
+            KeyboardShortcut.single key1
+
+        win k =
+            KeyboardShortcut.Sequence (Just (Key.W Key.Lower)) k
+
+        chord key1 key2 =
+            KeyboardShortcut.Chord key1 key2
+
+        key k =
+            KeyboardShortcut.Sequence Nothing k
+
+        letter k =
+            k Key.Lower
+
+        windowNav =
+            group "Window navigation"
+                [ command "Toggle sidebar" [ win (letter Key.S), chord Key.Meta (letter Key.B), chord Key.Ctrl (letter Key.B) ]
+                , command "Toggle project picker" [ win (letter Key.P) ]
+                , command "Toggle branch picker" [ win (letter Key.B) ]
+                , command "Toggle right pane" [ win (letter Key.R) ]
+                , command "Focus right pane" [ win (letter Key.L), win Key.ArrowRight ]
+                , command "Focus left pane" [ win (letter Key.H), win Key.ArrowLeft ]
+                ]
+
+        paneNav =
+            group "Pane navigation"
+                [ command "Move focus up" [ key Key.ArrowUp, key (letter Key.K) ]
+                , command "Move focus down" [ key Key.ArrowDown, key (letter Key.J) ]
+                , command "Move card up" [ chord Key.Shift Key.ArrowUp, chord Key.Shift (letter Key.K) ]
+                , command "Move card down" [ chord Key.Shift Key.ArrowDown, chord Key.Shift (letter Key.J) ]
+                , command "Close focused card" [ single (letter Key.X) ]
+                , command "Close all cards" [ chord Key.Shift (letter Key.X) ]
+                ]
+
+        other =
+            group "Other"
+                [ command "Command palette / Search" [ key Key.ForwardSlash, chord Key.Meta (letter Key.K), chord Key.Ctrl (letter Key.K) ]
+                ]
+
+        content =
+            div [ class "inner-content" ]
+                [ div [ class "all-instructions" ]
+                    [ windowNav
+                    , paneNav
+                    , other
+                    ]
+                ]
+    in
+    Modal.modal "keyboard-shortcuts-modal" CloseModal (Modal.content content)
+        |> Modal.withHeader "Keyboard shortcuts"
+
+
 view : AppContext -> (Msg -> msg) -> Model -> Window msg -> Browser.Document msg
 view appContext toMsg model win =
     let
@@ -528,11 +606,12 @@ view appContext toMsg model win =
                 , ActionMenu.titleItem "Resources"
                 , ActionMenu.optionItem Icon.graduationCap "Unison Docs" Link.docs
                 , ActionMenu.optionItem Icon.browse "Unison Share (libraries)" Link.share
+                , ActionMenu.optionItem Icon.keyboard "Keyboard shortcuts" (Click.onClick ShowKeyboardShortcutsModal)
+                , ActionMenu.optionItem Icon.unisonMark "About" (Click.onClick ShowAboutModal)
                 , ActionMenu.dividerItem
                 , ActionMenu.titleItem "Debug"
                 , ActionMenu.optionItem Icon.restartCircle "Restart app" (Click.onClick ReloadApp)
                 , ActionMenu.optionItem Icon.factory "Reset to factory settings" (Click.onClick ResetToFactorySettings)
-                , ActionMenu.optionItem Icon.unisonMark "About" (Click.onClick ShowAboutModal)
                 ]
                 |> ActionMenu.fromIconButton ToggleSettingsMenu Icon.cog
                 |> ActionMenu.withButtonColor Button.Subdued
@@ -585,6 +664,11 @@ view appContext toMsg model win =
             case ( model.modal, win.modal ) of
                 ( AboutModal, _ ) ->
                     aboutModal appContext
+                        |> Modal.map toMsg
+                        |> Modal.view
+
+                ( KeyboardShortcutsModal, _ ) ->
+                    keyboardShortcutsModal appContext
                         |> Modal.map toMsg
                         |> Modal.view
 

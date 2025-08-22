@@ -572,7 +572,7 @@ viewItem definitionSummaryTooltip item isFocused =
 
         card =
             case item of
-                WorkspaceItem.Loading ref ->
+                WorkspaceItem.Loading _ ->
                     cardBase
                         |> WorkspaceCard.withTitlebarLeft
                             [ Placeholder.text |> Placeholder.withLength Placeholder.Medium |> Placeholder.view
