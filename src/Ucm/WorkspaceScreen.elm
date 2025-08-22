@@ -56,7 +56,7 @@ init appContext workspaceContext =
             CodebaseTree.init config
 
         ( panes, panesCmd ) =
-            WorkspacePanes.init appContext.operatingSystem workspaceContext
+            WorkspacePanes.init appContext.operatingSystem
     in
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
@@ -311,7 +311,7 @@ update appContext msg model =
                                     CodebaseTree.init config
 
                                 ( panes, panesCmd ) =
-                                    WorkspacePanes.init appContext.operatingSystem workspaceContext
+                                    WorkspacePanes.init appContext.operatingSystem
                             in
                             ( { model
                                 | workspaceContext = workspaceContext
@@ -360,7 +360,7 @@ update appContext msg model =
                                     CodebaseTree.init config
 
                                 ( panes, panesCmd ) =
-                                    WorkspacePanes.init appContext.operatingSystem workspaceContext
+                                    WorkspacePanes.init appContext.operatingSystem
                             in
                             ( { model
                                 | workspaceContext = workspaceContext
@@ -379,7 +379,7 @@ update appContext msg model =
 
         WorkspacePanesMsg wspMsg ->
             let
-                ( panes, panesCmd ) =
+                ( panes, panesCmd, _ ) =
                     WorkspacePanes.update model.config wspMsg model.panes
             in
             ( { model | panes = panes }, Cmd.map WorkspacePanesMsg panesCmd, None )

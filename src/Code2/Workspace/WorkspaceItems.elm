@@ -18,10 +18,14 @@
 
 module Code2.Workspace.WorkspaceItems exposing (..)
 
+import Code.Definition.Reference exposing (Reference)
+import Code.FullyQualifiedName exposing (FQN)
+import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import List
 import List.Extra as ListE
+import Maybe.Extra as MaybeE
 
 
 {-| This technically allows multiple of the same definition across the 3 fields.
@@ -266,6 +270,21 @@ references items =
         |> List.map WorkspaceItem.reference
 
 
+definitionReferences : WorkspaceItems -> List Reference
+definitionReferences items =
+    items
+        |> toList
+        |> List.map WorkspaceItem.definitionReference
+        |> MaybeE.values
+
+
+fqns : WorkspaceItems -> List FQN
+fqns items =
+    items
+        |> toList
+        |> List.concatMap WorkspaceItem.allFqns
+
+
 head : WorkspaceItems -> Maybe WorkspaceItem
 head items =
     items
@@ -429,7 +448,7 @@ prev items =
 
 
 updateDefinitionItemState :
-    (WorkspaceItem.DefinitionItemState -> WorkspaceItem.DefinitionItemState)
+    (DefinitionWorkspaceItemState -> DefinitionWorkspaceItemState)
     -> WorkspaceItemRef
     -> WorkspaceItems
     -> WorkspaceItems

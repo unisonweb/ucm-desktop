@@ -2,13 +2,14 @@ module Code2.Workspace.WorkspaceItem exposing (..)
 
 import Code.Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
 import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
-import Code.Definition.Doc as Doc exposing (Doc, DocFoldToggles)
+import Code.Definition.Doc as Doc exposing (Doc)
 import Code.Definition.Info as Info
-import Code.Definition.Reference exposing (Reference)
+import Code.Definition.Reference as Reference exposing (Reference)
 import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDetail, TermSource)
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
+import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
 import Http
 import Json.Decode as Decode exposing (field, index)
@@ -42,18 +43,8 @@ type alias SearchResultsItem =
     { ref : SearchResultsRef }
 
 
-type DefinitionItemTab
-    = CodeTab
-    | DocsTab DocFoldToggles
-
-
-type alias DefinitionItemState =
-    { activeTab : DefinitionItemTab
-    }
-
-
 type LoadedWorkspaceItem
-    = DefinitionWorkspaceItem DefinitionItemState DefinitionItem
+    = DefinitionWorkspaceItem DefinitionWorkspaceItemState DefinitionItem
     | SearchResultsWorkspaceItem SearchResultsItem
 
 
@@ -74,6 +65,52 @@ reference item =
 
         Success ref _ ->
             ref
+
+
+definitionReference : WorkspaceItem -> Maybe Reference
+definitionReference item =
+    let
+        iRef =
+            reference item
+    in
+    case iRef of
+        SearchResultsItemRef _ ->
+            Nothing
+
+        DefinitionItemRef ref ->
+            Just ref
+
+
+allFqns : WorkspaceItem -> List FQN
+allFqns item =
+    let
+        fromRef =
+            MaybeE.values
+                [ item
+                    |> definitionReference
+                    |> Maybe.andThen Reference.fqn
+                ]
+    in
+    case item of
+        Success _ loadedItem ->
+            case loadedItem of
+                DefinitionWorkspaceItem _ (TermItem (Term _ _ { info })) ->
+                    Info.allFqns info
+
+                DefinitionWorkspaceItem _ (TypeItem (Type _ _ { info })) ->
+                    Info.allFqns info
+
+                DefinitionWorkspaceItem _ (AbilityConstructorItem (AbilityConstructor _ { info })) ->
+                    Info.allFqns info
+
+                DefinitionWorkspaceItem _ (DataConstructorItem (DataConstructor _ { info })) ->
+                    Info.allFqns info
+
+                _ ->
+                    fromRef
+
+        _ ->
+            fromRef
 
 
 isSameRef : WorkspaceItem -> WorkspaceItemRef -> Bool

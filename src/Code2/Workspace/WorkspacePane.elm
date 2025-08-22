@@ -14,8 +14,8 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
+import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
-import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
@@ -51,8 +51,8 @@ type alias Model =
     }
 
 
-init : OperatingSystem -> WorkspaceContext -> ( Model, Cmd Msg )
-init os _ =
+init : OperatingSystem -> ( Model, Cmd Msg )
+init os =
     ( { workspaceItems = WorkspaceItems.init Nothing
       , definitionSummaryTooltip = DefinitionSummaryTooltip.init
       , keyboardShortcut = KeyboardShortcut.init os
@@ -67,11 +67,11 @@ init os _ =
 
 type Msg
     = NoOp
-    | Focus
+    | PaneFocus
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
     | Refetch WorkspaceItemRef
     | CloseWorkspaceItem WorkspaceItemRef
-    | ChangeDefinitionItemTab WorkspaceItemRef WorkspaceItem.DefinitionItemTab
+    | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
     | OpenDependency Reference
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | Keydown KeyboardEvent.KeyboardEvent
@@ -81,14 +81,15 @@ type Msg
 
 type OutMsg
     = NoOut
-    | RequestFocus
+    | RequestPaneFocus
+    | FocusOn WorkspaceItemRef
 
 
 update : Config -> String -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update config paneId msg model =
     case msg of
-        Focus ->
-            ( model, Cmd.none, RequestFocus )
+        PaneFocus ->
+            ( model, Cmd.none, RequestPaneFocus )
 
         Refetch ref ->
             let
@@ -115,10 +116,10 @@ update config paneId msg model =
 
                 activeTab =
                     if WorkspaceItem.isDoc defItem then
-                        WorkspaceItem.DocsTab Doc.emptyDocFoldToggles
+                        DocsTab Doc.emptyDocFoldToggles
 
                     else
-                        WorkspaceItem.CodeTab
+                        CodeTab
             in
             ( { model
                 | workspaceItems =
@@ -173,7 +174,7 @@ update config paneId msg model =
 
         OpenDependency r ->
             let
-                ( m, c ) =
+                ( m, c, out ) =
                     case WorkspaceItems.focus model.workspaceItems of
                         Just item ->
                             openReference config
@@ -185,15 +186,15 @@ update config paneId msg model =
                         Nothing ->
                             openDefinition config paneId model r
             in
-            ( m, c, NoOut )
+            ( m, c, out )
 
         ToggleDocFold wsRef foldId ->
             let
                 updateState state =
                     case state.activeTab of
-                        WorkspaceItem.DocsTab toggles ->
+                        DocsTab toggles ->
                             { activeTab =
-                                WorkspaceItem.DocsTab (Doc.toggleFold toggles foldId)
+                                DocsTab (Doc.toggleFold toggles foldId)
                             }
 
                         _ ->
@@ -247,26 +248,26 @@ update config paneId msg model =
 -- HELPERS
 
 
-openDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg )
+openDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
 openDefinition config paneId model ref =
     openItem config paneId model Nothing (DefinitionItemRef ref)
 
 
-open : Config -> String -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg )
+open : Config -> String -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
 open config paneId model ref =
     openItem config paneId model Nothing ref
 
 
-openReference : Config -> String -> Model -> WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
+openReference : Config -> String -> Model -> WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
 openReference config paneId model relativeToRef ref =
     openItem config paneId model (Just relativeToRef) ref
 
 
-openItem : Config -> String -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg )
+openItem : Config -> String -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
 openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
     case ref of
         SearchResultsItemRef _ ->
-            ( model, Cmd.none )
+            ( model, Cmd.none, FocusOn ref )
 
         DefinitionItemRef dRef ->
             -- We don't want to refetch or replace any already open definitions, but we
@@ -279,10 +280,11 @@ openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
                     in
                     ( { model | workspaceItems = nextWorkspaceItems }
                     , scrollToItem paneId ref
+                    , FocusOn ref
                     )
 
                 else
-                    ( model, Cmd.none )
+                    ( model, Cmd.none, NoOut )
 
             else
                 let
@@ -299,7 +301,18 @@ openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
                 in
                 ( { model | workspaceItems = nextWorkspaceItems }
                 , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config dRef), scrollToItem paneId ref ]
+                , FocusOn ref
                 )
+
+
+currentlyOpenReferences : Model -> List Reference
+currentlyOpenReferences model =
+    WorkspaceItems.definitionReferences model.workspaceItems
+
+
+currentlyOpenFqns : Model -> List FQN
+currentlyOpenFqns model =
+    WorkspaceItems.fqns model.workspaceItems
 
 
 handleKeyboardShortcut : String -> Model -> KeyboardShortcut -> ( Model, Cmd Msg )
@@ -526,10 +539,10 @@ definitionItemTabs : WorkspaceItemRef -> { code : TabList.Tab Msg, docs : TabLis
 definitionItemTabs wsRef =
     { code =
         TabList.tab "Code"
-            (Click.onClick (ChangeDefinitionItemTab wsRef WorkspaceItem.CodeTab))
+            (Click.onClick (ChangeDefinitionItemTab wsRef CodeTab))
     , docs =
         TabList.tab "Docs"
-            (Click.onClick (ChangeDefinitionItemTab wsRef (WorkspaceItem.DocsTab Doc.emptyDocFoldToggles)))
+            (Click.onClick (ChangeDefinitionItemTab wsRef (DocsTab Doc.emptyDocFoldToggles)))
     }
 
 
@@ -573,10 +586,10 @@ viewItem definitionSummaryTooltip item isFocused =
                         withTabList c =
                             if hasDocs defItem then
                                 case state.activeTab of
-                                    WorkspaceItem.CodeTab ->
+                                    CodeTab ->
                                         c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs ])
 
-                                    WorkspaceItem.DocsTab _ ->
+                                    DocsTab _ ->
                                         c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code ] tabs.docs [])
 
                             else
@@ -590,7 +603,7 @@ viewItem definitionSummaryTooltip item isFocused =
 
                         itemContent =
                             case ( state.activeTab, WorkspaceItem.docs defItem ) of
-                                ( WorkspaceItem.DocsTab docFoldToggles, Just docs ) ->
+                                ( DocsTab docFoldToggles, Just docs ) ->
                                     Doc.view (syntaxConfig definitionSummaryTooltip)
                                         (ToggleDocFold wsRef)
                                         docFoldToggles
@@ -644,7 +657,7 @@ viewItem definitionSummaryTooltip item isFocused =
 view : String -> Bool -> Model -> Html Msg
 view paneId isFocused model =
     div
-        [ onClick Focus
+        [ onClick PaneFocus
         , class "workspace-pane"
         , id paneId
         , classList [ ( "workspace-pane_focused", isFocused ) ]

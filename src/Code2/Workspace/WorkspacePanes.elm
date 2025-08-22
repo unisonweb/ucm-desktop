@@ -2,7 +2,8 @@ module Code2.Workspace.WorkspacePanes exposing (..)
 
 import Code.Config exposing (Config)
 import Code.Definition.Reference exposing (Reference)
-import Code2.Workspace.WorkspaceContext exposing (WorkspaceContext)
+import Code.FullyQualifiedName exposing (FQN)
+import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import Code2.Workspace.WorkspacePane as WorkspacePane
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
@@ -23,14 +24,14 @@ type alias Model =
     }
 
 
-init : OperatingSystem -> WorkspaceContext -> ( Model, Cmd Msg )
-init os workspaceContext =
+init : OperatingSystem -> ( Model, Cmd Msg )
+init os =
     let
         ( leftPane, leftPaneCmd ) =
-            WorkspacePane.init os workspaceContext
+            WorkspacePane.init os
 
         ( rightPane, rightPaneCmd ) =
-            WorkspacePane.init os workspaceContext
+            WorkspacePane.init os
 
         splitPane =
             SplitPane.init SplitPane.Horizontal
@@ -62,7 +63,15 @@ type Msg
     | SplitPaneMsg SplitPane.Msg
 
 
-update : Config -> Msg -> Model -> ( Model, Cmd Msg )
+type OutMsg
+    = NoOut
+    | Focused WorkspaceItemRef
+    | Emptied
+    | ChangePerspectiveToSubNamespace Reference FQN
+    | ShowFinderRequest FQN
+
+
+update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update config msg model =
     case msg of
         LeftPaneMsg workspacePaneMsg ->
@@ -72,13 +81,16 @@ update config msg model =
 
                 focusedPane =
                     case ( out, model.focusedPane ) of
-                        ( WorkspacePane.RequestFocus, RightPaneFocus ) ->
+                        ( WorkspacePane.RequestPaneFocus, RightPaneFocus ) ->
                             LeftPaneFocus { rightPaneVisible = True }
 
                         _ ->
                             model.focusedPane
             in
-            ( { model | left = leftPane, focusedPane = focusedPane }, Cmd.map LeftPaneMsg leftPaneCmd )
+            ( { model | left = leftPane, focusedPane = focusedPane }
+            , Cmd.map LeftPaneMsg leftPaneCmd
+            , NoOut
+            )
 
         RightPaneMsg workspacePaneMsg ->
             let
@@ -87,13 +99,16 @@ update config msg model =
 
                 focusedPane =
                     case ( out, model.focusedPane ) of
-                        ( WorkspacePane.RequestFocus, LeftPaneFocus _ ) ->
+                        ( WorkspacePane.RequestPaneFocus, LeftPaneFocus _ ) ->
                             RightPaneFocus
 
                         _ ->
                             model.focusedPane
             in
-            ( { model | right = rightPane, focusedPane = focusedPane }, Cmd.map RightPaneMsg rightPaneCmd )
+            ( { model | right = rightPane, focusedPane = focusedPane }
+            , Cmd.map RightPaneMsg rightPaneCmd
+            , NoOut
+            )
 
         SplitPaneMsg paneMsg ->
             ( { model
@@ -103,6 +118,7 @@ update config msg model =
                         model.splitPane
               }
             , Cmd.none
+            , NoOut
             )
 
 
@@ -157,17 +173,30 @@ openDefinition config model ref =
     case model.focusedPane of
         LeftPaneFocus _ ->
             let
-                ( leftPane, leftPaneCmd ) =
+                -- TODO: deal with the out msg and routes
+                ( leftPane, leftPaneCmd, _ ) =
                     WorkspacePane.openDefinition config "workspace-pane_left" model.left ref
             in
             ( { model | left = leftPane }, Cmd.map LeftPaneMsg leftPaneCmd )
 
         RightPaneFocus ->
             let
-                ( rightPane, rightPaneCmd ) =
+                ( rightPane, rightPaneCmd, _ ) =
                     WorkspacePane.openDefinition config "workspace-pane_right" model.right ref
             in
             ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
+
+
+currentlyOpenReferences : Model -> List Reference
+currentlyOpenReferences model =
+    WorkspacePane.currentlyOpenReferences model.left
+        ++ WorkspacePane.currentlyOpenReferences model.left
+
+
+currentlyOpenFqns : Model -> List FQN
+currentlyOpenFqns model =
+    WorkspacePane.currentlyOpenFqns model.left
+        ++ WorkspacePane.currentlyOpenFqns model.right
 
 
 
