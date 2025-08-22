@@ -574,7 +574,9 @@ viewItem definitionSummaryTooltip item isFocused =
             case item of
                 WorkspaceItem.Loading ref ->
                     cardBase
-                        |> WorkspaceCard.withTitlebarLeft [ text (WorkspaceItemRef.toHumanString ref) ]
+                        |> WorkspaceCard.withTitlebarLeft
+                            [ Placeholder.text |> Placeholder.withLength Placeholder.Medium |> Placeholder.view
+                            ]
                         |> WorkspaceCard.withContent
                             [ div [ class "workspace-card_loading" ]
                                 [ Placeholder.text |> Placeholder.withLength Placeholder.Medium |> Placeholder.view
