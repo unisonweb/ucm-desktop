@@ -247,6 +247,11 @@ body.unison-light {
   --color-tooltip-border: var(--u-color_border);
 }
 
+.unison-light .tooltip {
+  --u-color_text: var(--color-gray-11);
+  --u-color_text_subdued: var(--color-gray-5);
+}
+
 .unison-light .anchored-overlay {
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
 }
