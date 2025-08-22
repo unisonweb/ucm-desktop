@@ -153,7 +153,7 @@ body.unison-dark {
   --u-color_icon-on-element: var(--color-gray-3);
 
   /* [x] */
-  --u-color_element_subdued: var(--color-gray-0);
+  --u-color_element_subdued: var(--color-gray-1);
   --u-color_element_subdued_hovered: var(--color-gray-9);
   --u-color_element_subdued_selected: var(--color-gray-9);
 

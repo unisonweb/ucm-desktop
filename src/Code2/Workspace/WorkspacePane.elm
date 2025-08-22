@@ -75,6 +75,7 @@ type Msg
     | OpenDependency Reference
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | Keydown KeyboardEvent.KeyboardEvent
+    | SetFocusedItem WorkspaceItemRef
     | DefinitionSummaryTooltipMsg DefinitionSummaryTooltip.Msg
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
@@ -207,6 +208,12 @@ update config paneId msg model =
                         model.workspaceItems
             in
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
+
+        SetFocusedItem wsRef ->
+            ( { model | workspaceItems = WorkspaceItems.focusOn model.workspaceItems wsRef }
+            , Cmd.none
+            , FocusOn wsRef
+            )
 
         Keydown event ->
             let
@@ -651,6 +658,8 @@ viewItem definitionSummaryTooltip item isFocused =
     card
         |> WorkspaceCard.withFocus isFocused
         |> WorkspaceCard.withDomId domId
+        |> WorkspaceCard.withClick
+            (Click.onClick (SetFocusedItem (WorkspaceItem.reference item)))
         |> WorkspaceCard.view
 
 

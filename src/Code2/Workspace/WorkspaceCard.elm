@@ -4,6 +4,7 @@ import Html exposing (Html, div, header, section, span, text)
 import Html.Attributes exposing (class)
 import UI
 import UI.Card as Card
+import UI.Click as Click exposing (Click)
 import UI.TabList as TabList exposing (TabList)
 
 
@@ -14,6 +15,7 @@ type alias WorkspaceCard msg =
     , content : List (Html msg)
     , hasFocus : Bool
     , domId : Maybe String
+    , click : Click msg
     }
 
 
@@ -29,6 +31,7 @@ empty =
     , content = []
     , hasFocus = False
     , domId = Nothing
+    , click = Click.disabled
     }
 
 
@@ -75,6 +78,11 @@ withDomId domId card_ =
     { card_ | domId = Just domId }
 
 
+withClick : Click msg -> WorkspaceCard msg -> WorkspaceCard msg
+withClick click card_ =
+    { card_ | click = click }
+
+
 withTabList : TabList msg -> WorkspaceCard msg -> WorkspaceCard msg
 withTabList tabList card_ =
     { card_ | tabList = Just tabList }
@@ -111,6 +119,7 @@ map f card_ =
     , content = map_ card_.content
     , hasFocus = card_.hasFocus
     , domId = card_.domId
+    , click = Click.map f card_.click
     }
 
 
@@ -119,7 +128,7 @@ map f card_ =
 
 
 view : WorkspaceCard msg -> Html msg
-view { titleLeft, titleRight, tabList, content, hasFocus, domId } =
+view { titleLeft, titleRight, tabList, content, hasFocus, domId, click } =
     let
         className =
             if hasFocus then
@@ -148,8 +157,16 @@ view { titleLeft, titleRight, tabList, content, hasFocus, domId } =
 
                 Nothing ->
                     Card.card cardContent
+
+        html =
+            card_
+                |> Card.asContained
+                |> Card.withClassName className
+                |> Card.view
     in
-    card_
-        |> Card.asContained
-        |> Card.withClassName className
-        |> Card.view
+    case click of
+        Click.Disabled ->
+            html
+
+        _ ->
+            Click.view [] [ html ] click
