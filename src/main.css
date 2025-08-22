@@ -9,6 +9,7 @@
 @import "./css/ucm/workspace-screen.css";
 @import "./css/ucm/command-palette-modal.css";
 @import "./css/ucm/about-modal.css";
+@import "./css/ucm/keyboard-shortcuts-modal.css";
 @import "./css/ucm/ucm-connectivity.css";
 
 /* prevents a tiny white box in the corner that appears when both horizontal
