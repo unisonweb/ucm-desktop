@@ -1,5 +1,5 @@
 #about-modal {
-  --c-about-modal_background: var(--u-color_container);
+  --c-about-modal_background: var(--u-color_chrome);
 
   border-radius: var(--border-radius-base);
   border: 1px solid var(--u-color_border);

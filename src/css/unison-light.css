@@ -89,8 +89,8 @@ body.unison-light {
   /* [x] */
   --u-color_icon-on-action-outlined_hovered: var(--color-gray-0);
 
-  --u-color_container: var(--color-gray-9);
-  --u-color_container_faded: var(--color-gray-9);
+  --u-color_container: var(--color-gray-11);
+  --u-color_container_faded: var(--u-color_chrome_subdued);
   --u-color_container_hovered: var(--color-gray-11);
   --u-color_container_selected: var(--color-gray-11);
   --u-color_container_subdued: var(--color-gray-9);
@@ -188,7 +188,7 @@ body.unison-light {
   --u-color_working_text-on-element_subdued: var(--u-color_text);
 
   --u-color_chrome: var(--color-gray-10);
-  --u-color_chrome_subdued: var(--color-gray-9);
+  --u-color_chrome_subdued: var(--color-gray-10);
   --u-color_chrome_emphasized: var(--color-gray-11);
   --u-color_chrome_border: var(--u-color_border);
 
@@ -235,8 +235,8 @@ body.unison-light {
 
 /* TODO: these component overwrites shouldn't be needed... */
 .unison-light .definition-doc {
-  --color-doc-bg: transparent;
-  --color-doc-focus-bg: transparent;
+  --color-doc-bg: var(--u-color_container_faded);
+  --color-doc-focus-bg: var(--u-color_container_selected);
 }
 
 .unison-light .definition-doc .copyable-source .copy-on-click {

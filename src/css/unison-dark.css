@@ -301,8 +301,8 @@ body.unison-dark {
 
 /* TODO: these component overwrites shouldn't be needed... */
 .unison-dark .definition-doc {
-  --color-doc-bg: transparent;
-  --color-doc-focus-bg: transparent;
+  --color-doc-bg: var(--u-color_container_faded);
+  --color-doc-focus-bg: var(--u-color_container_selected);
 }
 
 .unison-dark .definition-doc .copyable-source .copy-on-click {

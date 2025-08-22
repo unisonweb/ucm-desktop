@@ -60,6 +60,7 @@
     gap: 0;
     padding: 0.75rem;
     width: 100%;
+    font-size: var(--font-size-medium);
 
     container-name: doc-container;
     container-type: inline-size;
@@ -83,9 +84,11 @@
   --color-card-border: var(--c-workspace-card_border);
 }
 
-.workspace-card.focused {
+.workspace-pane_focused .workspace-card.focused {
   --c-workspace-card_border: var(--u-color_border);
   --c-workspace-card_background: var(--u-color_container_selected);
+  border-color: var(--u-color_focus-border);
+  box-shadow: 0 0 0 2px var(--u-color_focus-outline);
 
   & .workspace-card_titlebar {
     color: var(--u-color_text);
@@ -97,6 +100,10 @@
     --c-color_tabs_border: var(--color-card-border);
     background: var(--u-color_container);
   }
+}
+
+.workspace-pane_focused .workspace-card.focused .definition-doc {
+  --color-doc-bg: var(--color-doc-focus-bg);
 }
 
 .workspace-card .definition-doc aside {
