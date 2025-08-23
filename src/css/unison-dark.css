@@ -164,9 +164,9 @@ body.unison-dark {
   /* [x] */
   --u-color_icon-on-element-emphasized: var(--color-gray-8);
   /* [x] */
-  --u-color_element_emphasized_hovered: var(--color-gray-1);
+  --u-color_element_emphasized_hovered: var(--color-gray-3);
   /* [x] */
-  --u-color_element_emphasized_selected: var(--color-gray-3);
+  --u-color_element_emphasized_selected: var(--color-gray-4);
 
   /* [x] */
   --u-color_element_decorative-purple: var(--color-purple-1);

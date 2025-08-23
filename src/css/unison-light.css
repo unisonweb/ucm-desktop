@@ -47,7 +47,7 @@ body.unison-light {
   --u-color_divider: var(--color-gray-6);
   --u-color_border: var(--color-gray-6);
   --u-color_border_hovered: var(--color-gray-5);
-  --u-color_border_subdued: var(--color-gray-7);
+  --u-color_border_subdued: var(--color-gray-8);
   --u-color_border_emphasized: var(--color-gray-3);
   --u-color_interactive: var(--color-blue-1);
   --u-color_interactive_hovered: var(--color-blue-2);
@@ -110,8 +110,10 @@ body.unison-light {
   --u-color_element_emphasized: var(--color-gray-9);
   --u-color_text-on-element-emphasized: var(--color-gray-0);
   --u-color_icon-on-element-emphasized: var(--color-gray-2);
-  --u-color_element_emphasized_hovered: var(--color-gray-9);
-  --u-color_element_emphasized_selected: var(--color-gray-8);
+  --u-color_element_emphasized_hovered: var(--color-gray-8);
+  --u-color_element_emphasized_selected: var(--color-blue-2);
+  --u-color_text-on-element-emphasized-selected: var(--color-gray-11);
+  --u-color_icon-on-element-emphasized-selected: var(--color-blue-3);
 
   --u-color_element_decorative-purple: var(--color-purple-5);
   --u-color_border-on-element-decorative-purple: var(--color-purple-4);
@@ -243,19 +245,156 @@ body.unison-light {
   background: transparent;
 }
 
-.unison-light .tooltip {
-  --color-tooltip-border: var(--u-color_border);
-}
-
-.unison-light .tooltip {
-  --u-color_text: var(--color-gray-11);
-  --u-color_text_subdued: var(--color-gray-5);
-}
-
 .unison-light .anchored-overlay {
+  --u-color_text: var(--u-color_text);
+  --u-color_text_subdued: var(--u-color_text_subdued);
+  --u-color_text_very-subdued: var(--u-color_text_very-subdued);
+
+  --c-color_anchored-overlay_sheet_bg: var(--u-color_chrome_emphasized);
   --c-color_anchored-overlay_sheet_border: var(--u-color_border);
+  --c-color_anchored-overlay_sheet_text_subdued: var(--u-color_text_subdued);
+  --c-color_anchored-overlay_sheet_text_very-subdued: var(
+    --u-color_text_very-subdued
+  );
+  --c-color_anchored-overlay_sheet_text: var(--u-color_text);
+}
+
+.unison-light .anchored-overlay .form-field {
+  --u-color_caret: var(--color-blue-2);
+
+  --c-color_form-field_text: var(--u-color_text);
+  --c-color_form-field_text_subdued: var(--u-color_text_subdued);
+  --c-color_form-field_border: var(--u-color_border);
+  --c-color_form-field_border_hovered: var(--u-color_border_hovered);
+  --c-color_form-field_focus-border: var(--u-color_focus-border);
+  --c-color_form-field_focus-outline: var(--u-color_focus-outline);
+  --c-color_form-field_icon_subdued: var(--u-color_icon_subdued);
+  --c-color_form-field_clear: var(--u-color_action_subdued);
+  --c-color_form-field_clear_hovered: var(--u-color_action_subdued_hovered);
+  --c-color_form-field_background: var(--u-color_element);
+  --c-color_form-field_background_hovered: var(--u-color_element_hovered);
+}
+
+.unison-light .anchored-overlay .tag {
+  --c-color_tag_bg: var(--u-color_element);
+  --c-color_tag_text: var(--u-color_text);
+  --c-color_tag_text_subdued: var(--u-color_text_subdued);
+  --c-color_tag_icon: var(--u-color_icon);
+  --c-color_tag_icon_hovered: var(--u-color_icon_hovered);
+  --c-color_tag_icon_subdued: var(--u-color_icon_subdued);
+}
+
+.unison-light .anchored-overlay .status-indicator {
+  --c-color_status-indicator_working: var(--color-purple-5);
+  --c-color_status-indicator_icon-on-working: var(--color-purple-1);
 }
 
 .unison-light .action-menu {
   --c-color_action-menu_sheet_border: var(--u-color_border);
+}
+
+.unison-light .action-menu {
+  --c-color_action-menu_sheet: var(--u-color_chrome_emphasized);
+  --c-color_action-menu_sheet_border: var(--u-color_chrome_border);
+  --c-color_action-menu_action-items_text: var(--u-color_text);
+  --c-color_action-menu_action-items_text_subdued: var(--u-color_text_subdued);
+  --c-color_action-menu_action-items_icon: var(--u-color_icon);
+  --c-color_action-menu_action_action-item-option_hover: var(
+    --u-color_element_hovered
+  );
+}
+
+.unison-light .action-menu .divider.divider_on-surface_dark {
+  background: var(--u-color_border_subdued);
+}
+
+.unison-light .tooltip {
+  --u-color_text: var(--u-color_text);
+  --u-color_text_subdued: var(--u-color_text_subdued);
+
+  --color-tooltip-text: var(--u-color_text);
+  --color-tooltip-subtle-text: var(--u-color_text_subdued);
+
+  --color-tooltip-bg: var(--u-color_chrome_emphasized);
+  --color-tooltip-border: var(--u-color_chrome_border);
+  --color-tooltip-source-bg: var(--u-color_element);
+  --color-tooltip-source-mg: var(--u-color_element);
+  --color-tooltip-fold-hover-bg: var(--color-gray-2);
+  --color-tooltip-link: var(--color-blue-3);
+  --color-tooltip-link-active: var(--color-pink-2);
+  --color-tooltip-link-hover: var(--color-pink-3);
+  --color-tooltip-syntax-base: var(--color-gray-10);
+  --color-tooltip-syntax-subtle: var(--color-gray-4);
+  --color-tooltip-syntax-subtle-em: var(--color-gray-5);
+  --color-tooltip-syntax-keyword: var(--color-pink-3);
+  --color-tooltip-syntax-operator: var(--color-gray-4);
+  --color-tooltip-syntax-term: var(--color-purple-3);
+  --color-tooltip-syntax-term-namespace: var(--color-purple-4);
+  --color-tooltip-syntax-ability: var(--color-pink-2);
+  --color-tooltip-syntax-type: var(--color-blue-2);
+  --color-tooltip-syntax-type-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-constructor: var(--color-blue-2);
+  --color-tooltip-syntax-constructor-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-text: var(--color-green-2);
+  --color-tooltip-syntax-monochrome-base: var(--color-gray-5);
+  --color-tooltip-syntax-monochrome-em: var(--color-gray-10);
+  --color-tooltip-syntax-monochrome-subtle: var(--color-gray-4);
+
+  /* ActionMenu (should probably be moved out of tooltip) */
+  --color-tooltip-item-text: var(--color-gray-10);
+  --color-tooltip-item-subtle-text: var(--color-gray-4);
+  --color-tooltip-item-bg: var(--color-transparent);
+  --color-tooltip-item-hover-text: var(--color-gray-10);
+  --color-tooltip-item-hover-subtle-text: var(--color-gray-5);
+  --color-tooltip-item-hover-bg: var(--color-gray-2);
+
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+  z-index: var(--layer-tooltip);
+
+  --tooltip-border-size: 1px;
+  --tooltip-arrow-size: 0.375rem;
+  --tooltip-arrow-edge-offset-horizontal: 0.75rem;
+  --tooltip-arrow-edge-offset-vertical: 0.4rem;
+
+  /* A faux Arrow that is " larger than "arrow-size" such
+   * that it appears to give the original arrow a border. All :before styles
+   * target this */
+  --tooltip-arrow-border-size: calc(
+    var(--tooltip-border-size) + var(--tooltip-arrow-size)
+  );
+
+  --u-color_interactive: var(--color-blue-2);
+  --u-color_interactive_hovered: var(--color-blue-3);
+
+  /* Docs (.definition-doc) can exist inside tooltips, but tooltips often have
+   * a different background color, so overwrite doc colors to match tooltip */
+  --color-doc-link: var(--color-tooltip-link);
+  --color-doc-link-active: var(--color-tooltip-link-active);
+  --color-doc-link-hover: var(--color-tooltip-link-hover);
+  --color-doc-source-bg: var(--color-tooltip-source-bg);
+
+  /* Syntax (via Docs) can be rendered inside tooltips */
+  --color-syntax-base: var(--color-tooltip-syntax-base);
+  --color-syntax-subtle: var(--color-tooltip-syntax-subtle);
+  --color-syntax-subtle-em: var(--color-tooltip-syntax-subtle-em);
+  --color-syntax-keyword: var(--color-tooltip-syntax-keyword);
+  --color-syntax-operator: var(--color-tooltip-syntax-operator);
+  --color-syntax-term: var(--color-tooltip-syntax-term);
+  --color-syntax-term-namespace: var(--color-tooltip-syntax-term-namespace);
+  --color-syntax-ability: var(--color-tooltip-syntax-ability);
+  --color-syntax-type: var(--color-tooltip-syntax-type);
+  --color-syntax-type-namespace: var(--color-tooltip-syntax-type-namespace);
+  --color-syntax-constructor: var(--color-tooltip-syntax-constructor);
+  --color-syntax-constructor-namespace: var(
+    --color-tooltip-syntax-constructor-namespace
+  );
+  --color-syntax-text: var(--color-tooltip-syntax-text);
+  --color-syntax-monochrome-base: var(--color-tooltip-syntax-monochrome-base);
+  --color-syntax-monochrome-em: var(--color-tooltip-syntax-monochrome-em);
+  --color-syntax-monochrome-subtle: var(
+    --color-tooltip-syntax-monochrome-subtle
+  );
 }

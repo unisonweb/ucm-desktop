@@ -7,6 +7,7 @@
   --c-command-palette_outline: var(--color-gray-0);
   --c-command-palette_text: var(--u-color_text);
   --c-command-palette_icon: var(--u-color_icon_subdued);
+  --c-command-palette_icon_selected: var(--u-color_icon);
 
   padding: 0;
   border-radius: var(--border-radius-base);
@@ -88,9 +89,13 @@
       justify-content: space-between;
       padding: 0.75rem;
       border-radius: var(--border-radius-base);
+      line-height: 1;
 
       &.selected {
         background: var(--c-command-palette_selected);
+        & .command-palette-item_left-side .icon {
+          color: var(--c-command-palette_icon_selected);
+        }
       }
 
       &:hover {

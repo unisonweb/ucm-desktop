@@ -232,7 +232,6 @@ view title suggestions footer_ model =
 
                                 else
                                     [ EmptyState.search
-                                        |> EmptyState.onDark
                                         |> EmptyState.withContent
                                             [ div [ class "search-project-sheet_no-results_message" ]
                                                 [ h4 [] [ text "No matches" ]
@@ -261,7 +260,6 @@ view title suggestions footer_ model =
             else
                 [ Divider.divider
                     |> Divider.small
-                    |> Divider.onDark
                     |> Divider.withoutMargin
                     |> Divider.view
                 , div [ class "search-project-sheet_projects" ] content
