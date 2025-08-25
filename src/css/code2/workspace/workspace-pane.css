@@ -37,6 +37,34 @@
   /* Focus indicator
   &.workspace-pane_focused::before {
     content: " ";
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    background: var(--color-blue-2);
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--layer-beneath);
+  }
+
+  &.workspace-pane_focused::after {
+    content: " ";
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 1rem 0 0 0;
+    background: var(--u-color_chrome_subdued);
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--layer-beneath);
+  }
+  &#workspace-pane_right.workspace-pane_focused::after {
+    left: 1px;
+  }
+
+  &.workspace-pane_focused::before {
+    content: " ";
     background: linear-gradient(
       to bottom,
       var(--u-color_chrome_selected),
