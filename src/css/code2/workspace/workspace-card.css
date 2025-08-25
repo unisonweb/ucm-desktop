@@ -9,6 +9,7 @@
   padding: 0;
   width: var(--c-workspace-card_width);
   position: relative;
+  z-index: var(--layer-base);
 
   & .workspace-card_titlebar {
     display: flex;

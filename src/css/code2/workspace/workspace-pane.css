@@ -34,7 +34,57 @@
     opacity: 0.65;
   }
 
+  &.workspace-pane_focused::before {
+    content: " ";
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    background: var(--u-color_chrome_border);
+    top: 0;
+    right: 0;
+    z-index: var(--layer-beneath);
+  }
+
+  &.workspace-pane_focused::after {
+    content: " ";
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0 1rem 0 0;
+    background: var(--u-color_chrome_subdued);
+    top: 0;
+    right: 0;
+    z-index: var(--layer-beneath);
+  }
+
+  &#workspace-pane_right.workspace-pane_focused::before {
+    left: 0;
+    right: auto;
+  }
+
+  &#workspace-pane_right.workspace-pane_focused::after {
+    left: 1px;
+    right: auto;
+    border-radius: 1rem 0 0 0;
+  }
+
   /* Focus indicator
+
+  &.workspace-pane_focused::before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: inset 2px 2px 0.5rem 0.125rem var(--color-gray-6);
+  }
+
+  &#workspace-pane_right.workspace-pane_focused::before {
+    left: 1px;
+    right: 1px;
+  }
+
   &.workspace-pane_focused::before {
     content: " ";
     position: absolute;
