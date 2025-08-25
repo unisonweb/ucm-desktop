@@ -2,12 +2,20 @@
   --c-command-palette_background: var(--u-color_chrome_emphasized);
   --c-command-palette_selected: var(--u-color_element_emphasized_selected);
   --c-command-palette_hovered: var(--u-color_element_emphasized_hovered);
+  --c-command-palette_selected_hovered: var(
+    --u-color_element_emphasized_selected_hovered
+  );
   --c-command-palette_border: var(--u-color_border);
   --c-command-palette_shadow: var(--color-gray-1-20pct);
   --c-command-palette_outline: var(--color-gray-0);
   --c-command-palette_text: var(--u-color_text);
+  --c-command-palette_text_selected: var(
+    --u-color_text-on-element-emphasized-selected
+  );
   --c-command-palette_icon: var(--u-color_icon_subdued);
-  --c-command-palette_icon_selected: var(--u-color_icon);
+  --c-command-palette_icon_selected: var(
+    --u-color_icon-on-element-emphasized-selected
+  );
 
   padding: 0;
   border-radius: var(--border-radius-base);
@@ -93,13 +101,19 @@
 
       &.selected {
         background: var(--c-command-palette_selected);
+        --u-color_text: var(--c-command-palette_text_selected);
+
         & .command-palette-item_left-side .icon {
           color: var(--c-command-palette_icon_selected);
         }
       }
 
-      &:hover {
+      &:not(.selected):hover {
         background: var(--c-command-palette_hovered);
+      }
+
+      &.selected:hover {
+        background: var(--c-command-palette_selected_hovered);
       }
 
       & .command-palette-item_left-side {
