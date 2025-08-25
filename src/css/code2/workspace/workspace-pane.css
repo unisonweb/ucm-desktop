@@ -34,17 +34,35 @@
     opacity: 0.65;
   }
 
-  /*
-   * POTENTIAL focus indicator
+  /* Focus indicator
   &.workspace-pane_focused::before {
     content: " ";
-    background: linear-gradient(to bottom, var(--color-gray-2), transparent);
-    height: 20rem;
+    background: linear-gradient(
+      to bottom,
+      var(--u-color_chrome_selected),
+      transparent
+    );
+    height: 15rem;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: var(--layer-beneath);
+  }
+
+  &.workspace-pane_focused::before {
+    background: linear-gradient(
+      to bottom,
+      var(--u-color_chrome_border),
+      var(--u-color_chrome_border)
+    );
+    z-index: 2000;
+    content: " ";
+    height: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
   }
   */
 }

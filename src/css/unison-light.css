@@ -28,7 +28,7 @@ body.unison-light {
   */
 
   --u-color_background: var(--color-gray-11);
-  --u-color_background_subdued: var(--color-gray-ligthen-60);
+  --u-color_background_subdued: var(--color-gray-10);
   --u-color_caret: var(--color-blue-2);
   --u-color_focus-border: var(--color-blue-2);
   --u-color_focus-outline: var(--color-blue-2-25pct);
@@ -193,6 +193,7 @@ body.unison-light {
   --u-color_chrome: var(--color-gray-9);
   --u-color_chrome_subdued: var(--color-gray-10);
   --u-color_chrome_emphasized: var(--color-gray-11);
+  --u-color_chrome_selected: var(--color-gray-10);
   --u-color_chrome_border: var(--u-color_border);
 
   /* = Syntax =------------------------------------------------------------- */

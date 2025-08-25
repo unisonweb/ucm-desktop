@@ -259,6 +259,7 @@ body.unison-dark {
   --u-color_chrome: var(--color-gray-1);
   --u-color_chrome_subdued: var(--color-gray-0);
   --u-color_chrome_emphasized: var(--color-gray-2);
+  --u-color_chrome_selected: var(--color-gray-2);
   --u-color_chrome_border: var(--u-color_border);
 
   /* = Syntax =------------------------------------------------------------- */
