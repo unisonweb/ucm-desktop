@@ -110,8 +110,9 @@ body.unison-light {
   --u-color_element_emphasized: var(--color-gray-9);
   --u-color_text-on-element-emphasized: var(--color-gray-0);
   --u-color_icon-on-element-emphasized: var(--color-gray-2);
-  --u-color_element_emphasized_hovered: var(--color-gray-8);
+  --u-color_element_emphasized_hovered: var(--color-gray-9);
   --u-color_element_emphasized_selected: var(--color-blue-2);
+  --u-color_element_emphasized_selected_hovered: var(--color-blue-1);
   --u-color_text-on-element-emphasized-selected: var(--color-gray-11);
   --u-color_icon-on-element-emphasized-selected: var(--color-blue-3);
 
@@ -323,21 +324,23 @@ body.unison-light {
   --color-tooltip-link: var(--color-blue-3);
   --color-tooltip-link-active: var(--color-pink-2);
   --color-tooltip-link-hover: var(--color-pink-3);
-  --color-tooltip-syntax-base: var(--color-gray-10);
+
+  --color-tooltip-syntax-base: var(--color-gray-0);
   --color-tooltip-syntax-subtle: var(--color-gray-4);
-  --color-tooltip-syntax-subtle-em: var(--color-gray-5);
-  --color-tooltip-syntax-keyword: var(--color-pink-3);
-  --color-tooltip-syntax-operator: var(--color-gray-4);
-  --color-tooltip-syntax-term: var(--color-purple-3);
-  --color-tooltip-syntax-term-namespace: var(--color-purple-4);
-  --color-tooltip-syntax-ability: var(--color-pink-2);
-  --color-tooltip-syntax-type: var(--color-blue-2);
-  --color-tooltip-syntax-type-namespace: var(--color-blue-3);
-  --color-tooltip-syntax-constructor: var(--color-blue-2);
-  --color-tooltip-syntax-constructor-namespace: var(--color-blue-3);
-  --color-tooltip-syntax-text: var(--color-green-2);
-  --color-tooltip-syntax-monochrome-base: var(--color-gray-5);
-  --color-tooltip-syntax-monochrome-em: var(--color-gray-10);
+  --color-tooltip-syntax-subtle-em: var(--color-gray-3);
+  --color-tooltip-syntax-keyword: var(--color-pink-2);
+  --color-tooltip-syntax-operator: var(--color-gray-5);
+  --color-tooltip-syntax-term: var(--color-purple-2);
+  --color-tooltip-syntax-term-namespace: var(--color-purple-3);
+  --color-tooltip-syntax-ability: var(--color-pink-1);
+  --color-tooltip-syntax-type: var(--color-blue-1);
+  --color-tooltip-syntax-type-namespace: var(--color-blue-2);
+  --color-tooltip-syntax-constructor: var(--color-blue-1);
+  --color-tooltip-syntax-constructor-namespace: var(--color-blue-2);
+  --color-tooltip-syntax-text: var(--color-green-1);
+
+  --color-tooltip-syntax-monochrome-base: var(--color-gray-2);
+  --color-tooltip-syntax-monochrome-em: var(--color-gray-0);
   --color-tooltip-syntax-monochrome-subtle: var(--color-gray-4);
 
   /* ActionMenu (should probably be moved out of tooltip) */
@@ -375,26 +378,4 @@ body.unison-light {
   --color-doc-link-active: var(--color-tooltip-link-active);
   --color-doc-link-hover: var(--color-tooltip-link-hover);
   --color-doc-source-bg: var(--color-tooltip-source-bg);
-
-  /* Syntax (via Docs) can be rendered inside tooltips */
-  --color-syntax-base: var(--color-tooltip-syntax-base);
-  --color-syntax-subtle: var(--color-tooltip-syntax-subtle);
-  --color-syntax-subtle-em: var(--color-tooltip-syntax-subtle-em);
-  --color-syntax-keyword: var(--color-tooltip-syntax-keyword);
-  --color-syntax-operator: var(--color-tooltip-syntax-operator);
-  --color-syntax-term: var(--color-tooltip-syntax-term);
-  --color-syntax-term-namespace: var(--color-tooltip-syntax-term-namespace);
-  --color-syntax-ability: var(--color-tooltip-syntax-ability);
-  --color-syntax-type: var(--color-tooltip-syntax-type);
-  --color-syntax-type-namespace: var(--color-tooltip-syntax-type-namespace);
-  --color-syntax-constructor: var(--color-tooltip-syntax-constructor);
-  --color-syntax-constructor-namespace: var(
-    --color-tooltip-syntax-constructor-namespace
-  );
-  --color-syntax-text: var(--color-tooltip-syntax-text);
-  --color-syntax-monochrome-base: var(--color-tooltip-syntax-monochrome-base);
-  --color-syntax-monochrome-em: var(--color-tooltip-syntax-monochrome-em);
-  --color-syntax-monochrome-subtle: var(
-    --color-tooltip-syntax-monochrome-subtle
-  );
 }
