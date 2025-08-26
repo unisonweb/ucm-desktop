@@ -16,10 +16,11 @@ import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
+import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Html exposing (Html, div, span, strong, text)
+import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
@@ -100,6 +101,15 @@ update config paneId msg model =
                             ( model, Cmd.none )
 
                         DefinitionItemRef dRef ->
+                            let
+                                nextWorkspaceItems =
+                                    WorkspaceItems.replace model.workspaceItems ref (WorkspaceItem.Loading ref)
+                            in
+                            ( { model | workspaceItems = nextWorkspaceItems }
+                            , HttpApi.perform config.api (fetchDefinition config dRef)
+                            )
+
+                        DependentsItemRef dRef ->
                             let
                                 nextWorkspaceItems =
                                     WorkspaceItems.replace model.workspaceItems ref (WorkspaceItem.Loading ref)
@@ -274,6 +284,9 @@ openItem : Config -> String -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemR
 openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
     case ref of
         SearchResultsItemRef _ ->
+            ( model, Cmd.none, FocusOn ref )
+
+        DependentsItemRef _ ->
             ( model, Cmd.none, FocusOn ref )
 
         DefinitionItemRef dRef ->
@@ -460,107 +473,6 @@ syntaxConfig definitionSummaryTooltip =
         |> SyntaxConfig.withSyntaxHelp
 
 
-definitionItemName : WorkspaceItem.DefinitionItem -> FQN
-definitionItemName defItem =
-    case defItem of
-        WorkspaceItem.TermItem (Term.Term _ _ { info }) ->
-            info.name
-
-        WorkspaceItem.TypeItem (Type.Type _ _ { info }) ->
-            info.name
-
-        WorkspaceItem.AbilityConstructorItem (AbilityConstructor.AbilityConstructor _ { info }) ->
-            info.name
-
-        WorkspaceItem.DataConstructorItem (DataConstructor.DataConstructor _ { info }) ->
-            info.name
-
-
-definitionItemToLib : WorkspaceItem.DefinitionItem -> Maybe ProjectDependency
-definitionItemToLib defItem =
-    let
-        fqnToLib fqn =
-            case fqn |> FQN.segments |> NEL.toList of
-                "lib" :: _ :: "lib" :: _ ->
-                    Nothing
-
-                "lib" :: libName :: _ ->
-                    Just (ProjectDependency.fromString libName)
-
-                _ ->
-                    Nothing
-
-        toLib info =
-            case info.namespace of
-                Just n ->
-                    fqnToLib n
-
-                Nothing ->
-                    let
-                        f n acc =
-                            if MaybeE.isJust acc then
-                                acc
-
-                            else
-                                fqnToLib n
-                    in
-                    List.foldl f Nothing info.otherNames
-    in
-    case defItem of
-        WorkspaceItem.TermItem (Term.Term _ _ { info }) ->
-            toLib info
-
-        WorkspaceItem.TypeItem (Type.Type _ _ { info }) ->
-            toLib info
-
-        WorkspaceItem.AbilityConstructorItem (AbilityConstructor.AbilityConstructor _ { info }) ->
-            toLib info
-
-        WorkspaceItem.DataConstructorItem (DataConstructor.DataConstructor _ { info }) ->
-            toLib info
-
-
-viewDefinitionItemSource : DefinitionSummaryTooltip.Model -> WorkspaceItem.DefinitionItem -> Html Msg
-viewDefinitionItemSource definitionSummaryTooltip defItem =
-    let
-        sourceViewConfig =
-            SourceViewConfig.rich (syntaxConfig definitionSummaryTooltip)
-    in
-    case defItem of
-        WorkspaceItem.TermItem (Term.Term _ _ { info, source }) ->
-            Source.viewTermSource sourceViewConfig info.name source
-
-        WorkspaceItem.TypeItem (Type.Type _ _ { source }) ->
-            Source.viewTypeSource sourceViewConfig source
-
-        _ ->
-            UI.nothing
-
-
-hasDocs : WorkspaceItem.DefinitionItem -> Bool
-hasDocs defItem =
-    MaybeE.isJust (WorkspaceItem.docs defItem)
-
-
-definitionItemTabs : WorkspaceItemRef -> { code : TabList.Tab Msg, docs : TabList.Tab Msg }
-definitionItemTabs wsRef =
-    { code =
-        TabList.tab "Code"
-            (Click.onClick (ChangeDefinitionItemTab wsRef CodeTab))
-    , docs =
-        TabList.tab "Docs"
-            (Click.onClick (ChangeDefinitionItemTab wsRef (DocsTab Doc.emptyDocFoldToggles)))
-    }
-
-
-viewLibraryTag : ProjectDependency -> Html msg
-viewLibraryTag dep =
-    ContextualTag.contextualTag Icon.book (ProjectDependency.toString dep)
-        |> ContextualTag.decorativePurple
-        |> ContextualTag.withTooltipText "Library dependency"
-        |> ContextualTag.view
-
-
 viewItem : DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
 viewItem definitionSummaryTooltip item isFocused =
     let
@@ -589,48 +501,17 @@ viewItem definitionSummaryTooltip item isFocused =
 
                 WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem state defItem) ->
                     let
-                        tabs =
-                            definitionItemTabs wsRef
-
-                        withTabList c =
-                            if hasDocs defItem then
-                                case state.activeTab of
-                                    CodeTab ->
-                                        c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs ])
-
-                                    DocsTab _ ->
-                                        c |> WorkspaceCard.withTabList (TabList.tabList [ tabs.code ] tabs.docs [])
-
-                            else
-                                c
-
-                        lib =
-                            defItem
-                                |> definitionItemToLib
-                                |> Maybe.map viewLibraryTag
-                                |> Maybe.withDefault UI.nothing
-
-                        itemContent =
-                            case ( state.activeTab, WorkspaceItem.docs defItem ) of
-                                ( DocsTab docFoldToggles, Just docs ) ->
-                                    Doc.view (syntaxConfig definitionSummaryTooltip)
-                                        (ToggleDocFold wsRef)
-                                        docFoldToggles
-                                        docs
-
-                                _ ->
-                                    viewDefinitionItemSource definitionSummaryTooltip defItem
+                        config =
+                            { wsRef = wsRef
+                            , state = state
+                            , item = defItem
+                            , syntaxConfig = syntaxConfig definitionSummaryTooltip
+                            , closeItem = CloseWorkspaceItem wsRef
+                            , changeTab = ChangeDefinitionItemTab wsRef
+                            , toggleDocFold = ToggleDocFold wsRef
+                            }
                     in
-                    cardBase
-                        |> WorkspaceCard.withTitlebarLeft [ lib, strong [] [ text (FQN.toString (definitionItemName defItem)) ] ]
-                        |> WorkspaceCard.withTitlebarRight
-                            [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
-                                |> Button.subdued
-                                |> Button.small
-                                |> Button.view
-                            ]
-                        |> withTabList
-                        |> WorkspaceCard.withContent [ itemContent ]
+                    WorkspaceDefinitionItemCard.view config
 
                 WorkspaceItem.Success _ _ ->
                     {- TODO -}

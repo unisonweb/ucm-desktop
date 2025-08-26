@@ -46,6 +46,7 @@ type alias SearchResultsItem =
 type LoadedWorkspaceItem
     = DefinitionWorkspaceItem DefinitionWorkspaceItemState DefinitionItem
     | SearchResultsWorkspaceItem SearchResultsItem
+    | DependentsWorkspaceItem DefinitionItem
 
 
 type WorkspaceItem
@@ -78,6 +79,9 @@ definitionReference item =
             Nothing
 
         DefinitionItemRef ref ->
+            Just ref
+
+        DependentsItemRef ref ->
             Just ref
 
 
