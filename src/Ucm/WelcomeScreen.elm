@@ -51,7 +51,7 @@ init : AppContext -> ( Model, Cmd Msg )
 init appContext =
     ( { searchQuery = ""
       , projects = Loading
-      , window = Window.init
+      , window = Window.init appContext
       }
     , fetchProjects appContext
     )

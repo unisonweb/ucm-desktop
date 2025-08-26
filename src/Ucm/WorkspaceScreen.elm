@@ -9,6 +9,7 @@ import Code2.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceC
 import Code2.Workspace.WorkspacePanes as WorkspacePanes
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
+import Lib.Search as Search exposing (Search(..))
 import RemoteData exposing (RemoteData(..))
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
@@ -61,7 +62,7 @@ init appContext workspaceContext =
     ( { workspaceContext = workspaceContext
       , codebaseTree = codebaseTree
       , config = config
-      , window = Window.init
+      , window = Window.init appContext
       , panes = panes
       , switchProject = SwitchProject.init
       , switchBranch = SwitchBranch.init
@@ -264,6 +265,27 @@ update appContext msg model =
                                     SwitchBranch.toggleSheet appContext model.workspaceContext.projectName model.switchBranch
                             in
                             ( { model_ | switchBranch = switchBranch }, Cmd.map SwitchBranchMsg switchBranchCmd )
+
+                        ( CommandPaletteModal modal, Sequence _ Escape ) ->
+                            if Search.isEmptyQuery modal.search then
+                                ( { model_ | modal = NoModal }, Cmd.none )
+
+                            else
+                                ( { model
+                                    | modal =
+                                        CommandPaletteModal
+                                            (CommandPalette.init appContext CommandPalette.NoContext)
+                                  }
+                                , Cmd.none
+                                )
+
+                        ( NoModal, Sequence _ Escape ) ->
+                            ( { model
+                                | switchProject = SwitchProject.init
+                                , switchBranch = SwitchBranch.init
+                              }
+                            , Cmd.none
+                            )
 
                         _ ->
                             ( model_, Cmd.none )

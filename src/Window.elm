@@ -25,6 +25,7 @@ import UI.Divider as Divider
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut
 import UI.KeyboardShortcut.Key as Key
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Modal as Modal exposing (Modal)
 import UI.Tooltip as Tooltip
 import Ucm.AppContext exposing (AppContext)
@@ -45,16 +46,18 @@ type alias Model =
     { splitPane : SplitPane.State
     , isSettingsMenuOpen : Bool
     , modal : WindowModal
+    , keyboardShortcut : KeyboardShortcut.Model
     }
 
 
-init : Model
-init =
+init : AppContext -> Model
+init appContext =
     { splitPane =
         SplitPane.init SplitPane.Horizontal
             |> SplitPane.configureSplitter (SplitPane.px 256 Nothing)
     , isSettingsMenuOpen = False
     , modal = NoModal
+    , keyboardShortcut = KeyboardShortcut.init appContext.operatingSystem
     }
 
 
@@ -71,6 +74,8 @@ type Msg
     | ShowAboutModal
     | ShowKeyboardShortcutsModal
     | CloseModal
+    | Keydown KeyboardEvent.KeyboardEvent
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,6 +112,25 @@ update msg model =
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
 
+        Keydown event ->
+            let
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+            in
+            case shortcut of
+                KeyboardShortcut.Sequence _ Key.Escape ->
+                    ( { model | modal = NoModal, isSettingsMenuOpen = False }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
+
 
 
 -- PORTS
@@ -127,7 +151,10 @@ port clearSettings : () -> Cmd msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map SplitPaneMsg (SplitPane.subscriptions model.splitPane)
+    Sub.batch
+        [ Sub.map SplitPaneMsg (SplitPane.subscriptions model.splitPane)
+        , KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
+        ]
 
 
 
@@ -526,6 +553,9 @@ aboutModal appContext =
 keyboardShortcutsModal : AppContext -> Modal Msg
 keyboardShortcutsModal appContext =
     let
+        -- Why not use the one from Model? Well, we don't
+        -- really want this to light up sequence shortcuts
+        -- when viewing the shortcuts modal.
         keyboardShortcut =
             KeyboardShortcut.init appContext.operatingSystem
 
