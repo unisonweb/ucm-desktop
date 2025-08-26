@@ -64,6 +64,7 @@
     font-size: var(--font-size-medium);
     justify-content: center;
     align-items: flex-start;
+    max-width: 24rem;
   }
 
   & .project-option:hover .card {
