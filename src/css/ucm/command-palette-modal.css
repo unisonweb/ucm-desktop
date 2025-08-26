@@ -54,13 +54,10 @@
     }
 
     & .text-field {
-      padding: 0rem 1rem;
-
       & input {
         background: var(--c-command-palette_background);
         border: 0;
         width: 100%;
-        padding: 0;
         font-size: var(--font-size-base);
       }
 

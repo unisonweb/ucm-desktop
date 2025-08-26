@@ -236,6 +236,7 @@ view model =
             { updateQueryMsg = UpdateQuery
             , closeMsg = Close
             , keyboardShortcut = model.keyboardShortcut
+            , isWorking = Search.isSearching model.search
             }
 
         searchResultItems =

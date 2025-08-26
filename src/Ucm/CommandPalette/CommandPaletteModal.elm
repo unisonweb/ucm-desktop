@@ -79,6 +79,7 @@ type alias ViewConfig msg =
     { updateQueryMsg : String -> msg
     , closeMsg : msg
     , keyboardShortcut : KeyboardShortcut.Model
+    , isWorking : Bool
     }
 
 
@@ -118,6 +119,7 @@ view viewConfig palette =
                         "Type a command or search definitions..."
                         palette.query
                         |> TextField.withAutofocus
+                        |> TextField.withIconOrWorking Icon.search viewConfig.isWorking
                         |> TextField.view
                     ]
                 , sheet
