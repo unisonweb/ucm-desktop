@@ -13,6 +13,7 @@
     "ui-core-check-css": "ui-core-check-css",
     "ui-core-install": "ui-core-install",
     "ui-core-update": "ui-core-update",
+    "check": "elm-test; elm-review; ui-core-check-css; npx prettier --check .",
     "postinstall": "ui-core-install"
   },
   "devDependencies": {
