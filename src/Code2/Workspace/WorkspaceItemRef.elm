@@ -16,6 +16,19 @@ type WorkspaceItemRef
     | DependentsItemRef Reference
 
 
+definitionReference : WorkspaceItemRef -> Maybe Reference
+definitionReference ref =
+    case ref of
+        DefinitionItemRef r ->
+            Just r
+
+        DependentsItemRef r ->
+            Just r
+
+        _ ->
+            Nothing
+
+
 toString : WorkspaceItemRef -> String
 toString ref =
     case ref of

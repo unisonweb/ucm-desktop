@@ -1,0 +1,60 @@
+.workspace-card {
+  & .workspace-card_main-content:has(.workspace-dependents-item-card_content) {
+    padding: 0;
+  }
+
+  & .workspace-dependents-item-card_content {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+
+    & .dependents_column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border-right: 1px solid var(--c-workspace-card_border);
+      padding: 0.75rem;
+      display: flex;
+      width: 100%;
+
+      & header {
+        display: flex;
+        flex-direction: row;
+        gap: 0.25rem;
+        align-items: center;
+        line-height: 1;
+        color: var(--u-color_text_very-subdued);
+        font-weight: bold;
+
+        & .icon {
+          color: var(--u-color_icon_very-subdued);
+        }
+      }
+
+      & .dependents_items {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+
+        & .dependent {
+          font-family: var(--font-monospace);
+          margin-left: -0.25rem;
+          padding-left: 0.5rem;
+          border-radius: var(--border-radius-base);
+
+          & .fully-qualified-name {
+            font-weight: normal;
+          }
+
+          &:hover {
+            background: var(--u-color_element_hovered);
+          }
+        }
+      }
+    }
+
+    & .dependents_column:last-child {
+      border: 0;
+    }
+  }
+}

@@ -2,43 +2,33 @@ module Code2.Workspace.WorkspacePane exposing (..)
 
 import Code.CodebaseApi as CodebaseApi
 import Code.Config exposing (Config)
-import Code.Definition.AbilityConstructor as AbilityConstructor
-import Code.Definition.DataConstructor as DataConstructor
 import Code.Definition.Doc as Doc
 import Code.Definition.Reference exposing (Reference)
-import Code.Definition.Source as Source
-import Code.Definition.Term as Term
-import Code.Definition.Type as Type
 import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
 import Code.FullyQualifiedName as FQN exposing (FQN)
-import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
-import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
+import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Html exposing (Html, div, span, text)
+import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.OperatingSystem exposing (OperatingSystem)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
-import List.Nonempty as NEL
-import Maybe.Extra as MaybeE
-import UI
 import UI.Button as Button
 import UI.Click as Click
-import UI.ContextualTag as ContextualTag
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
 import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Placeholder as Placeholder
-import UI.TabList as TabList
+import UI.StatusIndicator as StatusIndicator
 
 
 
@@ -73,7 +63,8 @@ type Msg
     | Refetch WorkspaceItemRef
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
-    | OpenDependency Reference
+    | OpenDefinition Reference
+    | ShowDependentsOf { wsRef : WorkspaceItemRef, defItem : DefinitionItem }
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | Keydown KeyboardEvent.KeyboardEvent
     | SetFocusedItem WorkspaceItemRef
@@ -183,7 +174,7 @@ update config paneId msg model =
             in
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
-        OpenDependency r ->
+        OpenDefinition r ->
             let
                 ( m, c, out ) =
                     case WorkspaceItems.focus model.workspaceItems of
@@ -198,6 +189,74 @@ update config paneId msg model =
                             openDefinition config paneId model r
             in
             ( m, c, out )
+
+        ShowDependentsOf { wsRef, defItem } ->
+            case wsRef of
+                WorkspaceItemRef.DefinitionItemRef r ->
+                    let
+                        depRef =
+                            WorkspaceItemRef.DependentsItemRef r
+
+                        depItem =
+                            WorkspaceItem.Success
+                                depRef
+                                (WorkspaceItem.DependentsWorkspaceItem
+                                    defItem
+                                    -- TODO: Load the actual data instead of this mock
+                                    [ WorkspaceItem.TermMatch
+                                        { displayName = FQN.fromString "List.map"
+                                        , fqn = FQN.fromString "List.map"
+                                        }
+                                    , WorkspaceItem.TermMatch
+                                        { displayName = FQN.fromString "List.foldLeft"
+                                        , fqn = FQN.fromString "List.foldLeft"
+                                        }
+                                    , WorkspaceItem.TermMatch
+                                        { displayName = FQN.fromString "Optional.map"
+                                        , fqn = FQN.fromString "Optional.map"
+                                        }
+                                    , WorkspaceItem.TermMatch
+                                        { displayName = FQN.fromString "Cloud.run"
+                                        , fqn = FQN.fromString "Cloud.run"
+                                        }
+                                    , WorkspaceItem.AbilityConstructorMatch
+                                        { displayName = FQN.fromString "Cloud"
+                                        , fqn = FQN.fromString "Cloud"
+                                        }
+                                    ]
+                                )
+
+                        workspaceItems =
+                            model.workspaceItems
+                    in
+                    if WorkspaceItems.includesItem workspaceItems depRef then
+                        if not (WorkspaceItems.isFocused workspaceItems depRef) then
+                            let
+                                nextWorkspaceItems =
+                                    WorkspaceItems.focusOn workspaceItems depRef
+                            in
+                            ( { model | workspaceItems = nextWorkspaceItems }
+                            , scrollToItem paneId depRef
+                            , FocusOn depRef
+                            )
+
+                        else
+                            ( model, Cmd.none, NoOut )
+
+                    else
+                        ( { model
+                            | workspaceItems =
+                                WorkspaceItems.insertWithFocusBefore
+                                    workspaceItems
+                                    wsRef
+                                    depItem
+                          }
+                        , scrollToItem paneId wsRef
+                        , FocusOn wsRef
+                        )
+
+                _ ->
+                    ( model, Cmd.none, NoOut )
 
         ToggleDocFold wsRef foldId ->
             let
@@ -465,7 +524,7 @@ subscriptions _ =
 syntaxConfig : DefinitionSummaryTooltip.Model -> SyntaxConfig.SyntaxConfig Msg
 syntaxConfig definitionSummaryTooltip =
     SyntaxConfig.default
-        (OpenDependency >> Click.onClick)
+        (OpenDefinition >> Click.onClick)
         (DefinitionSummaryTooltip.tooltipConfig
             DefinitionSummaryTooltipMsg
             definitionSummaryTooltip
@@ -509,9 +568,23 @@ viewItem definitionSummaryTooltip item isFocused =
                             , closeItem = CloseWorkspaceItem wsRef
                             , changeTab = ChangeDefinitionItemTab wsRef
                             , toggleDocFold = ToggleDocFold wsRef
+                            , showDependents = ShowDependentsOf { wsRef = wsRef, defItem = defItem }
                             }
                     in
                     WorkspaceDefinitionItemCard.view config
+
+                WorkspaceItem.Success wsRef (WorkspaceItem.DependentsWorkspaceItem defItem dependents) ->
+                    let
+                        config =
+                            { wsRef = wsRef
+                            , item = defItem
+                            , dependents = dependents
+                            , syntaxConfig = syntaxConfig definitionSummaryTooltip
+                            , closeItem = CloseWorkspaceItem wsRef
+                            , openDefinition = OpenDefinition
+                            }
+                    in
+                    WorkspaceDependentsItemCard.view config
 
                 WorkspaceItem.Success _ _ ->
                     {- TODO -}
@@ -520,7 +593,11 @@ viewItem definitionSummaryTooltip item isFocused =
 
                 WorkspaceItem.Failure wsRef e ->
                     cardBase
-                        |> WorkspaceCard.withTitle ("Failed to load definition: " ++ WorkspaceItemRef.toHumanString wsRef)
+                        |> WorkspaceCard.withTitlebarLeft
+                            [ StatusIndicator.bad |> StatusIndicator.view
+                            , strong [] [ text (WorkspaceItemRef.toHumanString wsRef) ]
+                            , strong [ class "subdued" ] [ text "failed to load definition" ]
+                            ]
                         |> WorkspaceCard.withTitlebarRight
                             [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
                                 |> Button.subdued
@@ -529,11 +606,11 @@ viewItem definitionSummaryTooltip item isFocused =
                             ]
                         |> WorkspaceCard.withContent
                             [ div [ class "workspace-card_error" ]
-                                [ span [ class "error" ]
-                                    [ span [ class "error_icon" ] [ Icon.view Icon.warn ]
-                                    , text (Util.httpErrorToString e)
+                                [ p [ class "error" ]
+                                    [ text (Util.httpErrorToString e)
                                     ]
                                 , Button.iconThenLabel (Refetch wsRef) Icon.refresh "Try again"
+                                    |> Button.small
                                     |> Button.view
                                 ]
                             ]

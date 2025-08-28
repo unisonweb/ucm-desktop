@@ -55,6 +55,7 @@ body.unison-dark {
   --u-color_icon: var(--color-gray-5);
   /* [x] */
   --u-color_icon_subdued: var(--color-gray-4);
+  --u-color_icon_very-subdued: var(--color-gray-3);
   /* [x] */
   --u-color_icon_emphasized: var(--color-gray-6);
   /* [x] */
@@ -147,14 +148,14 @@ body.unison-dark {
 
   /* [x] */
   --u-color_element: var(--color-gray-0);
-  --u-color_element_hovered: var(--color-blue-5);
+  --u-color_element_hovered: var(--color-gray-3);
   --u-color_element_selected: var(--color-blue-4);
   --u-color_element_disabled: var(--color-gray-9);
   --u-color_icon-on-element: var(--color-gray-3);
 
   /* [x] */
   --u-color_element_subdued: var(--color-gray-1);
-  --u-color_element_subdued_hovered: var(--color-gray-9);
+  --u-color_element_subdued_hovered: var(--color-gray-3);
   --u-color_element_subdued_selected: var(--color-gray-9);
 
   /* [x] */

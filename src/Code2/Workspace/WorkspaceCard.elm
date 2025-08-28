@@ -1,10 +1,14 @@
 module Code2.Workspace.WorkspaceCard exposing (..)
 
+import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Html exposing (Html, div, header, section, span, text)
 import Html.Attributes exposing (class)
 import UI
+import UI.Button as Button
 import UI.Card as Card
 import UI.Click as Click exposing (Click)
+import UI.ContextualTag as ContextualTag
+import UI.Icon as Icon
 import UI.TabList as TabList exposing (TabList)
 
 
@@ -16,6 +20,7 @@ type alias WorkspaceCard msg =
     , hasFocus : Bool
     , domId : Maybe String
     , click : Click msg
+    , close : Maybe msg
     }
 
 
@@ -32,6 +37,7 @@ empty =
     , hasFocus = False
     , domId = Nothing
     , click = Click.disabled
+    , close = Nothing
     }
 
 
@@ -83,6 +89,11 @@ withClick click card_ =
     { card_ | click = click }
 
 
+withClose : msg -> WorkspaceCard msg -> WorkspaceCard msg
+withClose close card_ =
+    { card_ | close = Just close }
+
+
 withTabList : TabList msg -> WorkspaceCard msg -> WorkspaceCard msg
 withTabList tabList card_ =
     { card_ | tabList = Just tabList }
@@ -120,7 +131,20 @@ map f card_ =
     , hasFocus = card_.hasFocus
     , domId = card_.domId
     , click = Click.map f card_.click
+    , close = Maybe.map f card_.close
     }
+
+
+
+-- RELATED VIEW HELPERS
+
+
+viewLibraryTag : ProjectDependency -> Html msg
+viewLibraryTag dep =
+    ContextualTag.contextualTag Icon.book (ProjectDependency.toString dep)
+        |> ContextualTag.decorativePurple
+        |> ContextualTag.withTooltipText "Library dependency"
+        |> ContextualTag.view
 
 
 
@@ -128,7 +152,7 @@ map f card_ =
 
 
 view : WorkspaceCard msg -> Html msg
-view { titleLeft, titleRight, tabList, content, hasFocus, domId, click } =
+view { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close } =
     let
         className =
             if hasFocus then
@@ -137,10 +161,26 @@ view { titleLeft, titleRight, tabList, content, hasFocus, domId, click } =
             else
                 "workspace-card"
 
+        close_ =
+            case close of
+                Nothing ->
+                    []
+
+                Just closeMsg ->
+                    [ Button.icon closeMsg Icon.x
+                        |> Button.stopPropagation
+                        |> Button.subdued
+                        |> Button.small
+                        |> Button.view
+                    ]
+
+        titleRight_ =
+            div [ class "workspace-card_titlebar_right" ] (titleRight ++ close_)
+
         titlebar =
             header [ class "workspace-card_titlebar" ]
                 [ div [ class "workspace-card_titlebar_left" ] titleLeft
-                , div [ class "workspace-card_titlebar_right" ] titleRight
+                , titleRight_
                 ]
 
         cardContent =
