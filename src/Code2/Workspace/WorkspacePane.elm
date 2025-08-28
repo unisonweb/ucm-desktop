@@ -11,7 +11,7 @@ import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
 import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
-import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..), WorkspaceItem)
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem, WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Html exposing (Html, div, p, strong, text)

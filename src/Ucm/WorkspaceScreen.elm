@@ -9,8 +9,7 @@ import Code2.Workspace.WorkspaceContext as WorkspaceContext exposing (WorkspaceC
 import Code2.Workspace.WorkspacePanes as WorkspacePanes
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Lib.Search as Search exposing (Search(..))
-import RemoteData exposing (RemoteData(..))
+import Lib.Search as Search
 import UI.AnchoredOverlay as AnchoredOverlay
 import UI.Button as Button
 import UI.Icon as Icon

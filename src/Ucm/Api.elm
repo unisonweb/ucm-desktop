@@ -132,8 +132,7 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
                         HQ.HashQualified _ h ->
                             withoutConstructorSuffix h
             in
-            [ refToString ref ]
-                |> List.map (string "names")
+            [ string "names" (refToString ref) ]
                 |> (\names -> GET { path = base ++ [ "getDefinition" ], queryParams = names ++ perspectiveToQueryParams perspective })
 
         CodebaseApi.Summary { perspective, ref } ->

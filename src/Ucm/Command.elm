@@ -1,7 +1,7 @@
 module Ucm.Command exposing (..)
 
-import UI.Icon as Icon exposing (Icon)
-import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut)
+import UI.Icon exposing (Icon)
+import UI.KeyboardShortcut exposing (KeyboardShortcut)
 
 
 type WorkspaceCommand

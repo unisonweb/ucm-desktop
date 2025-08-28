@@ -7,11 +7,11 @@ import Code.Definition.DataConstructor exposing (DataConstructor(..))
 import Code.Definition.Reference as Reference exposing (Reference)
 import Code.Definition.Term exposing (Term(..))
 import Code.Definition.Type exposing (Type(..))
-import Code.Finder.FinderMatch as FinderMatch exposing (FinderItem(..), FinderMatch)
+import Code.Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Syntax as Syntax
 import Lib.HttpApi as HttpApi exposing (HttpResult)
-import Lib.Search as Search exposing (Search(..))
+import Lib.Search as Search exposing (Search)
 import Lib.SearchResults as SearchResults
 import UI.Click as Click
 import UI.Icon as Icon
@@ -158,7 +158,7 @@ update appContext config msg model =
                         _ ->
                             ( model_, NoOut )
             in
-            ( nextModel, Cmd.batch [ Cmd.map KeyboardShortcutMsg kCmd ], out )
+            ( nextModel, Cmd.map KeyboardShortcutMsg kCmd, out )
 
         KeyboardShortcutMsg kMsg ->
             let

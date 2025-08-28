@@ -4,8 +4,8 @@ import Code.Definition.Reference as Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.WorkspaceCard as WorkspaceCard exposing (WorkspaceCard)
-import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), DefinitionMatch(..), LoadedWorkspaceItem(..))
-import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef(..))
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem, DefinitionMatch(..))
+import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import Html exposing (Html, div, header, strong, text)
 import Html.Attributes exposing (class)
 import Lib.String.Helpers exposing (pluralize)

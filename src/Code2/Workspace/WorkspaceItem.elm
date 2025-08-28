@@ -5,7 +5,7 @@ import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstr
 import Code.Definition.Doc as Doc exposing (Doc)
 import Code.Definition.Info as Info
 import Code.Definition.Reference as Reference exposing (Reference)
-import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDetail, TermSignature, TermSource)
+import Code.Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature, TermSource)
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash

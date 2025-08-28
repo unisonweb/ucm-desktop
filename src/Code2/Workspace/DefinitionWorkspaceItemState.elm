@@ -1,6 +1,6 @@
 module Code2.Workspace.DefinitionWorkspaceItemState exposing (..)
 
-import Code.Definition.Doc as Doc exposing (DocFoldToggles)
+import Code.Definition.Doc exposing (DocFoldToggles)
 
 
 type DefinitionItemTab

@@ -9,13 +9,11 @@ import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..), DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceCard as WorkspaceCard exposing (WorkspaceCard)
-import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem(..), LoadedWorkspaceItem(..))
-import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef(..))
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem)
+import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import Html exposing (Html, strong, text)
 import UI
 import UI.Click as Click
-import UI.KeyboardShortcut exposing (KeyboardShortcut(..))
-import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.TabList as TabList
 
 
