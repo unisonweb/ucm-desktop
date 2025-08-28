@@ -5,10 +5,11 @@ import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstr
 import Code.Definition.Doc as Doc exposing (Doc)
 import Code.Definition.Info as Info
 import Code.Definition.Reference as Reference exposing (Reference)
-import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDetail, TermSource)
+import Code.Definition.Term as Term exposing (Term(..), TermCategory(..), TermDetail, TermSignature, TermSource)
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
+import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
 import Http
@@ -39,6 +40,13 @@ type DefinitionItem
     | AbilityConstructorItem AbilityConstructorDetail
 
 
+type DefinitionMatch
+    = TermMatch { displayName : FQN, fqn : FQN } -- , signature : TermSignature }
+    | TypeMatch { displayName : FQN, fqn : FQN, source : TypeSource }
+    | DataConstructorMatch { displayName : FQN, fqn : FQN, signature : TermSignature }
+    | AbilityConstructorMatch { displayName : FQN, fqn : FQN } --, signature : TermSignature }
+
+
 type alias SearchResultsItem =
     { ref : SearchResultsRef }
 
@@ -46,6 +54,7 @@ type alias SearchResultsItem =
 type LoadedWorkspaceItem
     = DefinitionWorkspaceItem DefinitionWorkspaceItemState DefinitionItem
     | SearchResultsWorkspaceItem SearchResultsItem
+    | DependentsWorkspaceItem DefinitionItem (List DefinitionMatch)
 
 
 type WorkspaceItem
@@ -79,6 +88,69 @@ definitionReference item =
 
         DefinitionItemRef ref ->
             Just ref
+
+        DependentsItemRef ref ->
+            Just ref
+
+
+definitionItemToLib : DefinitionItem -> Maybe ProjectDependency
+definitionItemToLib defItem =
+    let
+        fqnToLib fqn =
+            case fqn |> FQN.segments |> NEL.toList of
+                "lib" :: _ :: "lib" :: _ ->
+                    Nothing
+
+                "lib" :: libName :: _ ->
+                    Just (ProjectDependency.fromString libName)
+
+                _ ->
+                    Nothing
+
+        toLib info =
+            case info.namespace of
+                Just n ->
+                    fqnToLib n
+
+                Nothing ->
+                    let
+                        f n acc =
+                            if MaybeE.isJust acc then
+                                acc
+
+                            else
+                                fqnToLib n
+                    in
+                    List.foldl f Nothing info.otherNames
+    in
+    case defItem of
+        TermItem (Term.Term _ _ { info }) ->
+            toLib info
+
+        TypeItem (Type.Type _ _ { info }) ->
+            toLib info
+
+        AbilityConstructorItem (AbilityConstructor _ { info }) ->
+            toLib info
+
+        DataConstructorItem (DataConstructor _ { info }) ->
+            toLib info
+
+
+definitionItemName : DefinitionItem -> FQN
+definitionItemName defItem =
+    case defItem of
+        TermItem (Term.Term _ _ { info }) ->
+            info.name
+
+        TypeItem (Type.Type _ _ { info }) ->
+            info.name
+
+        AbilityConstructorItem (AbilityConstructor _ { info }) ->
+            info.name
+
+        DataConstructorItem (DataConstructor _ { info }) ->
+            info.name
 
 
 allFqns : WorkspaceItem -> List FQN
@@ -134,6 +206,11 @@ docs defItem =
 
         _ ->
             Nothing
+
+
+hasDocs : DefinitionItem -> Bool
+hasDocs defItem =
+    MaybeE.isJust (docs defItem)
 
 
 isDoc : DefinitionItem -> Bool

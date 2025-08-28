@@ -1,6 +1,7 @@
 @import "../code2/workspace/workspace-panes.css";
 @import "../code2/workspace/workspace-pane.css";
 @import "../code2/workspace/workspace-card.css";
+@import "../code2/workspace/workspace-dependents-item-card.css";
 
 #workspace-screen_window-content {
   display: flex;

@@ -42,6 +42,7 @@ body.unison-light {
   --u-color_text_emphasized: var(--color-gray-0);
   --u-color_icon: var(--color-gray-4);
   --u-color_icon_subdued: var(--color-gray-5);
+  --u-color_icon_very-subdued: var(--color-gray-6);
   --u-color_icon_emphasized: var(--color-gray-3);
   --u-color_icon_hovered: var(--color-gray-3);
   --u-color_divider: var(--color-gray-6);

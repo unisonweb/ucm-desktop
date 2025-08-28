@@ -10,6 +10,7 @@
   width: var(--c-workspace-card_width);
   position: relative;
   z-index: var(--layer-base);
+  transition: all 0.2s;
 
   & .workspace-card_titlebar {
     display: flex;
@@ -24,6 +25,10 @@
     font-size: var(--font-size-medium);
     color: var(--u-color_text_subdued);
     position: relative;
+
+    & .subdued {
+      color: var(--u-color_text_very-subdued);
+    }
 
     & .workspace-card_titlebar_left {
       display: flex;
@@ -72,6 +77,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+
+    & .error {
+      font-family: var(--font-monospace);
+    }
   }
 
   & .workspace-card_loading {
@@ -102,6 +111,11 @@
     --c-color_tabs_border: var(--color-card-border);
     background: var(--u-color_container);
   }
+}
+
+.workspace-card:not(.focused):hover {
+  --c-workspace-card_border: var(--u-color_border);
+  --c-workspace-card_background: var(--u-color_container_selected);
 }
 
 .workspace-pane_focused .workspace-card.focused .definition-doc {

@@ -13,6 +13,20 @@ type SearchResultsRef
 type WorkspaceItemRef
     = DefinitionItemRef Reference
     | SearchResultsItemRef SearchResultsRef
+    | DependentsItemRef Reference
+
+
+definitionReference : WorkspaceItemRef -> Maybe Reference
+definitionReference ref =
+    case ref of
+        DefinitionItemRef r ->
+            Just r
+
+        DependentsItemRef r ->
+            Just r
+
+        _ ->
+            Nothing
 
 
 toString : WorkspaceItemRef -> String
@@ -24,6 +38,9 @@ toString ref =
         SearchResultsItemRef (SearchResultsRef r) ->
             r
 
+        DependentsItemRef r ->
+            Reference.toString r
+
 
 toDomString : WorkspaceItemRef -> String
 toDomString ref =
@@ -32,8 +49,8 @@ toDomString ref =
 
 toHumanString : WorkspaceItemRef -> String
 toHumanString ref =
-    case ref of
-        DefinitionItemRef r ->
+    let
+        defRefToString r =
             let
                 fqn =
                     Reference.fqn r
@@ -45,6 +62,13 @@ toHumanString ref =
                 |> Maybe.map FQN.toString
                 |> MaybeE.or (Maybe.map Hash.toShortString hash)
                 |> Maybe.withDefault (Reference.toHumanString r)
+    in
+    case ref of
+        DefinitionItemRef r ->
+            defRefToString r
 
         SearchResultsItemRef (SearchResultsRef r) ->
             r
+
+        DependentsItemRef r ->
+            defRefToString r
