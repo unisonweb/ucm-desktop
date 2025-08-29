@@ -21,6 +21,8 @@ import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.OperatingSystem exposing (OperatingSystem)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
+import Set exposing (Set)
+import Set.Extra as SetE
 import UI.Button as Button
 import UI.Click as Click
 import UI.Icon as Icon
@@ -38,6 +40,7 @@ import UI.StatusIndicator as StatusIndicator
 type alias Model =
     { workspaceItems : WorkspaceItems
     , definitionSummaryTooltip : DefinitionSummaryTooltip.Model
+    , collapsedItems : Set String -- Serialized WorkspaceItemRef
     , keyboardShortcut : KeyboardShortcut.Model
     }
 
@@ -46,6 +49,7 @@ init : OperatingSystem -> ( Model, Cmd Msg )
 init os =
     ( { workspaceItems = WorkspaceItems.init Nothing
       , definitionSummaryTooltip = DefinitionSummaryTooltip.init
+      , collapsedItems = Set.empty
       , keyboardShortcut = KeyboardShortcut.init os
       }
     , Cmd.none
@@ -66,6 +70,7 @@ type Msg
     | OpenDefinition Reference
     | ShowDependentsOf { wsRef : WorkspaceItemRef, defItem : DefinitionItem }
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
+    | ToggleFold WorkspaceItemRef
     | Keydown KeyboardEvent.KeyboardEvent
     | SetFocusedItem WorkspaceItemRef
     | DefinitionSummaryTooltipMsg DefinitionSummaryTooltip.Msg
@@ -159,6 +164,17 @@ update config paneId msg model =
             ( { model
                 | workspaceItems =
                     WorkspaceItems.remove model.workspaceItems ref
+              }
+            , Cmd.none
+            , NoOut
+            )
+
+        ToggleFold ref ->
+            ( { model
+                | collapsedItems =
+                    SetE.toggle
+                        (WorkspaceItemRef.toString ref)
+                        model.collapsedItems
               }
             , Cmd.none
             , NoOut
@@ -473,6 +489,37 @@ handleKeyboardShortcut paneId model shortcut =
             , Cmd.none
             )
 
+        Sequence _ (Z _) ->
+            let
+                collapsedItems =
+                    model.workspaceItems
+                        |> WorkspaceItems.focus
+                        |> Maybe.map WorkspaceItem.reference
+                        |> Maybe.map WorkspaceItemRef.toString
+                        |> Maybe.map (\r -> SetE.toggle r model.collapsedItems)
+                        |> Maybe.withDefault model.collapsedItems
+            in
+            ( { model | collapsedItems = collapsedItems }
+            , Cmd.none
+            )
+
+        Chord Shift (Z _) ->
+            let
+                collapsedItems =
+                    if Set.isEmpty model.collapsedItems then
+                        model.workspaceItems
+                            |> WorkspaceItems.toList
+                            |> List.map WorkspaceItem.reference
+                            |> List.map WorkspaceItemRef.toString
+                            |> Set.fromList
+
+                    else
+                        Set.empty
+            in
+            ( { model | collapsedItems = collapsedItems }
+            , Cmd.none
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -532,8 +579,8 @@ syntaxConfig definitionSummaryTooltip =
         |> SyntaxConfig.withSyntaxHelp
 
 
-viewItem : DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
-viewItem definitionSummaryTooltip item isFocused =
+viewItem : OperatingSystem -> Set String -> DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
+viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused =
     let
         cardBase =
             WorkspaceCard.empty
@@ -568,6 +615,11 @@ viewItem definitionSummaryTooltip item isFocused =
                             , closeItem = CloseWorkspaceItem wsRef
                             , changeTab = ChangeDefinitionItemTab wsRef
                             , toggleDocFold = ToggleDocFold wsRef
+                            , isFolded =
+                                Set.member
+                                    (WorkspaceItemRef.toString wsRef)
+                                    collapsedItems
+                            , toggleFold = ToggleFold wsRef
                             , showDependents = ShowDependentsOf { wsRef = wsRef, defItem = defItem }
                             }
                     in
@@ -620,11 +672,11 @@ viewItem definitionSummaryTooltip item isFocused =
         |> WorkspaceCard.withDomId domId
         |> WorkspaceCard.withClick
             (Click.onClick (SetFocusedItem (WorkspaceItem.reference item)))
-        |> WorkspaceCard.view
+        |> WorkspaceCard.view operatingSystem
 
 
-view : String -> Bool -> Model -> Html Msg
-view paneId isFocused model =
+view : OperatingSystem -> String -> Bool -> Model -> Html Msg
+view operatingSystem paneId isFocused model =
     div
         [ onClick PaneFocus
         , class "workspace-pane"
@@ -632,5 +684,5 @@ view paneId isFocused model =
         , classList [ ( "workspace-pane_focused", isFocused ) ]
         ]
         (model.workspaceItems
-            |> WorkspaceItems.mapToList (viewItem model.definitionSummaryTooltip)
+            |> WorkspaceItems.mapToList (viewItem operatingSystem model.collapsedItems model.definitionSummaryTooltip)
         )

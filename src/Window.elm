@@ -24,7 +24,7 @@ import UI.Click as Click
 import UI.Divider as Divider
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut
-import UI.KeyboardShortcut.Key as Key
+import UI.KeyboardShortcut.Key as Key exposing (letter)
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Modal as Modal exposing (Modal)
 import UI.Tooltip as Tooltip
@@ -579,17 +579,11 @@ keyboardShortcutsModal appContext =
         chord key1 key2 =
             KeyboardShortcut.Chord key1 key2
 
-        key k =
-            KeyboardShortcut.Sequence Nothing k
-
-        letter k =
-            k Key.Lower
-
         windowNav =
             group "Window navigation"
                 [ command "Toggle sidebar" [ win (letter Key.S), chord Key.Meta (letter Key.B), chord Key.Ctrl (letter Key.B) ]
-                , command "Toggle project picker" [ win (letter Key.P) ]
-                , command "Toggle branch picker" [ win (letter Key.B) ]
+                , command "Show project picker" [ win (letter Key.P) ]
+                , command "Show branch picker" [ win (letter Key.B) ]
                 , command "Toggle right pane" [ win (letter Key.R) ]
                 , command "Focus right pane" [ win (letter Key.L), win Key.ArrowRight ]
                 , command "Focus left pane" [ win (letter Key.H), win Key.ArrowLeft ]
@@ -597,17 +591,19 @@ keyboardShortcutsModal appContext =
 
         paneNav =
             group "Pane navigation"
-                [ command "Move focus up" [ key Key.ArrowUp, key (letter Key.K) ]
-                , command "Move focus down" [ key Key.ArrowDown, key (letter Key.J) ]
+                [ command "Move focus up" [ single Key.ArrowUp, single (letter Key.K) ]
+                , command "Move focus down" [ single Key.ArrowDown, single (letter Key.J) ]
                 , command "Move card up" [ chord Key.Shift Key.ArrowUp, chord Key.Shift (letter Key.K) ]
                 , command "Move card down" [ chord Key.Shift Key.ArrowDown, chord Key.Shift (letter Key.J) ]
+                , command "Toggle fold for focused" [ single (letter Key.Z) ]
+                , command "Toggle fold for all cards" [ chord Key.Shift (letter Key.Z) ]
                 , command "Close focused card" [ single (letter Key.X) ]
                 , command "Close all cards" [ chord Key.Shift (letter Key.X) ]
                 ]
 
         other =
             group "Other"
-                [ command "Command palette / Search" [ key Key.ForwardSlash, chord Key.Meta (letter Key.K), chord Key.Ctrl (letter Key.K) ]
+                [ command "Command palette / Search" [ single Key.ForwardSlash, chord Key.Meta (letter Key.K), chord Key.Ctrl (letter Key.K) ]
                 ]
 
         content =

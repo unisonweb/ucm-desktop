@@ -12,6 +12,25 @@
   z-index: var(--layer-base);
   transition: all 0.2s;
 
+  & .tooltip-with-shortcut {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  & .workspace-card_foldable-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    transition: height 0.2s ease-in-out;
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+    height: calc-size(auto, size);
+  }
+
   & .workspace-card_titlebar {
     display: flex;
     flex-direction: row;
@@ -21,10 +40,11 @@
     justify-content: space-between;
     padding: 0.5rem 0.75rem;
     height: 2.5rem;
-    border-bottom: 1px solid var(--c-workspace-card_border);
     font-size: var(--font-size-medium);
     color: var(--u-color_text_subdued);
     position: relative;
+    transition: none;
+    border-bottom: 1px solid var(--c-workspace-card_border);
 
     & .subdued {
       color: var(--u-color_text_very-subdued);
@@ -35,11 +55,48 @@
       flex-direction: row;
       gap: 0.5rem;
       align-items: center;
+
+      & .copy-on-click {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
+
+        & .copy-on-click_success {
+          margin-top: 3px;
+
+          & .icon {
+            color: var(--u-color_positive_icon-on-element_subdued);
+          }
+        }
+      }
+
+      & .tooltip {
+        margin-top: 0.5rem;
+        margin-left: -0.5rem;
+
+        & .tooltip-bubble {
+          height: 2.25rem;
+          display: flex;
+          align-items: center;
+        }
+      }
     }
 
     & .workspace-card_titlebar_right {
       position: absolute;
       right: 0.325rem;
+
+      & .tooltip {
+        margin-top: 0.5rem;
+        margin-left: 2rem;
+
+        & .tooltip-bubble {
+          height: 2.25rem;
+          display: flex;
+          align-items: center;
+        }
+      }
     }
 
     & .workspace-card_title {
@@ -113,6 +170,10 @@
   }
 }
 
+.workspace-card:hover {
+  z-index: var(--layer-floating-controls);
+}
+
 .workspace-card:not(.focused):hover {
   --c-workspace-card_border: var(--u-color_border);
   --c-workspace-card_background: var(--u-color_container_selected);
@@ -124,6 +185,21 @@
 
 .workspace-card .definition-doc aside {
   right: -16.5rem;
+}
+
+.workspace-card.folded {
+  border-radius: var(--border-radius-base);
+
+  & .workspace-card_foldable-content {
+    height: 0;
+  }
+
+  &.folded .workspace-card_titlebar,
+  & .workspace-card_titlebar {
+    border-bottom: 1px solid transparent;
+    transition: border 0.2s ease-in-out 0.2s;
+    border-radius: var(--border-radius-base);
+  }
 }
 
 @container workspace-pane (max-width: 968px) {

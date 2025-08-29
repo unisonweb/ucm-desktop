@@ -1,14 +1,17 @@
 module Code2.Workspace.WorkspaceCard exposing (..)
 
 import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
+import Code2.Workspace.WorkspaceCardTitlebarButton as TitlebarButton exposing (titlebarButton)
 import Html exposing (Html, div, header, section, span, text)
 import Html.Attributes exposing (class)
+import Lib.OperatingSystem exposing (OperatingSystem)
 import UI
-import UI.Button as Button
 import UI.Card as Card
 import UI.Click as Click exposing (Click)
 import UI.ContextualTag as ContextualTag
-import UI.Icon as Icon
+import UI.Icon as Icon exposing (Icon)
+import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..), single)
+import UI.KeyboardShortcut.Key as Key exposing (letter)
 import UI.TabList as TabList exposing (TabList)
 
 
@@ -21,6 +24,8 @@ type alias WorkspaceCard msg =
     , domId : Maybe String
     , click : Click msg
     , close : Maybe msg
+    , isFolded : Bool
+    , toggleFold : Maybe msg
     }
 
 
@@ -38,6 +43,8 @@ empty =
     , domId = Nothing
     , click = Click.disabled
     , close = Nothing
+    , isFolded = False
+    , toggleFold = Nothing
     }
 
 
@@ -94,6 +101,26 @@ withClose close card_ =
     { card_ | close = Just close }
 
 
+withToggleFold : msg -> WorkspaceCard msg -> WorkspaceCard msg
+withToggleFold toggleFold card_ =
+    { card_ | toggleFold = Just toggleFold }
+
+
+withIsFolded : Bool -> WorkspaceCard msg -> WorkspaceCard msg
+withIsFolded isFolded card_ =
+    { card_ | isFolded = isFolded }
+
+
+fold : WorkspaceCard msg -> WorkspaceCard msg
+fold card_ =
+    { card_ | isFolded = True }
+
+
+unfold : WorkspaceCard msg -> WorkspaceCard msg
+unfold card_ =
+    { card_ | isFolded = False }
+
+
 withTabList : TabList msg -> WorkspaceCard msg -> WorkspaceCard msg
 withTabList tabList card_ =
     { card_ | tabList = Just tabList }
@@ -132,6 +159,8 @@ map f card_ =
     , domId = card_.domId
     , click = Click.map f card_.click
     , close = Maybe.map f card_.close
+    , isFolded = card_.isFolded
+    , toggleFold = Maybe.map f card_.toggleFold
     }
 
 
@@ -151,15 +180,32 @@ viewLibraryTag dep =
 -- VIEW
 
 
-view : WorkspaceCard msg -> Html msg
-view { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close } =
+toggleFoldedIcon : Bool -> Icon msg
+toggleFoldedIcon isFolded =
+    if isFolded then
+        Icon.collapseUp
+
+    else
+        Icon.expandDown
+
+
+consIf : a -> Bool -> List a -> List a
+consIf x isTrue xs =
+    if isTrue then
+        x :: xs
+
+    else
+        xs
+
+
+view : OperatingSystem -> WorkspaceCard msg -> Html msg
+view os { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
     let
         className =
-            if hasFocus then
-                "workspace-card focused"
-
-            else
-                "workspace-card"
+            [ "workspace-card" ]
+                |> consIf "focused" hasFocus
+                |> consIf "folded" isFolded
+                |> String.join " "
 
         close_ =
             case close of
@@ -167,15 +213,40 @@ view { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close } 
                     []
 
                 Just closeMsg ->
-                    [ Button.icon closeMsg Icon.x
-                        |> Button.stopPropagation
-                        |> Button.subdued
-                        |> Button.small
-                        |> Button.view
+                    [ titlebarButton closeMsg
+                        Icon.x
+                        |> TitlebarButton.withLeftOfTooltip
+                            (div [ class "tooltip-with-shortcut" ]
+                                [ text "Close"
+                                , KeyboardShortcut.viewSimple os (single (letter Key.X))
+                                , text "Close all:"
+                                , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.X))
+                                ]
+                            )
+                        |> TitlebarButton.view
+                    ]
+
+        toggleFold_ =
+            case toggleFold of
+                Nothing ->
+                    []
+
+                Just toggle ->
+                    [ titlebarButton toggle
+                        (toggleFoldedIcon isFolded)
+                        |> TitlebarButton.withLeftOfTooltip
+                            (div [ class "tooltip-with-shortcut" ]
+                                [ text "Toggle fold"
+                                , KeyboardShortcut.viewSimple os (single (letter Key.Z))
+                                , text "Toggle all:"
+                                , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.Z))
+                                ]
+                            )
+                        |> TitlebarButton.view
                     ]
 
         titleRight_ =
-            div [ class "workspace-card_titlebar_right" ] (titleRight ++ close_)
+            div [ class "workspace-card_titlebar_right" ] (titleRight ++ toggleFold_ ++ close_)
 
         titlebar =
             header [ class "workspace-card_titlebar" ]
@@ -185,8 +256,10 @@ view { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close } 
 
         cardContent =
             [ titlebar
-            , tabList |> Maybe.map TabList.view |> Maybe.withDefault UI.nothing
-            , section [ class "workspace-card_main-content" ] content
+            , div [ class "workspace-card_foldable-content" ]
+                [ tabList |> Maybe.map TabList.view |> Maybe.withDefault UI.nothing
+                , section [ class "workspace-card_main-content" ] content
+                ]
             ]
 
         card_ =
