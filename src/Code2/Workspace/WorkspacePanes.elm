@@ -224,14 +224,14 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : OperatingSystem -> Model -> Html Msg
+view operatingSystem model =
     let
         left isFocused =
-            Html.map LeftPaneMsg (WorkspacePane.view "workspace-pane_left" isFocused model.left)
+            Html.map LeftPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_left" isFocused model.left)
 
         right isFocused =
-            Html.map RightPaneMsg (WorkspacePane.view "workspace-pane_right" isFocused model.right)
+            Html.map RightPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_right" isFocused model.right)
 
         paneConfig =
             SplitPane.createViewConfig

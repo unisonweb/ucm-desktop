@@ -561,7 +561,12 @@ view appContext model =
                         window_
 
         content =
-            [ Html.map WorkspacePanesMsg (WorkspacePanes.view model.panes) ]
+            [ Html.map WorkspacePanesMsg
+                (WorkspacePanes.view
+                    appContext.operatingSystem
+                    model.panes
+                )
+            ]
     in
     window__
         |> Window.withTitlebarLeft (titlebarLeft model)

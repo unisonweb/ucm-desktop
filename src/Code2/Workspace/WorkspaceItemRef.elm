@@ -33,13 +33,13 @@ toString : WorkspaceItemRef -> String
 toString ref =
     case ref of
         DefinitionItemRef r ->
-            Reference.toString r
+            "Definition: " ++ Reference.toString r
 
         SearchResultsItemRef (SearchResultsRef r) ->
-            r
+            "Search results:" ++ r
 
         DependentsItemRef r ->
-            Reference.toString r
+            "Dependents of :" ++ Reference.toString r
 
 
 toDomString : WorkspaceItemRef -> String

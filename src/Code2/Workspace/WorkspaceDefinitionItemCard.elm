@@ -21,6 +21,8 @@ type alias WorkspaceDefinitionItemCardConfig msg =
     { wsRef : WorkspaceItemRef
     , toggleDocFold : Doc.FoldId -> msg
     , closeItem : msg
+    , isFolded : Bool
+    , toggleFold : msg
     , state : DefinitionWorkspaceItemState
     , item : DefinitionItem
     , changeTab : DefinitionItemTab -> msg
@@ -58,14 +60,14 @@ definitionItemTabs changeTab =
 
 
 view : WorkspaceDefinitionItemCardConfig msg -> WorkspaceCard msg
-view { state, item, toggleDocFold, syntaxConfig, changeTab, closeItem } =
+view cfg =
     let
         tabs =
-            definitionItemTabs changeTab
+            definitionItemTabs cfg.changeTab
 
         withTabList c =
-            if WorkspaceItem.hasDocs item then
-                case state.activeTab of
+            if WorkspaceItem.hasDocs cfg.item then
+                case cfg.state.activeTab of
                     CodeTab ->
                         c |> WorkspaceCard.withTabList (TabList.tabList [] tabs.code [ tabs.docs ])
 
@@ -76,25 +78,25 @@ view { state, item, toggleDocFold, syntaxConfig, changeTab, closeItem } =
                 c
 
         lib =
-            item
+            cfg.item
                 |> WorkspaceItem.definitionItemToLib
                 |> Maybe.map WorkspaceCard.viewLibraryTag
                 |> Maybe.withDefault UI.nothing
 
         itemContent =
-            case ( state.activeTab, WorkspaceItem.docs item ) of
+            case ( cfg.state.activeTab, WorkspaceItem.docs cfg.item ) of
                 ( DocsTab docFoldToggles, Just docs ) ->
-                    Doc.view syntaxConfig
-                        toggleDocFold
+                    Doc.view cfg.syntaxConfig
+                        cfg.toggleDocFold
                         docFoldToggles
                         docs
 
                 _ ->
-                    viewDefinitionItemSource syntaxConfig item
+                    viewDefinitionItemSource cfg.syntaxConfig cfg.item
 
         {-
            showDependentsButton =
-               Button.icon showDependents Icon.dependents
+               Button.icon cfg.showDependents Icon.dependents
                    |> Button.stopPropagation
                    |> Button.subdued
                    |> Button.small
@@ -105,12 +107,14 @@ view { state, item, toggleDocFold, syntaxConfig, changeTab, closeItem } =
         |> WorkspaceCard.withTitlebarLeft
             [ lib
             , strong []
-                [ text (FQN.toString (WorkspaceItem.definitionItemName item))
+                [ text (FQN.toString (WorkspaceItem.definitionItemName cfg.item))
                 ]
             ]
         |> WorkspaceCard.withTitlebarRight
             [-- showDependentsButton
             ]
-        |> WorkspaceCard.withClose closeItem
+        |> WorkspaceCard.withClose cfg.closeItem
+        |> WorkspaceCard.withToggleFold cfg.toggleFold
+        |> WorkspaceCard.withIsFolded cfg.isFolded
         |> withTabList
         |> WorkspaceCard.withContent [ itemContent ]
