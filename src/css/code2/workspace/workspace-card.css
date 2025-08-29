@@ -34,12 +34,11 @@
   & .workspace-card_titlebar {
     display: flex;
     flex-direction: row;
-    flex: 1;
     width: 100%;
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0.75rem;
-    height: 2.5rem;
+    height: 2.25rem;
     font-size: var(--font-size-medium);
     color: var(--u-color_text_subdued);
     position: relative;

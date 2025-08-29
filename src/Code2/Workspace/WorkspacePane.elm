@@ -105,14 +105,8 @@ update config paneId msg model =
                             , HttpApi.perform config.api (fetchDefinition config dRef)
                             )
 
-                        DependentsItemRef dRef ->
-                            let
-                                nextWorkspaceItems =
-                                    WorkspaceItems.replace model.workspaceItems ref (WorkspaceItem.Loading ref)
-                            in
-                            ( { model | workspaceItems = nextWorkspaceItems }
-                            , HttpApi.perform config.api (fetchDefinition config dRef)
-                            )
+                        DependentsItemRef _ ->
+                            ( model, Cmd.none )
             in
             ( model_, cmd, NoOut )
 
@@ -127,9 +121,8 @@ update config paneId msg model =
 
                     else
                         CodeTab
-            in
-            ( { model
-                | workspaceItems =
+
+                workspaceItems =
                     WorkspaceItems.replace
                         model.workspaceItems
                         workspaceItemRef
@@ -139,10 +132,8 @@ update config paneId msg model =
                                 defItem
                             )
                         )
-              }
-            , Cmd.none
-            , NoOut
-            )
+            in
+            ( { model | workspaceItems = workspaceItems }, Cmd.none, NoOut )
 
         FetchDefinitionItemFinished dRef (Err e) ->
             let
