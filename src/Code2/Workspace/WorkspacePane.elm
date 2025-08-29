@@ -27,7 +27,7 @@ import UI.Button as Button
 import UI.Click as Click
 import UI.Icon as Icon
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
-import UI.KeyboardShortcut.Key as Key exposing (Key(..))
+import UI.KeyboardShortcut.Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent
 import UI.Placeholder as Placeholder
 import UI.StatusIndicator as StatusIndicator

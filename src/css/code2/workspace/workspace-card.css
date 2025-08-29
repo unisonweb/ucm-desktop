@@ -55,6 +55,32 @@
       flex-direction: row;
       gap: 0.5rem;
       align-items: center;
+
+      & .copy-on-click {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
+
+        & .copy-on-click_success {
+          margin-top: 3px;
+
+          & .icon {
+            color: var(--u-color_positive_icon-on-element_subdued);
+          }
+        }
+      }
+
+      & .tooltip {
+        margin-top: 0.5rem;
+        margin-left: -0.5rem;
+
+        & .tooltip-bubble {
+          height: 2.25rem;
+          display: flex;
+          align-items: center;
+        }
+      }
     }
 
     & .workspace-card_titlebar_right {
@@ -66,7 +92,9 @@
         margin-left: 2rem;
 
         & .tooltip-bubble {
-          padding: 0.25rem;
+          height: 2.25rem;
+          display: flex;
+          align-items: center;
         }
       }
     }

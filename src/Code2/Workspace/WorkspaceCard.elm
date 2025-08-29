@@ -1,11 +1,11 @@
 module Code2.Workspace.WorkspaceCard exposing (..)
 
 import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
+import Code2.Workspace.WorkspaceCardTitlebarButton as TitlebarButton exposing (titlebarButton)
 import Html exposing (Html, div, header, section, span, text)
 import Html.Attributes exposing (class)
 import Lib.OperatingSystem exposing (OperatingSystem)
 import UI
-import UI.Button as Button
 import UI.Card as Card
 import UI.Click as Click exposing (Click)
 import UI.ContextualTag as ContextualTag
@@ -13,7 +13,6 @@ import UI.Icon as Icon exposing (Icon)
 import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..), single)
 import UI.KeyboardShortcut.Key as Key exposing (letter)
 import UI.TabList as TabList exposing (TabList)
-import UI.Tooltip as Tooltip
 
 
 type alias WorkspaceCard msg =
@@ -44,7 +43,7 @@ empty =
     , domId = Nothing
     , click = Click.disabled
     , close = Nothing
-    , isFolded = True
+    , isFolded = False
     , toggleFold = Nothing
     }
 
@@ -199,21 +198,6 @@ consIf x isTrue xs =
         xs
 
 
-titlebarButton : msg -> Icon msg -> Html msg -> Html msg
-titlebarButton onClick icon tooltipContent =
-    Tooltip.rich tooltipContent
-        |> Tooltip.tooltip
-        |> Tooltip.below
-        |> Tooltip.withArrow Tooltip.End
-        |> Tooltip.view
-            (Button.icon onClick icon
-                |> Button.stopPropagation
-                |> Button.subdued
-                |> Button.small
-                |> Button.view
-            )
-
-
 view : OperatingSystem -> WorkspaceCard msg -> Html msg
 view os { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
     let
@@ -231,13 +215,15 @@ view os { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close
                 Just closeMsg ->
                     [ titlebarButton closeMsg
                         Icon.x
-                        (div [ class "tooltip-with-shortcut" ]
-                            [ text "Close"
-                            , KeyboardShortcut.viewSimple os (single (letter Key.X))
-                            , text "Close all:"
-                            , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.X))
-                            ]
-                        )
+                        |> TitlebarButton.withLeftOfTooltip
+                            (div [ class "tooltip-with-shortcut" ]
+                                [ text "Close"
+                                , KeyboardShortcut.viewSimple os (single (letter Key.X))
+                                , text "Close all:"
+                                , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.X))
+                                ]
+                            )
+                        |> TitlebarButton.view
                     ]
 
         toggleFold_ =
@@ -248,13 +234,15 @@ view os { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close
                 Just toggle ->
                     [ titlebarButton toggle
                         (toggleFoldedIcon isFolded)
-                        (div [ class "tooltip-with-shortcut" ]
-                            [ text "Toggle fold"
-                            , KeyboardShortcut.viewSimple os (single (letter Key.Z))
-                            , text "Toggle all:"
-                            , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.Z))
-                            ]
-                        )
+                        |> TitlebarButton.withLeftOfTooltip
+                            (div [ class "tooltip-with-shortcut" ]
+                                [ text "Toggle fold"
+                                , KeyboardShortcut.viewSimple os (single (letter Key.Z))
+                                , text "Toggle all:"
+                                , KeyboardShortcut.viewSimple os (Chord Key.Shift (letter Key.Z))
+                                ]
+                            )
+                        |> TitlebarButton.view
                     ]
 
         titleRight_ =

@@ -11,10 +11,14 @@ import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(
 import Code2.Workspace.WorkspaceCard as WorkspaceCard exposing (WorkspaceCard)
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem)
 import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
-import Html exposing (Html, strong, text)
+import Html exposing (Html, div, strong, text)
+import Html.Attributes exposing (class)
 import UI
 import UI.Click as Click
+import UI.CopyOnClick as CopyOnClick
+import UI.Icon as Icon
 import UI.TabList as TabList
+import UI.Tooltip as Tooltip
 
 
 type alias WorkspaceDefinitionItemCardConfig msg =
@@ -29,6 +33,19 @@ type alias WorkspaceDefinitionItemCardConfig msg =
     , syntaxConfig : SyntaxConfig.SyntaxConfig msg
     , showDependents : msg
     }
+
+
+rawSource : WorkspaceItem.DefinitionItem -> Maybe String
+rawSource defItem =
+    case defItem of
+        WorkspaceItem.TermItem detail ->
+            Term.rawSource detail
+
+        WorkspaceItem.TypeItem detail ->
+            Type.rawSource detail
+
+        _ ->
+            Nothing
 
 
 viewDefinitionItemSource : SyntaxConfig.SyntaxConfig msg -> WorkspaceItem.DefinitionItem -> Html msg
@@ -96,12 +113,28 @@ view cfg =
 
         {-
            showDependentsButton =
-               Button.icon cfg.showDependents Icon.dependents
-                   |> Button.stopPropagation
-                   |> Button.subdued
-                   |> Button.small
-                   |> Button.view
+             titlebarButton cfg.showDependentsButton Icon.dependents
+              |> TitlebarButton.withLeftOfTooltip (text "View direct dependents")
+              |> TitlebarButton.view
         -}
+        copySourceToClipboard =
+            case rawSource cfg.item of
+                Just source ->
+                    div [ class "copy-code" ]
+                        [ Tooltip.tooltip (Tooltip.text "Copy source")
+                            |> Tooltip.below
+                            |> Tooltip.withArrow Tooltip.Start
+                            |> Tooltip.view
+                                (CopyOnClick.view source
+                                    (div [ class "button small subdued content-icon" ]
+                                        [ Icon.view Icon.clipboard ]
+                                    )
+                                    (Icon.view Icon.checkmark)
+                                )
+                        ]
+
+                Nothing ->
+                    UI.nothing
     in
     WorkspaceCard.empty
         |> WorkspaceCard.withTitlebarLeft
@@ -109,6 +142,7 @@ view cfg =
             , strong []
                 [ text (FQN.toString (WorkspaceItem.definitionItemName cfg.item))
                 ]
+            , copySourceToClipboard
             ]
         |> WorkspaceCard.withTitlebarRight
             [-- showDependentsButton
