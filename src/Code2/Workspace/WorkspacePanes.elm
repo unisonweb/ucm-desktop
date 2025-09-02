@@ -222,16 +222,39 @@ subscriptions model =
 
 
 -- VIEW
+{-
+   PaneMsg -> PanesMsg
+
+   but I need
+
+   PanesMsg -> PaneMsg
+-}
 
 
 view : OperatingSystem -> Model -> Html Msg
 view operatingSystem model =
     let
+        someHtml : Html Msg
+        someHtml =
+            div [] []
+
         left isFocused =
-            Html.map LeftPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_left" isFocused model.left)
+            WorkspacePane.view
+                LeftPaneMsg
+                someHtml
+                operatingSystem
+                "workspace-pane_left"
+                isFocused
+                model.left
 
         right isFocused =
-            Html.map RightPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_right" isFocused model.right)
+            WorkspacePane.view
+                RightPaneMsg
+                someHtml
+                operatingSystem
+                "workspace-pane_right"
+                isFocused
+                model.right
 
         paneConfig =
             SplitPane.createViewConfig

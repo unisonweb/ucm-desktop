@@ -559,19 +559,19 @@ subscriptions _ =
 -- VIEW
 
 
-syntaxConfig : DefinitionSummaryTooltip.Model -> SyntaxConfig.SyntaxConfig Msg
-syntaxConfig definitionSummaryTooltip =
+syntaxConfig : (Msg -> msg) -> DefinitionSummaryTooltip.Model -> SyntaxConfig.SyntaxConfig msg
+syntaxConfig toMsg definitionSummaryTooltip =
     SyntaxConfig.default
-        (OpenDefinition >> Click.onClick)
+        (OpenDefinition >> toMsg >> Click.onClick)
         (DefinitionSummaryTooltip.tooltipConfig
-            DefinitionSummaryTooltipMsg
+            (DefinitionSummaryTooltipMsg >> toMsg)
             definitionSummaryTooltip
         )
         |> SyntaxConfig.withSyntaxHelp
 
 
-viewItem : OperatingSystem -> Set String -> DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
-viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused =
+viewItem : (Msg -> msg) -> Html msg -> OperatingSystem -> Set String -> DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html msg
+viewItem toMsg someHtml operatingSystem collapsedItems definitionSummaryTooltip item isFocused =
     let
         cardBase =
             WorkspaceCard.empty
@@ -602,16 +602,16 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                             { wsRef = wsRef
                             , state = state
                             , item = defItem
-                            , syntaxConfig = syntaxConfig definitionSummaryTooltip
-                            , closeItem = CloseWorkspaceItem wsRef
-                            , changeTab = ChangeDefinitionItemTab wsRef
-                            , toggleDocFold = ToggleDocFold wsRef
+                            , syntaxConfig = syntaxConfig toMsg definitionSummaryTooltip
+                            , closeItem = toMsg (CloseWorkspaceItem wsRef)
+                            , changeTab = ChangeDefinitionItemTab wsRef >> toMsg
+                            , toggleDocFold = ToggleDocFold wsRef >> toMsg
                             , isFolded =
                                 Set.member
                                     (WorkspaceItemRef.toString wsRef)
                                     collapsedItems
-                            , toggleFold = ToggleFold wsRef
-                            , showDependents = ShowDependentsOf { wsRef = wsRef, defItem = defItem }
+                            , toggleFold = toMsg (ToggleFold wsRef)
+                            , showDependents = toMsg (ShowDependentsOf { wsRef = wsRef, defItem = defItem })
                             }
                     in
                     WorkspaceDefinitionItemCard.view config
@@ -622,9 +622,9 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                             { wsRef = wsRef
                             , item = defItem
                             , dependents = dependents
-                            , syntaxConfig = syntaxConfig definitionSummaryTooltip
-                            , closeItem = CloseWorkspaceItem wsRef
-                            , openDefinition = OpenDefinition
+                            , syntaxConfig = syntaxConfig toMsg definitionSummaryTooltip
+                            , closeItem = toMsg (CloseWorkspaceItem wsRef)
+                            , openDefinition = OpenDefinition >> toMsg
                             }
                     in
                     WorkspaceDependentsItemCard.view config
@@ -640,9 +640,10 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                             [ StatusIndicator.bad |> StatusIndicator.view
                             , strong [] [ text (WorkspaceItemRef.toHumanString wsRef) ]
                             , strong [ class "subdued" ] [ text "failed to load definition" ]
+                            , someHtml
                             ]
                         |> WorkspaceCard.withTitlebarRight
-                            [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
+                            [ Button.icon (toMsg (CloseWorkspaceItem wsRef)) Icon.x
                                 |> Button.subdued
                                 |> Button.small
                                 |> Button.view
@@ -652,7 +653,7 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                                 [ p [ class "error" ]
                                     [ text (Util.httpErrorToString e)
                                     ]
-                                , Button.iconThenLabel (Refetch wsRef) Icon.refresh "Try again"
+                                , Button.iconThenLabel (toMsg (Refetch wsRef)) Icon.refresh "Try again"
                                     |> Button.small
                                     |> Button.view
                                 ]
@@ -662,18 +663,21 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
         |> WorkspaceCard.withFocus isFocused
         |> WorkspaceCard.withDomId domId
         |> WorkspaceCard.withClick
-            (Click.onClick (SetFocusedItem (WorkspaceItem.reference item)))
+            (Click.onClick (toMsg (SetFocusedItem (WorkspaceItem.reference item))))
         |> WorkspaceCard.view operatingSystem
 
 
-view : OperatingSystem -> String -> Bool -> Model -> Html Msg
-view operatingSystem paneId isFocused model =
+{-| We render in `msg` instead of `Msg` to allow the parent to configure the
+Card since the Workspace is shared between UCM Desktop and Unison Share
+-}
+view : (Msg -> msg) -> Html msg -> OperatingSystem -> String -> Bool -> Model -> Html msg
+view toMsg someHtml operatingSystem paneId isFocused model =
     div
-        [ onClick PaneFocus
+        [ onClick (toMsg PaneFocus)
         , class "workspace-pane"
         , id paneId
         , classList [ ( "workspace-pane_focused", isFocused ) ]
         ]
         (model.workspaceItems
-            |> WorkspaceItems.mapToList (viewItem operatingSystem model.collapsedItems model.definitionSummaryTooltip)
+            |> WorkspaceItems.mapToList (viewItem toMsg someHtml operatingSystem model.collapsedItems model.definitionSummaryTooltip)
         )
