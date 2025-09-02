@@ -8,7 +8,7 @@ import Code.Definition.Reference as Reference exposing (Reference)
 import Code.Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature, TermSource)
 import Code.Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
-import Code.Hash as Hash
+import Code.Hash as Hash exposing (Hash)
 import Code.ProjectDependency as ProjectDependency exposing (ProjectDependency)
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
@@ -151,6 +151,22 @@ definitionItemName defItem =
 
         DataConstructorItem (DataConstructor _ { info }) ->
             info.name
+
+
+definitionItemHash : DefinitionItem -> Hash
+definitionItemHash defItem =
+    case defItem of
+        TermItem (Term.Term h _ _) ->
+            h
+
+        TypeItem (Type.Type h _ _) ->
+            h
+
+        AbilityConstructorItem (AbilityConstructor h _) ->
+            h
+
+        DataConstructorItem (DataConstructor h _) ->
+            h
 
 
 allFqns : WorkspaceItem -> List FQN

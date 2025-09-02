@@ -1,0 +1,11 @@
+.workspace-card.workspace-definition-item-card {
+  & .hash {
+    font-size: var(--font-size-extra-small);
+    margin-right: 0.75rem;
+
+    & .icon {
+      font-size: var(--font-size-extra-small);
+      margin-right: 0;
+    }
+  }
+}

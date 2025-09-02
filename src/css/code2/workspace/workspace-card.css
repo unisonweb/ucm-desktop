@@ -85,6 +85,10 @@
     & .workspace-card_titlebar_right {
       position: absolute;
       right: 0.325rem;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.125rem;
 
       & .tooltip {
         margin-top: 0.5rem;

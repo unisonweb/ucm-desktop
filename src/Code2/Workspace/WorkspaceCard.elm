@@ -26,6 +26,7 @@ type alias WorkspaceCard msg =
     , close : Maybe msg
     , isFolded : Bool
     , toggleFold : Maybe msg
+    , className : String
     }
 
 
@@ -45,6 +46,7 @@ empty =
     , close = Nothing
     , isFolded = False
     , toggleFold = Nothing
+    , className = ""
     }
 
 
@@ -64,6 +66,11 @@ withTitle title card_ =
         | titleLeft =
             [ span [ class "workspace-card_title" ] [ text title ] ]
     }
+
+
+withClassName : String -> WorkspaceCard msg -> WorkspaceCard msg
+withClassName className card_ =
+    { card_ | className = className }
 
 
 withTitlebar : { left : List (Html msg), right : List (Html msg) } -> WorkspaceCard msg -> WorkspaceCard msg
@@ -161,6 +168,7 @@ map f card_ =
     , close = Maybe.map f card_.close
     , isFolded = card_.isFolded
     , toggleFold = Maybe.map f card_.toggleFold
+    , className = card_.className
     }
 
 
@@ -199,10 +207,13 @@ consIf x isTrue xs =
 
 
 view : OperatingSystem -> WorkspaceCard msg -> Html msg
-view os { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
+view os wsCard =
     let
+        { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
+            wsCard
+
         className =
-            [ "workspace-card" ]
+            [ "workspace-card", wsCard.className ]
                 |> consIf "focused" hasFocus
                 |> consIf "folded" isFolded
                 |> String.join " "

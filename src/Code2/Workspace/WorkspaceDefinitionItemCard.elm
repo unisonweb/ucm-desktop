@@ -5,13 +5,14 @@ import Code.Definition.Source as Source
 import Code.Definition.Term as Term
 import Code.Definition.Type as Type
 import Code.FullyQualifiedName as FQN
+import Code.Hash as Hash
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..), DefinitionWorkspaceItemState)
 import Code2.Workspace.WorkspaceCard as WorkspaceCard exposing (WorkspaceCard)
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem)
 import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
-import Html exposing (Html, div, strong, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import UI
 import UI.Click as Click
@@ -137,15 +138,15 @@ view cfg =
                     UI.nothing
     in
     WorkspaceCard.empty
+        |> WorkspaceCard.withClassName "workspace-definition-item-card"
         |> WorkspaceCard.withTitlebarLeft
             [ lib
-            , strong []
-                [ text (FQN.toString (WorkspaceItem.definitionItemName cfg.item))
-                ]
+            , FQN.view (WorkspaceItem.definitionItemName cfg.item)
             , copySourceToClipboard
             ]
         |> WorkspaceCard.withTitlebarRight
-            [-- showDependentsButton
+            [ -- showDependentsButton
+              Hash.view (WorkspaceItem.definitionItemHash cfg.item)
             ]
         |> WorkspaceCard.withClose cfg.closeItem
         |> WorkspaceCard.withToggleFold cfg.toggleFold
