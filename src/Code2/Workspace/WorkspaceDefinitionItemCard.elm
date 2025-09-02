@@ -136,6 +136,18 @@ view cfg =
 
                 Nothing ->
                     UI.nothing
+
+        defHash =
+            div [ class "definition-hash" ]
+                [ Tooltip.tooltip (Tooltip.text "Copy full definition hash")
+                    |> Tooltip.below
+                    |> Tooltip.withArrow Tooltip.Middle
+                    |> Tooltip.view
+                        (CopyOnClick.view (Hash.toUnprefixedString (WorkspaceItem.definitionItemHash cfg.item))
+                            (Hash.view (WorkspaceItem.definitionItemHash cfg.item))
+                            (Icon.view Icon.checkmark)
+                        )
+                ]
     in
     WorkspaceCard.empty
         |> WorkspaceCard.withClassName "workspace-definition-item-card"
@@ -145,8 +157,9 @@ view cfg =
             , copySourceToClipboard
             ]
         |> WorkspaceCard.withTitlebarRight
-            [ -- showDependentsButton
-              Hash.view (WorkspaceItem.definitionItemHash cfg.item)
+            [ defHash
+
+            -- ,showDependentsButton
             ]
         |> WorkspaceCard.withClose cfg.closeItem
         |> WorkspaceCard.withToggleFold cfg.toggleFold

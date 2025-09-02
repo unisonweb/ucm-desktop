@@ -1,11 +1,50 @@
 .workspace-card.workspace-definition-item-card {
-  & .hash {
-    font-size: var(--font-size-extra-small);
+  & .definition-hash {
     margin-right: 0.75rem;
+    padding: 0 0.5rem;
+    border-radius: var(--border-radius-base);
+    height: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & .hash {
+      font-size: var(--font-size-extra-small);
+    }
 
     & .icon {
       font-size: var(--font-size-extra-small);
-      margin-right: 0;
+      transition: none;
+    }
+
+    & .copy-on-click {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.25rem;
+
+      & .copy-on-click_success {
+        position: absolute;
+        margin-top: 3px;
+        margin-left: -1.5rem;
+
+        & .icon {
+          color: var(--u-color_positive_icon-on-element_subdued);
+          font-size: var(--font-size-small);
+        }
+      }
+    }
+
+    &:hover {
+      background: var(--u-color_action_hovered);
+
+      & .hash {
+        color: var(--u-color_text);
+      }
+
+      & .icon {
+        color: var(--u-color_icon);
+      }
     }
   }
 }
