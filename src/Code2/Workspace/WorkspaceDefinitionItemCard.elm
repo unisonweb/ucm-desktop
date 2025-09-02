@@ -141,7 +141,7 @@ view cfg =
             div [ class "definition-hash" ]
                 [ Tooltip.tooltip (Tooltip.text "Copy full definition hash")
                     |> Tooltip.below
-                    |> Tooltip.withArrow Tooltip.Middle
+                    |> Tooltip.withArrow Tooltip.End
                     |> Tooltip.view
                         (CopyOnClick.view (Hash.toUnprefixedString (WorkspaceItem.definitionItemHash cfg.item))
                             (Hash.view (WorkspaceItem.definitionItemHash cfg.item))

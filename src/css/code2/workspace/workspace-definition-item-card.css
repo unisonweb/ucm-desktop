@@ -8,6 +8,17 @@
     flex-direction: row;
     align-items: center;
 
+    & .tooltip {
+      margin-top: calc(0.25rem - 1px);
+      margin-left: 5.5rem;
+
+      & .tooltip-bubble {
+        height: 2.25rem;
+        display: flex;
+        align-items: center;
+      }
+    }
+
     & .hash {
       font-size: var(--font-size-extra-small);
     }
