@@ -224,16 +224,39 @@ subscriptions model =
 -- VIEW
 
 
-view : OperatingSystem -> Model -> Html Msg
-view operatingSystem model =
+type alias PanesConfig =
+    { operatingSystem : OperatingSystem
+    , withDependents : Bool
+    , withDependencies : Bool
+    }
+
+
+view : PanesConfig -> Model -> Html Msg
+view cfg model =
     let
+        paneConfig paneId isFocused =
+            { operatingSystem = cfg.operatingSystem
+            , withDependents = cfg.withDependents
+            , withDependencies = cfg.withDependencies
+            , paneId = paneId
+            , isFocused = isFocused
+            }
+
         left isFocused =
-            Html.map LeftPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_left" isFocused model.left)
+            Html.map LeftPaneMsg
+                (WorkspacePane.view
+                    (paneConfig "workspace-pane_left" isFocused)
+                    model.left
+                )
 
         right isFocused =
-            Html.map RightPaneMsg (WorkspacePane.view operatingSystem "workspace-pane_right" isFocused model.right)
+            Html.map RightPaneMsg
+                (WorkspacePane.view
+                    (paneConfig "workspace-pane_right" isFocused)
+                    model.right
+                )
 
-        paneConfig =
+        splitConfig =
             SplitPane.createViewConfig
                 { toMsg = SplitPaneMsg
                 , customSplitter =
@@ -248,10 +271,10 @@ view operatingSystem model =
     case model.focusedPane of
         LeftPaneFocus { rightPaneVisible } ->
             if rightPaneVisible then
-                div [ class "workspace-panes" ] [ SplitPane.view paneConfig (left True) (right False) model.splitPane ]
+                div [ class "workspace-panes" ] [ SplitPane.view splitConfig (left True) (right False) model.splitPane ]
 
             else
                 div [ class "workspace-panes_single-pane" ] [ left True ]
 
         RightPaneFocus ->
-            div [ class "workspace-panes" ] [ SplitPane.view paneConfig (left False) (right True) model.splitPane ]
+            div [ class "workspace-panes" ] [ SplitPane.view splitConfig (left False) (right True) model.splitPane ]

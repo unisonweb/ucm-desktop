@@ -560,13 +560,14 @@ view appContext model =
                         (m |> CommandPalette.view |> Modal.map CommandPaletteMsg)
                         window_
 
+        panesConfig =
+            { operatingSystem = appContext.operatingSystem
+            , withDependents = False
+            , withDependencies = False
+            }
+
         content =
-            [ Html.map WorkspacePanesMsg
-                (WorkspacePanes.view
-                    appContext.operatingSystem
-                    model.panes
-                )
-            ]
+            [ Html.map WorkspacePanesMsg (WorkspacePanes.view panesConfig model.panes) ]
     in
     window__
         |> Window.withTitlebarLeft (titlebarLeft model)

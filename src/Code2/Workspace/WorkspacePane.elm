@@ -5,13 +5,15 @@ import Code.Config exposing (Config)
 import Code.Definition.Doc as Doc
 import Code.Definition.Reference exposing (Reference)
 import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
-import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.FullyQualifiedName exposing (FQN)
 import Code.Syntax.SyntaxConfig as SyntaxConfig
+import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
+import Code2.Workspace.DefinitionMatch as DefinitionMatch exposing (DefinitionMatch)
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
 import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
-import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem, WorkspaceItem)
+import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Html exposing (Html, div, p, strong, text)
@@ -68,7 +70,8 @@ type Msg
     | CloseWorkspaceItem WorkspaceItemRef
     | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
     | OpenDefinition Reference
-    | ShowDependentsOf { wsRef : WorkspaceItemRef, defItem : DefinitionItem }
+    | ShowDependentsOf { defRef : WorkspaceItemRef, defItem : DefinitionItem }
+    | FetchDependentsFinished { depRef : WorkspaceItemRef, defItem : DefinitionItem } (HttpResult (List DefinitionMatch))
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | ToggleFold WorkspaceItemRef
     | Keydown KeyboardEvent.KeyboardEvent
@@ -116,7 +119,7 @@ update config paneId msg model =
                     WorkspaceItemRef.DefinitionItemRef dRef
 
                 activeTab =
-                    if WorkspaceItem.isDoc defItem then
+                    if DefinitionItem.isDoc defItem then
                         DocsTab Doc.emptyDocFoldToggles
 
                     else
@@ -182,88 +185,40 @@ update config paneId msg model =
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
         OpenDefinition r ->
-            let
-                ( m, c, out ) =
-                    case WorkspaceItems.focus model.workspaceItems of
-                        Just item ->
-                            openReference config
-                                paneId
-                                model
-                                (WorkspaceItem.reference item)
-                                (WorkspaceItemRef.DefinitionItemRef r)
+            openDefinition config paneId model r
 
-                        Nothing ->
-                            openDefinition config paneId model r
-            in
-            ( m, c, out )
-
-        ShowDependentsOf { wsRef, defItem } ->
-            case wsRef of
+        ShowDependentsOf { defRef, defItem } ->
+            case defRef of
                 WorkspaceItemRef.DefinitionItemRef r ->
-                    let
-                        depRef =
-                            WorkspaceItemRef.DependentsItemRef r
-
-                        depItem =
-                            WorkspaceItem.Success
-                                depRef
-                                (WorkspaceItem.DependentsWorkspaceItem
-                                    defItem
-                                    -- TODO: Load the actual data instead of this mock
-                                    [ WorkspaceItem.TermMatch
-                                        { displayName = FQN.fromString "List.map"
-                                        , fqn = FQN.fromString "List.map"
-                                        }
-                                    , WorkspaceItem.TermMatch
-                                        { displayName = FQN.fromString "List.foldLeft"
-                                        , fqn = FQN.fromString "List.foldLeft"
-                                        }
-                                    , WorkspaceItem.TermMatch
-                                        { displayName = FQN.fromString "Optional.map"
-                                        , fqn = FQN.fromString "Optional.map"
-                                        }
-                                    , WorkspaceItem.TermMatch
-                                        { displayName = FQN.fromString "Cloud.run"
-                                        , fqn = FQN.fromString "Cloud.run"
-                                        }
-                                    , WorkspaceItem.AbilityConstructorMatch
-                                        { displayName = FQN.fromString "Cloud"
-                                        , fqn = FQN.fromString "Cloud"
-                                        }
-                                    ]
-                                )
-
-                        workspaceItems =
-                            model.workspaceItems
-                    in
-                    if WorkspaceItems.includesItem workspaceItems depRef then
-                        if not (WorkspaceItems.isFocused workspaceItems depRef) then
-                            let
-                                nextWorkspaceItems =
-                                    WorkspaceItems.focusOn workspaceItems depRef
-                            in
-                            ( { model | workspaceItems = nextWorkspaceItems }
-                            , scrollToItem paneId depRef
-                            , FocusOn depRef
-                            )
-
-                        else
-                            ( model, Cmd.none, NoOut )
-
-                    else
-                        ( { model
-                            | workspaceItems =
-                                WorkspaceItems.insertWithFocusBefore
-                                    workspaceItems
-                                    wsRef
-                                    depItem
-                          }
-                        , scrollToItem paneId wsRef
-                        , FocusOn wsRef
-                        )
+                    openDependents config paneId model r defItem
 
                 _ ->
                     ( model, Cmd.none, NoOut )
+
+        FetchDependentsFinished { depRef, defItem } (Ok dependents) ->
+            let
+                workspaceItems =
+                    WorkspaceItems.replace
+                        model.workspaceItems
+                        depRef
+                        (WorkspaceItem.Success
+                            depRef
+                            (WorkspaceItem.DependentsWorkspaceItem defItem dependents)
+                        )
+            in
+            ( { model | workspaceItems = workspaceItems }, Cmd.none, NoOut )
+
+        FetchDependentsFinished { depRef } (Err e) ->
+            ( { model
+                | workspaceItems =
+                    WorkspaceItems.replace
+                        model.workspaceItems
+                        depRef
+                        (WorkspaceItem.Failure depRef e)
+              }
+            , Cmd.none
+            , NoOut
+            )
 
         ToggleDocFold wsRef foldId ->
             let
@@ -332,63 +287,77 @@ update config paneId msg model =
 
 
 openDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
-openDefinition config paneId model ref =
-    openItem config paneId model Nothing (DefinitionItemRef ref)
+openDefinition config paneId ({ workspaceItems } as model) ref =
+    let
+        wsRef =
+            WorkspaceItemRef.DefinitionItemRef ref
+    in
+    -- openItem config paneId model (Just relativeToRef) ref
+    -- We don't want to refetch or replace any already open definitions, but we
+    -- do want to focus and scroll to it (unless its already currently focused)
+    if WorkspaceItems.includesItem workspaceItems wsRef then
+        focusOpenedItem paneId model wsRef
+
+    else
+        let
+            toInsert =
+                WorkspaceItem.Loading wsRef
+
+            nextWorkspaceItems =
+                case workspaceItems |> WorkspaceItems.focus |> Maybe.map WorkspaceItem.reference of
+                    Nothing ->
+                        WorkspaceItems.prependWithFocus workspaceItems toInsert
+
+                    Just r ->
+                        WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
+        in
+        ( { model | workspaceItems = nextWorkspaceItems }
+        , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config ref), scrollToItem paneId wsRef ]
+        , FocusOn wsRef
+        )
 
 
-open : Config -> String -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
-open config paneId model ref =
-    openItem config paneId model Nothing ref
+focusOpenedItem : String -> Model -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
+focusOpenedItem paneId ({ workspaceItems } as model) wsRef =
+    if not (WorkspaceItems.isFocused workspaceItems wsRef) then
+        let
+            nextWorkspaceItems =
+                WorkspaceItems.focusOn workspaceItems wsRef
+        in
+        ( { model | workspaceItems = nextWorkspaceItems }
+        , scrollToItem paneId wsRef
+        , FocusOn wsRef
+        )
+
+    else
+        ( model, Cmd.none, NoOut )
 
 
-openReference : Config -> String -> Model -> WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
-openReference config paneId model relativeToRef ref =
-    openItem config paneId model (Just relativeToRef) ref
+openDependents : Config -> String -> Model -> Reference -> DefinitionItem -> ( Model, Cmd Msg, OutMsg )
+openDependents config paneId ({ workspaceItems } as model) dependentsOfRef dependentsOfItem =
+    let
+        depRef =
+            WorkspaceItemRef.DependentsItemRef dependentsOfRef
+    in
+    if WorkspaceItems.includesItem workspaceItems depRef then
+        focusOpenedItem paneId model depRef
 
-
-openItem : Config -> String -> Model -> Maybe WorkspaceItemRef -> WorkspaceItemRef -> ( Model, Cmd Msg, OutMsg )
-openItem config paneId ({ workspaceItems } as model) relativeToRef ref =
-    case ref of
-        SearchResultsItemRef _ ->
-            ( model, Cmd.none, FocusOn ref )
-
-        DependentsItemRef _ ->
-            ( model, Cmd.none, FocusOn ref )
-
-        DefinitionItemRef dRef ->
-            -- We don't want to refetch or replace any already open definitions, but we
-            -- do want to focus and scroll to it (unless its already currently focused)
-            if WorkspaceItems.includesItem workspaceItems ref then
-                if not (WorkspaceItems.isFocused workspaceItems ref) then
-                    let
-                        nextWorkspaceItems =
-                            WorkspaceItems.focusOn workspaceItems ref
-                    in
-                    ( { model | workspaceItems = nextWorkspaceItems }
-                    , scrollToItem paneId ref
-                    , FocusOn ref
-                    )
-
-                else
-                    ( model, Cmd.none, NoOut )
-
-            else
-                let
-                    toInsert =
-                        WorkspaceItem.Loading ref
-
-                    nextWorkspaceItems =
-                        case relativeToRef of
-                            Nothing ->
-                                WorkspaceItems.prependWithFocus workspaceItems toInsert
-
-                            Just r ->
-                                WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
-                in
-                ( { model | workspaceItems = nextWorkspaceItems }
-                , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config dRef), scrollToItem paneId ref ]
-                , FocusOn ref
-                )
+    else
+        let
+            nextWorkspaceItems =
+                WorkspaceItems.insertWithFocusBefore
+                    workspaceItems
+                    (WorkspaceItemRef.DefinitionItemRef dependentsOfRef)
+                    (WorkspaceItem.Loading depRef)
+        in
+        ( { model | workspaceItems = nextWorkspaceItems }
+        , Cmd.batch
+            [ HttpApi.perform config.api
+                (fetchDependents config depRef dependentsOfRef dependentsOfItem)
+            , scrollToItem paneId depRef
+            ]
+        , FocusOn depRef
+        )
 
 
 currentlyOpenReferences : Model -> List Reference
@@ -531,8 +500,21 @@ fetchDefinition config ref =
     endpoint
         |> config.toApiEndpoint
         |> HttpApi.toRequest
-            (WorkspaceItem.decodeDefinitionItem ref)
+            (DefinitionItem.decode ref)
             (FetchDefinitionItemFinished ref)
+
+
+fetchDependents : Config -> WorkspaceItemRef -> Reference -> DefinitionItem -> ApiRequest (List DefinitionMatch) Msg
+fetchDependents config depRef defRef defItem =
+    let
+        endpoint =
+            CodebaseApi.Dependents { ref = defRef }
+    in
+    endpoint
+        |> config.toApiEndpoint
+        |> HttpApi.toRequest
+            DefinitionMatch.decodeList
+            (FetchDependentsFinished { depRef = depRef, defItem = defItem })
 
 
 scrollToItem : String -> WorkspaceItemRef -> Cmd Msg
@@ -559,6 +541,15 @@ subscriptions _ =
 -- VIEW
 
 
+type alias PaneConfig =
+    { paneId : String
+    , operatingSystem : OperatingSystem
+    , isFocused : Bool
+    , withDependents : Bool
+    , withDependencies : Bool
+    }
+
+
 syntaxConfig : DefinitionSummaryTooltip.Model -> SyntaxConfig.SyntaxConfig Msg
 syntaxConfig definitionSummaryTooltip =
     SyntaxConfig.default
@@ -570,8 +561,8 @@ syntaxConfig definitionSummaryTooltip =
         |> SyntaxConfig.withSyntaxHelp
 
 
-viewItem : OperatingSystem -> Set String -> DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
-viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused =
+viewItem : PaneConfig -> Set String -> DefinitionSummaryTooltip.Model -> WorkspaceItem -> Bool -> Html Msg
+viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
     let
         cardBase =
             WorkspaceCard.empty
@@ -611,7 +602,9 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                                     (WorkspaceItemRef.toString wsRef)
                                     collapsedItems
                             , toggleFold = ToggleFold wsRef
-                            , showDependents = ShowDependentsOf { wsRef = wsRef, defItem = defItem }
+                            , withDependents = cfg.withDependents
+                            , withDependencies = cfg.withDependencies
+                            , showDependents = ShowDependentsOf { defRef = wsRef, defItem = defItem }
                             }
                     in
                     WorkspaceDefinitionItemCard.view config
@@ -635,11 +628,29 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
                         |> WorkspaceCard.withContent []
 
                 WorkspaceItem.Failure wsRef e ->
+                    let
+                        ( title, subTitle ) =
+                            case wsRef of
+                                WorkspaceItemRef.DefinitionItemRef _ ->
+                                    ( WorkspaceItemRef.toHumanString wsRef
+                                    , "failed to load definition"
+                                    )
+
+                                WorkspaceItemRef.DependentsItemRef _ ->
+                                    ( WorkspaceItemRef.toHumanString wsRef
+                                    , "failed to load dependents"
+                                    )
+
+                                _ ->
+                                    ( WorkspaceItemRef.toHumanString wsRef
+                                    , "failed to load"
+                                    )
+                    in
                     cardBase
                         |> WorkspaceCard.withTitlebarLeft
                             [ StatusIndicator.bad |> StatusIndicator.view
-                            , strong [] [ text (WorkspaceItemRef.toHumanString wsRef) ]
-                            , strong [ class "subdued" ] [ text "failed to load definition" ]
+                            , strong [] [ text title ]
+                            , strong [ class "subdued" ] [ text subTitle ]
                             ]
                         |> WorkspaceCard.withTitlebarRight
                             [ Button.icon (CloseWorkspaceItem wsRef) Icon.x
@@ -663,17 +674,17 @@ viewItem operatingSystem collapsedItems definitionSummaryTooltip item isFocused 
         |> WorkspaceCard.withDomId domId
         |> WorkspaceCard.withClick
             (Click.onClick (SetFocusedItem (WorkspaceItem.reference item)))
-        |> WorkspaceCard.view operatingSystem
+        |> WorkspaceCard.view cfg.operatingSystem
 
 
-view : OperatingSystem -> String -> Bool -> Model -> Html Msg
-view operatingSystem paneId isFocused model =
+view : PaneConfig -> Model -> Html Msg
+view cfg model =
     div
         [ onClick PaneFocus
         , class "workspace-pane"
-        , id paneId
-        , classList [ ( "workspace-pane_focused", isFocused ) ]
+        , id cfg.paneId
+        , classList [ ( "workspace-pane_focused", cfg.isFocused ) ]
         ]
         (model.workspaceItems
-            |> WorkspaceItems.mapToList (viewItem operatingSystem model.collapsedItems model.definitionSummaryTooltip)
+            |> WorkspaceItems.mapToList (viewItem cfg model.collapsedItems model.definitionSummaryTooltip)
         )

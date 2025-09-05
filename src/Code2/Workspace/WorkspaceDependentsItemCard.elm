@@ -3,8 +3,9 @@ module Code2.Workspace.WorkspaceDependentsItemCard exposing (view)
 import Code.Definition.Reference as Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN
 import Code.Syntax.SyntaxConfig as SyntaxConfig
+import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
+import Code2.Workspace.DefinitionMatch exposing (DefinitionMatch(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard exposing (WorkspaceCard)
-import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (DefinitionItem, DefinitionMatch(..))
 import Code2.Workspace.WorkspaceItemRef exposing (WorkspaceItemRef)
 import Html exposing (Html, div, header, strong, text)
 import Html.Attributes exposing (class)
@@ -37,16 +38,16 @@ groupDependents dependents =
     let
         f dep acc =
             case dep of
-                WorkspaceItem.TermMatch _ ->
+                TermMatch _ ->
                     { acc | terms = dep :: acc.terms }
 
-                WorkspaceItem.TypeMatch _ ->
+                TypeMatch _ ->
                     { acc | types = dep :: acc.types }
 
-                WorkspaceItem.AbilityConstructorMatch _ ->
+                AbilityConstructorMatch _ ->
                     { acc | abilities = dep :: acc.abilities }
 
-                WorkspaceItem.DataConstructorMatch _ ->
+                DataConstructorMatch _ ->
                     { acc | docs = dep :: acc.docs }
     in
     List.foldl f { terms = [], types = [], abilities = [], docs = [] } dependents
@@ -123,13 +124,13 @@ view cfg =
     let
         lib =
             cfg.item
-                |> WorkspaceItem.definitionItemToLib
+                |> DefinitionItem.toLib
                 |> Maybe.map WorkspaceCard.viewLibraryTag
                 |> Maybe.withDefault UI.nothing
 
         itemContent =
             case cfg.item of
-                WorkspaceItem.TermItem _ ->
+                DefinitionItem.TermItem _ ->
                     div [ class "workspace-dependents-item-card_content" ]
                         [ viewTerms cfg.openDefinition cfg.dependents
                         ]
@@ -152,7 +153,7 @@ view cfg =
     WorkspaceCard.empty
         |> WorkspaceCard.withTitlebarLeft
             [ lib
-            , strong [] [ text (FQN.toString (WorkspaceItem.definitionItemName cfg.item)) ]
+            , strong [] [ text (FQN.toString (DefinitionItem.name cfg.item)) ]
             , strong [ class "subdued" ]
                 [ text
                     (String.fromInt numDeps

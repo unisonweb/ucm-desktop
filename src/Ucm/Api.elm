@@ -67,6 +67,37 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
     let
         base =
             baseCodePathFromContext context
+
+        constructorSuffixRegex =
+            Maybe.withDefault Regex.never (Regex.fromString "#[ad]\\d$")
+
+        withoutConstructorSuffix h =
+            h
+                |> Hash.toString
+                |> Regex.replace constructorSuffixRegex (always "")
+
+        prefixedRefPath prefix ref =
+            case Reference.hashQualified ref of
+                HQ.NameOnly fqn ->
+                    prefix ++ [ "by-name", FQN.toApiUrlString fqn ]
+
+                HQ.HashOnly h ->
+                    prefix ++ [ "by-hash", withoutConstructorSuffix h ]
+
+                HQ.HashQualified _ h ->
+                    prefix ++ [ "by-hash", withoutConstructorSuffix h ]
+
+        refToString r =
+            case Reference.hashQualified r of
+                HQ.NameOnly fqn ->
+                    -- Using plain `toString` here because percentEncoded is added in elm/url's query param builder below
+                    fqn |> FQN.toString
+
+                HQ.HashOnly h ->
+                    withoutConstructorSuffix h
+
+                HQ.HashQualified _ h ->
+                    withoutConstructorSuffix h
     in
     case cbEndpoint of
         CodebaseApi.Find { perspective, withinFqn, limit, sourceWidth, query } ->
@@ -110,28 +141,27 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
                 , queryParams = Maybe.withDefault [] namespace_ ++ perspectiveToQueryParams perspective
                 }
 
-        CodebaseApi.Definition { perspective, ref } ->
+        CodebaseApi.Dependencies { ref } ->
             let
-                constructorSuffixRegex =
-                    Maybe.withDefault Regex.never (Regex.fromString "#[ad]\\d$")
-
-                withoutConstructorSuffix h =
-                    h
-                        |> Hash.toString
-                        |> Regex.replace constructorSuffixRegex (always "")
-
-                refToString r =
-                    case Reference.hashQualified r of
-                        HQ.NameOnly fqn ->
-                            -- Using plain `toString` here because percentEncoded is added in elm/url's query param builder below
-                            fqn |> FQN.toString
-
-                        HQ.HashOnly h ->
-                            withoutConstructorSuffix h
-
-                        HQ.HashQualified _ h ->
-                            withoutConstructorSuffix h
+                path =
+                    prefixedRefPath [ "definitions", "dependencies" ] ref
             in
+            GET
+                { path = base ++ path
+                , queryParams = []
+                }
+
+        CodebaseApi.Dependents { ref } ->
+            let
+                path =
+                    prefixedRefPath [ "definitions", "dependents" ] ref
+            in
+            GET
+                { path = base ++ path
+                , queryParams = []
+                }
+
+        CodebaseApi.Definition { perspective, ref } ->
             [ string "names" (refToString ref) ]
                 |> (\names -> GET { path = base ++ [ "getDefinition" ], queryParams = names ++ perspectiveToQueryParams perspective })
 
