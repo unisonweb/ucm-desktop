@@ -564,10 +564,16 @@ view appContext model =
             { operatingSystem = appContext.operatingSystem
             , withDependents = False
             , withDependencies = False
+            , withNamespaceDropdown = False
             }
 
         content =
-            [ Html.map WorkspacePanesMsg (WorkspacePanes.view panesConfig model.panes) ]
+            [ Html.map WorkspacePanesMsg
+                (WorkspacePanes.view
+                    panesConfig
+                    model.panes
+                )
+            ]
     in
     window__
         |> Window.withTitlebarLeft (titlebarLeft model)

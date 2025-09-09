@@ -51,8 +51,8 @@ toLib defItem =
                 _ ->
                     Nothing
 
-        toLib_ info =
-            case info.namespace of
+        toLib_ info_ =
+            case info_.namespace of
                 Just n ->
                     fqnToLib n
 
@@ -65,36 +65,16 @@ toLib defItem =
                             else
                                 fqnToLib n
                     in
-                    List.foldl f Nothing info.otherNames
+                    List.foldl f Nothing info_.otherNames
     in
-    case defItem of
-        TermItem (Term.Term _ _ { info }) ->
-            toLib_ info
-
-        TypeItem (Type.Type _ _ { info }) ->
-            toLib_ info
-
-        AbilityConstructorItem (AbilityConstructor _ { info }) ->
-            toLib_ info
-
-        DataConstructorItem (DataConstructor _ { info }) ->
-            toLib_ info
+    defItem
+        |> info
+        |> toLib_
 
 
 name : DefinitionItem -> FQN
 name defItem =
-    case defItem of
-        TermItem (Term.Term _ _ { info }) ->
-            info.name
-
-        TypeItem (Type.Type _ _ { info }) ->
-            info.name
-
-        AbilityConstructorItem (AbilityConstructor _ { info }) ->
-            info.name
-
-        DataConstructorItem (DataConstructor _ { info }) ->
-            info.name
+    defItem |> info |> .name
 
 
 hash : DefinitionItem -> Hash
@@ -141,6 +121,32 @@ isDoc defItem =
             False
 
 
+info : DefinitionItem -> Info.Info
+info defItem =
+    case defItem of
+        TermItem (Term.Term _ _ details) ->
+            details.info
+
+        TypeItem (Type.Type _ _ details) ->
+            details.info
+
+        AbilityConstructorItem (AbilityConstructor _ details) ->
+            details.info
+
+        DataConstructorItem (DataConstructor _ details) ->
+            details.info
+
+
+namespace : DefinitionItem -> Maybe FQN
+namespace defItem =
+    defItem |> info |> .namespace
+
+
+otherNames : DefinitionItem -> List FQN
+otherNames defItem =
+    defItem |> info |> .otherNames
+
+
 
 -- JSON DECODERS
 
@@ -163,11 +169,11 @@ decodeTypeDetails :
         }
 decodeTypeDetails =
     let
-        make cat name_ otherNames source doc =
+        make cat name_ otherNames_ source doc =
             { category = cat
             , doc = doc
             , name = name_
-            , otherNames = otherNames
+            , otherNames = otherNames_
             , source = source
             }
     in
@@ -211,10 +217,10 @@ decodeTermDetails :
         }
 decodeTermDetails =
     let
-        make cat name_ otherNames source doc =
+        make cat name_ otherNames_ source doc =
             { category = cat
             , name = name_
-            , otherNames = otherNames
+            , otherNames = otherNames_
             , source = source
             , doc = doc
             }

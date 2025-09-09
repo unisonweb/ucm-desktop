@@ -228,6 +228,7 @@ type alias PanesConfig =
     { operatingSystem : OperatingSystem
     , withDependents : Bool
     , withDependencies : Bool
+    , withNamespaceDropdown : Bool
     }
 
 
@@ -240,6 +241,7 @@ view cfg model =
             , withDependencies = cfg.withDependencies
             , paneId = paneId
             , isFocused = isFocused
+            , withNamespaceDropdown = cfg.withNamespaceDropdown
             }
 
         left isFocused =

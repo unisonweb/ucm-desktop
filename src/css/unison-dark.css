@@ -242,9 +242,9 @@ body.unison-dark {
   --u-color_positive_element: var(--color-green-1);
   --u-color_positive_text-on-element: var(--color-gray-11);
   --u-color_positive_icon-on-element: var(--color-gray-11);
-  --u-color_positive_element_subdued: var(--color-green-5);
+  --u-color_positive_element_subdued: var(--color-green-0);
   --u-color_positive_text-on-element_subdued: var(--u-color_text);
-  --u-color_positive_icon-on-element_subdued: var(--color-green-1);
+  --u-color_positive_icon-on-element_subdued: var(--color-green-4);
 
   /* [x] */
   --u-color_working_element: var(--color-purple-5);
