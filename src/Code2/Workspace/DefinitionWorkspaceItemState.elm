@@ -10,4 +10,10 @@ type DefinitionItemTab
 
 type alias DefinitionWorkspaceItemState =
     { activeTab : DefinitionItemTab
+    , namespaceDropdownIsOpen : Bool
     }
+
+
+init : DefinitionItemTab -> DefinitionWorkspaceItemState
+init tab =
+    { activeTab = tab, namespaceDropdownIsOpen = False }

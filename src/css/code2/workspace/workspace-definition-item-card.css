@@ -1,4 +1,59 @@
 .workspace-card.workspace-definition-item-card {
+  & .workspace-definition-item-card_other-names {
+    & .workspace-definition-item-card_other-names_button {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: var(--border-radius-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        & .icon {
+          color: var(--u-color_icon-on-action_hovered);
+        }
+      }
+    }
+
+    & .tooltip {
+      & .tooltip-bubble {
+        height: auto;
+      }
+    }
+  }
+
+  & .workspace-definition-item-card_other-names_list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    & .aka {
+      color: var(--u-color_text_subdued);
+    }
+
+    & .aka,
+    & .other-name {
+      display: flex;
+      line-height: 1;
+      padding: 0.25rem 0;
+    }
+
+    & .other-name {
+      flex-direction: row;
+      gap: 0.25rem;
+      align-items: center;
+
+      & .icon {
+        color: var(--u-color_icon_subdued);
+      }
+
+      & .fully-qualified-name {
+        height: auto;
+        padding: 0;
+      }
+    }
+  }
+
   & .definition-hash {
     margin-right: 0.75rem;
     padding: 0 0.5rem;
@@ -7,6 +62,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    transition: all 0.2s;
 
     & .tooltip {
       margin-top: calc(0.25rem - 1px);

@@ -9,7 +9,7 @@ import Code.FullyQualifiedName exposing (FQN)
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
 import Code2.Workspace.DefinitionMatch as DefinitionMatch exposing (DefinitionMatch)
-import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
+import Code2.Workspace.DefinitionWorkspaceItemState as DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
 import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
@@ -71,8 +71,11 @@ type Msg
     | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
     | OpenDefinition Reference
     | ShowDependentsOf { defRef : WorkspaceItemRef, defItem : DefinitionItem }
+    | FindWithinNamespace FQN
+    | ChangePerspective FQN
     | FetchDependentsFinished { depRef : WorkspaceItemRef, defItem : DefinitionItem } (HttpResult (List DefinitionMatch))
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
+    | ToggleNamespaceDropdown WorkspaceItemRef
     | ToggleFold WorkspaceItemRef
     | Keydown KeyboardEvent.KeyboardEvent
     | SetFocusedItem WorkspaceItemRef
@@ -84,6 +87,8 @@ type OutMsg
     = NoOut
     | RequestPaneFocus
     | FocusOn WorkspaceItemRef
+    | RequestFindInNamespace FQN
+    | RequestChangePerspective FQN
 
 
 update : Config -> String -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -131,7 +136,7 @@ update config paneId msg model =
                         workspaceItemRef
                         (WorkspaceItem.Success workspaceItemRef
                             (WorkspaceItem.DefinitionWorkspaceItem
-                                { activeTab = activeTab }
+                                (DefinitionWorkspaceItemState.init activeTab)
                                 defItem
                             )
                         )
@@ -178,7 +183,7 @@ update config paneId msg model =
             let
                 workspaceItems_ =
                     WorkspaceItems.updateDefinitionItemState
-                        (\_ -> { activeTab = newTab })
+                        (\s -> { s | activeTab = newTab })
                         wsRef
                         model.workspaceItems
             in
@@ -225,12 +230,29 @@ update config paneId msg model =
                 updateState state =
                     case state.activeTab of
                         DocsTab toggles ->
-                            { activeTab =
-                                DocsTab (Doc.toggleFold toggles foldId)
+                            { state
+                                | activeTab =
+                                    DocsTab (Doc.toggleFold toggles foldId)
                             }
 
                         _ ->
                             state
+
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        updateState
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
+
+        ToggleNamespaceDropdown wsRef ->
+            let
+                updateState state =
+                    { state
+                        | namespaceDropdownIsOpen =
+                            not state.namespaceDropdownIsOpen
+                    }
 
                 workspaceItems_ =
                     WorkspaceItems.updateDefinitionItemState
@@ -547,6 +569,7 @@ type alias PaneConfig =
     , isFocused : Bool
     , withDependents : Bool
     , withDependencies : Bool
+    , withNamespaceDropdown : Bool
     }
 
 
@@ -589,6 +612,17 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
 
                 WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem state defItem) ->
                     let
+                        namespaceDropdown =
+                            if cfg.withNamespaceDropdown then
+                                Just
+                                    { toggle = ToggleNamespaceDropdown wsRef
+                                    , findWithinNamespace = FindWithinNamespace
+                                    , changePerspective = ChangePerspective
+                                    }
+
+                            else
+                                Nothing
+
                         config =
                             { wsRef = wsRef
                             , state = state
@@ -605,6 +639,7 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                             , withDependents = cfg.withDependents
                             , withDependencies = cfg.withDependencies
                             , showDependents = ShowDependentsOf { defRef = wsRef, defItem = defItem }
+                            , namespaceDropdown = namespaceDropdown
                             }
                     in
                     WorkspaceDefinitionItemCard.view config

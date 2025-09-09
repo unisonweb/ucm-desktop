@@ -62,10 +62,19 @@
         gap: 0.25rem;
 
         & .copy-on-click_success {
-          margin-top: 3px;
+          position: absolute;
+          background: var(--u-color_positive_element_subdued);
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 4px;
+          display: flex;
+          line-height: 1;
+          align-items: center;
+          justify-content: center;
 
           & .icon {
             color: var(--u-color_positive_icon-on-element_subdued);
+            font-size: var(--font-size-base);
           }
         }
       }
