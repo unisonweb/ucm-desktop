@@ -562,9 +562,11 @@ view appContext model =
 
         panesConfig =
             { operatingSystem = appContext.operatingSystem
-            , withDependents = False
+            , withDependents = True
             , withDependencies = False
             , withNamespaceDropdown = False
+            , withFocusedPaneIndicator = True
+            , withMinimap = False
             }
 
         content =

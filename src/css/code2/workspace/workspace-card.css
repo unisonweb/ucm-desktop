@@ -1,7 +1,24 @@
+.clickable-workspace-card {
+  --c-workspace-card_width: min(
+    calc(var(--readable-column-width-medium) + 2rem),
+    100%
+  );
+
+  width: var(--c-workspace-card_width);
+}
+
 .workspace-card {
   --c-workspace-card_border: var(--u-color_border_subdued);
   --c-workspace-card_background: var(--u-color_container_faded);
-  --c-workspace-card_width: calc(var(--readable-column-width-medium) + 2rem);
+  --c-workspace-card_width: min(
+    calc(var(--readable-column-width-medium) + 2rem),
+    100%
+  );
+
+  & .definition-doc {
+    --color-doc-bg: var(--c-workspace-card_background);
+    --color-doc-source-bg: var(--u-color_container_subdued);
+  }
 
   display: flex;
   flex-direction: column;
@@ -25,7 +42,6 @@
     gap: 0;
     padding: 0;
     transition: height 0.2s ease-in-out;
-    overflow: hidden;
     width: 100%;
     height: auto;
     height: calc-size(auto, size);
@@ -37,16 +53,20 @@
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    height: 2.25rem;
+    padding: 0.75rem;
+    height: 2.5rem;
     font-size: var(--font-size-medium);
     color: var(--u-color_text_subdued);
     position: relative;
     transition: none;
     border-bottom: 1px solid var(--c-workspace-card_border);
 
+    & a:has(.fully-qualified-name):hover .fully-qualified-name_segment {
+      color: var(--u-color_interactive);
+    }
+
     & .subdued {
-      color: var(--u-color_text_very-subdued);
+      color: var(--u-color_text_subdued);
     }
 
     & .workspace-card_titlebar_left {
@@ -116,10 +136,29 @@
     }
   }
 
+  & .workspace-card_titlebar:has(+ .workspace-card_subtitlebar) {
+    border-bottom: 0;
+  }
+
+  & .workspace-card_subtitlebar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    padding-top: 0;
+    font-size: var(--font-size-medium);
+    color: var(--u-color_text_subdued);
+    position: relative;
+    transition: none;
+    border-bottom: 1px solid var(--c-workspace-card_border);
+  }
+
   & .tab-list {
-    --c-color_tabs_text: var(--u-color_text_very-subdued);
+    --c-color_tabs_text: var(--u-color_text_subdued);
     --c-color_tabs_border: var(--color-card-border);
-    --c-color_tabs_text_selected: var(--u-color_text_subdued);
+    --c-color_tabs_text_selected: var(--u-color_text);
     --c-color_tabs_border_selected: var(--u-color_border_emphasized);
     --c-color_tabs_text_hovered: var(--u-color_text);
     --c-color_tabs_border_hovered: var(--color-card-border);
@@ -176,6 +215,10 @@
     border-radius: var(--border-radius-base) var(--border-radius-base) 0 0;
   }
 
+  & .workspace-card_subtitlebar {
+    background: var(--u-color_container);
+  }
+
   & .tab-list {
     --c-color_tabs_border: var(--color-card-border);
     background: var(--u-color_container);
@@ -191,10 +234,6 @@
   --c-workspace-card_background: var(--u-color_container_selected);
 }
 
-.workspace-pane_focused .workspace-card.focused .definition-doc {
-  --color-doc-bg: var(--color-doc-focus-bg);
-}
-
 .workspace-card .definition-doc aside {
   right: -16.5rem;
 }
@@ -204,6 +243,7 @@
 
   & .workspace-card_foldable-content {
     height: 0;
+    overflow: hidden;
   }
 
   &.folded .workspace-card_titlebar,
@@ -211,16 +251,5 @@
     border-bottom: 1px solid transparent;
     transition: border 0.2s ease-in-out 0.2s;
     border-radius: var(--border-radius-base);
-  }
-}
-
-@container workspace-pane (max-width: 968px) {
-  /* TODO: these are the styles from ui-core. This container query probably
-   * belongs there showhow */
-  .workspace-card .definition-doc aside {
-    position: relative;
-    right: auto;
-    width: auto;
-    margin: 1.5rem 1.5rem 1.5rem 1.5rem;
   }
 }

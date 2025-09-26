@@ -76,38 +76,69 @@ update config msg model =
     case msg of
         LeftPaneMsg workspacePaneMsg ->
             let
-                ( leftPane, leftPaneCmd, out ) =
+                ( leftPane, leftPaneCmd, leftPaneOut ) =
                     WorkspacePane.update config "workspace-pane_left" workspacePaneMsg model.left
 
-                focusedPane =
-                    case ( out, model.focusedPane ) of
-                        ( WorkspacePane.RequestPaneFocus, RightPaneFocus ) ->
-                            LeftPaneFocus { rightPaneVisible = True }
+                ( model_, out ) =
+                    case leftPaneOut of
+                        WorkspacePane.RequestPaneFocus ->
+                            case model.focusedPane of
+                                RightPaneFocus ->
+                                    ( { model | focusedPane = LeftPaneFocus { rightPaneVisible = True } }, NoOut )
+
+                                _ ->
+                                    ( model, NoOut )
+
+                        WorkspacePane.FocusOn wsRef ->
+                            ( model, Focused wsRef )
+
+                        WorkspacePane.RequestFindInNamespace fqn ->
+                            ( model, ShowFinderRequest fqn )
+
+                        WorkspacePane.Emptied ->
+                            ( model, Emptied )
+
+                        WorkspacePane.RequestChangePerspective ref fqn ->
+                            ( model, ChangePerspectiveToSubNamespace ref fqn )
 
                         _ ->
-                            model.focusedPane
+                            ( model, NoOut )
             in
-            ( { model | left = leftPane, focusedPane = focusedPane }
+            ( { model_ | left = leftPane }
             , Cmd.map LeftPaneMsg leftPaneCmd
-            , NoOut
+            , out
             )
 
         RightPaneMsg workspacePaneMsg ->
             let
-                ( rightPane, rightPaneCmd, out ) =
-                    WorkspacePane.update config "workspace-pane_right" workspacePaneMsg model.right
+                ( rightPane, rightPaneCmd, rightPaneOut ) =
+                    WorkspacePane.update config "workspace-pane_right" workspacePaneMsg model.left
 
-                focusedPane =
-                    case ( out, model.focusedPane ) of
-                        ( WorkspacePane.RequestPaneFocus, LeftPaneFocus _ ) ->
-                            RightPaneFocus
+                ( model_, out ) =
+                    case rightPaneOut of
+                        WorkspacePane.RequestPaneFocus ->
+                            case model.focusedPane of
+                                RightPaneFocus ->
+                                    ( { model | focusedPane = RightPaneFocus }, NoOut )
+
+                                _ ->
+                                    ( model, NoOut )
+
+                        WorkspacePane.FocusOn wsRef ->
+                            ( model, Focused wsRef )
+
+                        WorkspacePane.RequestFindInNamespace fqn ->
+                            ( model, ShowFinderRequest fqn )
+
+                        WorkspacePane.Emptied ->
+                            ( model, Emptied )
 
                         _ ->
-                            model.focusedPane
+                            ( model, NoOut )
             in
-            ( { model | right = rightPane, focusedPane = focusedPane }
+            ( { model_ | right = rightPane }
             , Cmd.map RightPaneMsg rightPaneCmd
-            , NoOut
+            , out
             )
 
         SplitPaneMsg paneMsg ->
@@ -187,6 +218,25 @@ openDefinition config model ref =
             ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
 
 
+openDependentsOf : Config -> Model -> Reference -> ( Model, Cmd Msg )
+openDependentsOf config model ref =
+    case model.focusedPane of
+        LeftPaneFocus _ ->
+            let
+                -- TODO: deal with the out msg and routes
+                ( leftPane, leftPaneCmd, _ ) =
+                    WorkspacePane.openDependents config "workspace-pane_left" model.left ref
+            in
+            ( { model | left = leftPane }, Cmd.map LeftPaneMsg leftPaneCmd )
+
+        RightPaneFocus ->
+            let
+                ( rightPane, rightPaneCmd, _ ) =
+                    WorkspacePane.openDependents config "workspace-pane_right" model.right ref
+            in
+            ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
+
+
 currentlyOpenReferences : Model -> List Reference
 currentlyOpenReferences model =
     WorkspacePane.currentlyOpenReferences model.left
@@ -228,7 +278,9 @@ type alias PanesConfig =
     { operatingSystem : OperatingSystem
     , withDependents : Bool
     , withDependencies : Bool
+    , withFocusedPaneIndicator : Bool
     , withNamespaceDropdown : Bool
+    , withMinimap : Bool
     }
 
 
@@ -241,7 +293,9 @@ view cfg model =
             , withDependencies = cfg.withDependencies
             , paneId = paneId
             , isFocused = isFocused
+            , withFocusedPaneIndicator = cfg.withFocusedPaneIndicator
             , withNamespaceDropdown = cfg.withNamespaceDropdown
+            , withMinimap = cfg.withMinimap
             }
 
         left isFocused =

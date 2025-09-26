@@ -1,7 +1,7 @@
 module Code2.Workspace.DefinitionItem exposing (..)
 
-import Code.Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
-import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
+import Code.Definition.AbilityConstructor as AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
+import Code.Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
 import Code.Definition.Doc as Doc exposing (Doc)
 import Code.Definition.Info as Info
 import Code.Definition.Reference exposing (Reference)
@@ -35,6 +35,24 @@ type DefinitionItem
       -- rendered separate from TypeItem
     | DataConstructorItem DataConstructorDetail
     | AbilityConstructorItem AbilityConstructorDetail
+
+
+isLib : DefinitionItem -> Bool
+isLib defItem =
+    MaybeE.isJust (toLib defItem)
+
+
+toLibFqn : FQN -> Maybe FQN
+toLibFqn fqn =
+    case fqn |> FQN.segments |> NEL.toList of
+        "lib" :: _ :: "lib" :: _ ->
+            Nothing
+
+        "lib" :: libName :: _ ->
+            Just (FQN.fromList [ "lib", libName ])
+
+        _ ->
+            Nothing
 
 
 toLib : DefinitionItem -> Maybe ProjectDependency
@@ -91,6 +109,32 @@ hash defItem =
 
         DataConstructorItem (DataConstructor h _) ->
             h
+
+
+isBuiltin : DefinitionItem -> Bool
+isBuiltin defItem =
+    case defItem of
+        TermItem t ->
+            Term.isBuiltin t
+
+        TypeItem t ->
+            Type.isBuiltin t
+
+        AbilityConstructorItem (AbilityConstructor.AbilityConstructor _ a) ->
+            Type.isBuiltinSource a.source
+
+        DataConstructorItem (DataConstructor.DataConstructor _ d) ->
+            Type.isBuiltinSource d.source
+
+
+isTerm : DefinitionItem -> Bool
+isTerm defItem =
+    case defItem of
+        TermItem _ ->
+            True
+
+        _ ->
+            False
 
 
 docs : DefinitionItem -> Maybe Doc

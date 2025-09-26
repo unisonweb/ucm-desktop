@@ -114,4 +114,43 @@
       }
     }
   }
+
+  & .mixed-docs-and-code {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  & .definition-source {
+    overflow: auto;
+
+    & .term-signature .large-signature {
+      margin-left: 2ch;
+    }
+  }
+
+  & .foldable-source {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+}
+
+@container workspace-pane (max-width: 968px) {
+  .workspace-card.workspace-definition-item-card {
+    & .definition-doc aside {
+      position: relative;
+      right: auto;
+      width: auto;
+      margin: 1.5rem 1.5rem 1.5rem 1.5rem;
+    }
+
+    & .namespace-dropdown,
+    & .category-icon,
+    & .workspace-definition-item-card_other-names_list,
+    & .definition-hash {
+      display: none;
+    }
+  }
 }

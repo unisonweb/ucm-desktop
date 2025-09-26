@@ -1,7 +1,7 @@
 module Code2.Workspace.DefinitionMatch exposing (..)
 
-import Code.Definition.Term as Term exposing (TermSignature)
-import Code.Definition.Type as Type exposing (TypeSource)
+import Code.Definition.Term as Term exposing (TermCategory, TermSignature)
+import Code.Definition.Type as Type exposing (TypeCategory, TypeSource)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Json.Decode as Decode exposing (at, field)
@@ -10,16 +10,21 @@ import Json.Decode.Pipeline exposing (required, requiredAt)
 import Lib.Decode.Helpers exposing (whenKindIs)
 
 
-type alias MatchSummary sum =
-    { displayName : FQN, fqn : FQN, hash : Hash, summary : sum }
+type alias MatchSummary cat sum =
+    { displayName : FQN
+    , fqn : FQN
+    , category : cat
+    , hash : Hash
+    , summary : sum
+    }
 
 
 type alias TermMatchSummary =
-    MatchSummary TermSignature
+    MatchSummary TermCategory TermSignature
 
 
 type alias TypeMatchSummary =
-    MatchSummary TypeSource
+    MatchSummary TypeCategory TypeSource
 
 
 type DefinitionMatch
@@ -30,21 +35,58 @@ type DefinitionMatch
 
 
 
+-- HELPERS
+
+
+displayName : DefinitionMatch -> FQN
+displayName defItem =
+    case defItem of
+        TermMatch sum ->
+            sum.displayName
+
+        TypeMatch sum ->
+            sum.displayName
+
+        DataConstructorMatch sum ->
+            sum.displayName
+
+        AbilityConstructorMatch sum ->
+            sum.displayName
+
+
+fqn : DefinitionMatch -> FQN
+fqn defItem =
+    case defItem of
+        TermMatch sum ->
+            sum.fqn
+
+        TypeMatch sum ->
+            sum.fqn
+
+        DataConstructorMatch sum ->
+            sum.fqn
+
+        AbilityConstructorMatch sum ->
+            sum.fqn
+
+
+
 -- JSON DECODERS
 
 
 decodeMatch_ :
-    (MatchSummary sum -> DefinitionMatch)
-    -> (List String -> Decode.Decoder c)
-    -> (List String -> Decode.Decoder sum)
+    (MatchSummary cat sum -> DefinitionMatch)
+    -> (List String -> Decode.Decoder cat)
+    -> Decode.Decoder sum
     -> Decode.Decoder DefinitionMatch
 decodeMatch_ ctor catDecoder summaryDecoder =
     let
-        make hash name_ fqn _ summary =
+        make hash name_ fqn_ category summary =
             ctor
                 { hash = hash
-                , fqn = fqn
+                , fqn = fqn_
                 , displayName = name_
+                , category = category
                 , summary = summary
                 }
     in
@@ -53,7 +95,7 @@ decodeMatch_ ctor catDecoder summaryDecoder =
         |> requiredAt [ "definition", "displayName" ] FQN.decode
         |> required "fqn" FQN.decode
         |> requiredAt [ "definition" ] (catDecoder [ "tag" ])
-        |> requiredAt [ "definition" ] (summaryDecoder [ "summary" ])
+        |> requiredAt [ "definition", "summary" ] summaryDecoder
 
 
 decode : Decode.Decoder DefinitionMatch
@@ -70,26 +112,25 @@ decode =
                 "Term"
 
         decodeConstructorSuffix =
-            Decode.map termTypeByHash (at [ "contents", "namedTerm", "termHash" ] Hash.decode)
+            Decode.map termTypeByHash (at [ "definition", "hash" ] Hash.decode)
 
         decodeTypeMatch =
-            -- TODO
-            decodeMatch_ TypeMatch Type.decodeTypeCategory (\path -> Type.decodeTypeSource path [])
+            decodeMatch_ TypeMatch Type.decodeTypeCategory (Type.decodeTypeSource [ "tag" ] [ "contents" ])
 
         decodeTermMatch =
-            decodeMatch_ TermMatch Term.decodeTermCategory Term.decodeSignature
+            decodeMatch_ TermMatch Term.decodeTermCategory (Term.decodeSignature [ "contents" ])
 
         decodeAbilityConstructorMatch =
-            decodeMatch_ TermMatch Term.decodeTermCategory Term.decodeSignature
+            decodeMatch_ TermMatch Term.decodeTermCategory (Term.decodeSignature [ "contents" ])
 
         decodeDataConstructorMatch =
-            decodeMatch_ TermMatch Term.decodeTermCategory Term.decodeSignature
+            decodeMatch_ TermMatch Term.decodeTermCategory (Term.decodeSignature [ "contents" ])
     in
     Decode.oneOf
-        [ when decodeConstructorSuffix ((==) "AbilityConstructor") (field "contents" decodeAbilityConstructorMatch)
-        , when decodeConstructorSuffix ((==) "DataConstructor") (field "contents" decodeDataConstructorMatch)
-        , whenKindIs "term" (field "contents" decodeTermMatch)
-        , whenKindIs "type" (field "contents" decodeTypeMatch)
+        [ when decodeConstructorSuffix ((==) "AbilityConstructor") (field "definition" decodeAbilityConstructorMatch)
+        , when decodeConstructorSuffix ((==) "DataConstructor") (field "definition" decodeDataConstructorMatch)
+        , whenKindIs "term" decodeTermMatch
+        , whenKindIs "type" decodeTypeMatch
         ]
 
 

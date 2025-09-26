@@ -9,22 +9,28 @@ import Code.FullyQualifiedName exposing (FQN)
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
 import Code2.Workspace.DefinitionMatch as DefinitionMatch exposing (DefinitionMatch)
-import Code2.Workspace.DefinitionWorkspaceItemState as DefinitionWorkspaceItemState exposing (DefinitionItemTab(..))
+import Code2.Workspace.DefinitionWorkspaceItemState as DefinitionWorkspaceItemState exposing (DefinitionItemTab)
+import Code2.Workspace.DependentsWorkspaceItemState as DependentsWorkspaceItemState exposing (DependentsItemTab)
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
 import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
 import Code2.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Html exposing (Html, div, p, strong, text)
+import Code2.Workspace.WorkspaceMinimap as WorkspaceMinimap
+import Html exposing (Html, div, p, pre, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
+import Json.Decode as Decode
 import Lib.HttpApi as HttpApi exposing (ApiRequest, HttpResult)
 import Lib.OperatingSystem exposing (OperatingSystem)
 import Lib.ScrollTo as ScrollTo
 import Lib.Util as Util
+import Maybe.Extra as MaybeE
 import Set exposing (Set)
 import Set.Extra as SetE
+import Task
+import UI
 import UI.Button as Button
 import UI.Click as Click
 import UI.Icon as Icon
@@ -44,6 +50,7 @@ type alias Model =
     , definitionSummaryTooltip : DefinitionSummaryTooltip.Model
     , collapsedItems : Set String -- Serialized WorkspaceItemRef
     , keyboardShortcut : KeyboardShortcut.Model
+    , isMinimapToggled : Bool
     }
 
 
@@ -53,6 +60,7 @@ init os =
       , definitionSummaryTooltip = DefinitionSummaryTooltip.init
       , collapsedItems = Set.empty
       , keyboardShortcut = KeyboardShortcut.init os
+      , isMinimapToggled = False
       }
     , Cmd.none
     )
@@ -67,13 +75,18 @@ type Msg
     | PaneFocus
     | FetchDefinitionItemFinished Reference (HttpResult DefinitionItem)
     | Refetch WorkspaceItemRef
+    | CloseAll
     | CloseWorkspaceItem WorkspaceItemRef
+    | ToggleMinimap
     | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
+    | ToggleCodeFold WorkspaceItemRef
+    | ChangeDependentsItemTab WorkspaceItemRef DependentsItemTab
     | OpenDefinition Reference
-    | ShowDependentsOf { defRef : WorkspaceItemRef, defItem : DefinitionItem }
-    | FindWithinNamespace FQN
-    | ChangePerspective FQN
-    | FetchDependentsFinished { depRef : WorkspaceItemRef, defItem : DefinitionItem } (HttpResult (List DefinitionMatch))
+    | ShowDependentsOf WorkspaceItemRef
+    | UpdateDependentsSearchQuery WorkspaceItemRef String
+    | FindWithinNamespace WorkspaceItemRef FQN
+    | ChangePerspective WorkspaceItemRef Reference FQN
+    | FetchDependentsFinished WorkspaceItemRef Reference (HttpResult ( DefinitionItem, List DefinitionMatch ))
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | ToggleNamespaceDropdown WorkspaceItemRef
     | ToggleFold WorkspaceItemRef
@@ -88,7 +101,8 @@ type OutMsg
     | RequestPaneFocus
     | FocusOn WorkspaceItemRef
     | RequestFindInNamespace FQN
-    | RequestChangePerspective FQN
+    | RequestChangePerspective Reference FQN
+    | Emptied
 
 
 update : Config -> String -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -125,10 +139,10 @@ update config paneId msg model =
 
                 activeTab =
                     if DefinitionItem.isDoc defItem then
-                        DocsTab Doc.emptyDocFoldToggles
+                        DefinitionWorkspaceItemState.DocsTab
 
                     else
-                        CodeTab
+                        DefinitionWorkspaceItemState.CodeTab
 
                 workspaceItems =
                     WorkspaceItems.replace
@@ -136,6 +150,7 @@ update config paneId msg model =
                         workspaceItemRef
                         (WorkspaceItem.Success workspaceItemRef
                             (WorkspaceItem.DefinitionWorkspaceItem
+                                dRef
                                 (DefinitionWorkspaceItemState.init activeTab)
                                 defItem
                             )
@@ -159,14 +174,26 @@ update config paneId msg model =
             , NoOut
             )
 
-        CloseWorkspaceItem ref ->
-            ( { model
-                | workspaceItems =
-                    WorkspaceItems.remove model.workspaceItems ref
-              }
+        CloseAll ->
+            ( { model | workspaceItems = WorkspaceItems.empty }
             , Cmd.none
-            , NoOut
+            , Emptied
             )
+
+        CloseWorkspaceItem ref ->
+            let
+                workspaceItems =
+                    WorkspaceItems.remove model.workspaceItems ref
+
+                out =
+                    workspaceItems
+                        |> WorkspaceItems.focusedReference
+                        |> MaybeE.unwrap Emptied FocusOn
+            in
+            ( { model | workspaceItems = workspaceItems }, Cmd.none, out )
+
+        ToggleMinimap ->
+            ( { model | isMinimapToggled = not model.isMinimapToggled }, Cmd.none, NoOut )
 
         ToggleFold ref ->
             ( { model
@@ -189,18 +216,38 @@ update config paneId msg model =
             in
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
+        ToggleCodeFold wsRef ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        (\s -> { s | isCodeFolded = not s.isCodeFolded })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
+
+        ChangeDependentsItemTab wsRef newTab ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDependentsItemState
+                        (\s -> { s | activeTab = newTab })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
+
         OpenDefinition r ->
             openDefinition config paneId model r
 
-        ShowDependentsOf { defRef, defItem } ->
+        ShowDependentsOf defRef ->
             case defRef of
                 WorkspaceItemRef.DefinitionItemRef r ->
-                    openDependents config paneId model r defItem
+                    openDependents config paneId model r
 
                 _ ->
                     ( model, Cmd.none, NoOut )
 
-        FetchDependentsFinished { depRef, defItem } (Ok dependents) ->
+        FetchDependentsFinished depRef defRef (Ok ( defItem, dependents )) ->
             let
                 workspaceItems =
                     WorkspaceItems.replace
@@ -208,12 +255,17 @@ update config paneId msg model =
                         depRef
                         (WorkspaceItem.Success
                             depRef
-                            (WorkspaceItem.DependentsWorkspaceItem defItem dependents)
+                            (WorkspaceItem.DependentsWorkspaceItem
+                                defRef
+                                (DependentsWorkspaceItemState.init DependentsWorkspaceItemState.TermsTab)
+                                defItem
+                                dependents
+                            )
                         )
             in
             ( { model | workspaceItems = workspaceItems }, Cmd.none, NoOut )
 
-        FetchDependentsFinished { depRef } (Err e) ->
+        FetchDependentsFinished depRef _ (Err e) ->
             ( { model
                 | workspaceItems =
                     WorkspaceItems.replace
@@ -228,15 +280,7 @@ update config paneId msg model =
         ToggleDocFold wsRef foldId ->
             let
                 updateState state =
-                    case state.activeTab of
-                        DocsTab toggles ->
-                            { state
-                                | activeTab =
-                                    DocsTab (Doc.toggleFold toggles foldId)
-                            }
-
-                        _ ->
-                            state
+                    { state | docFoldToggles = Doc.toggleFold state.docFoldToggles foldId }
 
                 workspaceItems_ =
                     WorkspaceItems.updateDefinitionItemState
@@ -264,8 +308,47 @@ update config paneId msg model =
 
         SetFocusedItem wsRef ->
             ( { model | workspaceItems = WorkspaceItems.focusOn model.workspaceItems wsRef }
-            , Cmd.none
+            , scrollToItem paneId wsRef
             , FocusOn wsRef
+            )
+
+        FindWithinNamespace wsRef fqn ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        (\s -> { s | namespaceDropdownIsOpen = False })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }
+            , Cmd.none
+            , RequestFindInNamespace fqn
+            )
+
+        ChangePerspective wsRef ref fqn ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDefinitionItemState
+                        (\s -> { s | namespaceDropdownIsOpen = False })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }
+            , Cmd.none
+            , RequestChangePerspective ref fqn
+            )
+
+        UpdateDependentsSearchQuery wsRef query ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDependentsItemState
+                        (\s -> { s | searchQuery = query })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }
+            , Cmd.none
+            , NoOut
             )
 
         Keydown event ->
@@ -276,12 +359,12 @@ update config paneId msg model =
                 shortcut =
                     KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
 
-                ( nextModel, cmd ) =
+                ( nextModel, cmd, out ) =
                     handleKeyboardShortcut paneId
                         { model | keyboardShortcut = keyboardShortcut }
                         shortcut
             in
-            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], NoOut )
+            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], out )
 
         KeyboardShortcutMsg kMsg ->
             let
@@ -355,8 +438,8 @@ focusOpenedItem paneId ({ workspaceItems } as model) wsRef =
         ( model, Cmd.none, NoOut )
 
 
-openDependents : Config -> String -> Model -> Reference -> DefinitionItem -> ( Model, Cmd Msg, OutMsg )
-openDependents config paneId ({ workspaceItems } as model) dependentsOfRef dependentsOfItem =
+openDependents : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+openDependents config paneId ({ workspaceItems } as model) dependentsOfRef =
     let
         depRef =
             WorkspaceItemRef.DependentsItemRef dependentsOfRef
@@ -374,8 +457,7 @@ openDependents config paneId ({ workspaceItems } as model) dependentsOfRef depen
         in
         ( { model | workspaceItems = nextWorkspaceItems }
         , Cmd.batch
-            [ HttpApi.perform config.api
-                (fetchDependents config depRef dependentsOfRef dependentsOfItem)
+            [ fetchDependents config depRef dependentsOfRef
             , scrollToItem paneId depRef
             ]
         , FocusOn depRef
@@ -392,7 +474,7 @@ currentlyOpenFqns model =
     WorkspaceItems.fqns model.workspaceItems
 
 
-handleKeyboardShortcut : String -> Model -> KeyboardShortcut -> ( Model, Cmd Msg )
+handleKeyboardShortcut : String -> Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
 handleKeyboardShortcut paneId model shortcut =
     let
         scrollToCmd =
@@ -405,29 +487,41 @@ handleKeyboardShortcut paneId model shortcut =
             let
                 next =
                     WorkspaceItems.next model.workspaceItems
-            in
-            ( { model | workspaceItems = next }, scrollToCmd next )
 
-        prevDefinitions =
+                out =
+                    next
+                        |> WorkspaceItems.focusedReference
+                        |> Maybe.map FocusOn
+                        |> Maybe.withDefault NoOut
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next, out )
+
+        prevDefinition =
             let
                 prev =
                     WorkspaceItems.prev model.workspaceItems
+
+                out =
+                    prev
+                        |> WorkspaceItems.focusedReference
+                        |> Maybe.map FocusOn
+                        |> Maybe.withDefault NoOut
             in
-            ( { model | workspaceItems = prev }, scrollToCmd prev )
+            ( { model | workspaceItems = prev }, scrollToCmd prev, out )
 
         moveDown =
             let
                 next =
                     WorkspaceItems.moveDown model.workspaceItems
             in
-            ( { model | workspaceItems = next }, scrollToCmd next )
+            ( { model | workspaceItems = next }, scrollToCmd next, NoOut )
 
         moveUp =
             let
                 next =
                     WorkspaceItems.moveUp model.workspaceItems
             in
-            ( { model | workspaceItems = next }, scrollToCmd next )
+            ( { model | workspaceItems = next }, scrollToCmd next, NoOut )
     in
     case shortcut of
         Chord Shift ArrowDown ->
@@ -445,6 +539,7 @@ handleKeyboardShortcut paneId model shortcut =
         Chord Shift (X _) ->
             ( { model | workspaceItems = WorkspaceItems.empty }
             , Cmd.none
+            , Emptied
             )
 
         Sequence _ ArrowDown ->
@@ -454,10 +549,10 @@ handleKeyboardShortcut paneId model shortcut =
             nextDefinition
 
         Sequence _ ArrowUp ->
-            prevDefinitions
+            prevDefinition
 
         Sequence _ (K _) ->
-            prevDefinitions
+            prevDefinition
 
         Sequence _ (X _) ->
             let
@@ -466,9 +561,16 @@ handleKeyboardShortcut paneId model shortcut =
                         |> WorkspaceItems.focus
                         |> Maybe.map (WorkspaceItem.reference >> WorkspaceItems.remove model.workspaceItems)
                         |> Maybe.withDefault model.workspaceItems
+
+                out =
+                    without
+                        |> WorkspaceItems.focusedReference
+                        |> Maybe.map FocusOn
+                        |> Maybe.withDefault Emptied
             in
             ( { model | workspaceItems = without }
             , Cmd.none
+            , out
             )
 
         Sequence _ (Z _) ->
@@ -483,6 +585,7 @@ handleKeyboardShortcut paneId model shortcut =
             in
             ( { model | collapsedItems = collapsedItems }
             , Cmd.none
+            , NoOut
             )
 
         Chord Shift (Z _) ->
@@ -500,10 +603,11 @@ handleKeyboardShortcut paneId model shortcut =
             in
             ( { model | collapsedItems = collapsedItems }
             , Cmd.none
+            , NoOut
             )
 
         _ ->
-            ( model, Cmd.none )
+            ( model, Cmd.none, NoOut )
 
 
 
@@ -526,17 +630,28 @@ fetchDefinition config ref =
             (FetchDefinitionItemFinished ref)
 
 
-fetchDependents : Config -> WorkspaceItemRef -> Reference -> DefinitionItem -> ApiRequest (List DefinitionMatch) Msg
-fetchDependents config depRef defRef defItem =
+fetchDependents : Config -> WorkspaceItemRef -> Reference -> Cmd Msg
+fetchDependents config depRef defRef =
     let
-        endpoint =
+        deps =
             CodebaseApi.Dependents { ref = defRef }
+                |> config.toApiEndpoint
+                |> HttpApi.toTask config.api.url
+                    (Decode.field "results" DefinitionMatch.decodeList)
+
+        def =
+            CodebaseApi.Definition
+                { perspective = config.perspective
+                , ref = defRef
+                }
+                |> config.toApiEndpoint
+                |> HttpApi.toTask config.api.url
+                    (DefinitionItem.decode defRef)
+
+        t =
+            Task.map2 Tuple.pair def deps
     in
-    endpoint
-        |> config.toApiEndpoint
-        |> HttpApi.toRequest
-            DefinitionMatch.decodeList
-            (FetchDependentsFinished { depRef = depRef, defItem = defItem })
+    Task.attempt (FetchDependentsFinished depRef defRef) t
 
 
 scrollToItem : String -> WorkspaceItemRef -> Cmd Msg
@@ -567,9 +682,11 @@ type alias PaneConfig =
     { paneId : String
     , operatingSystem : OperatingSystem
     , isFocused : Bool
+    , withFocusedPaneIndicator : Bool
     , withDependents : Bool
     , withDependencies : Bool
     , withNamespaceDropdown : Bool
+    , withMinimap : Bool
     }
 
 
@@ -610,14 +727,14 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                                 ]
                             ]
 
-                WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem state defItem) ->
+                WorkspaceItem.Success wsRef (WorkspaceItem.DefinitionWorkspaceItem definitionRef state defItem) ->
                     let
                         namespaceDropdown =
                             if cfg.withNamespaceDropdown then
                                 Just
                                     { toggle = ToggleNamespaceDropdown wsRef
-                                    , findWithinNamespace = FindWithinNamespace
-                                    , changePerspective = ChangePerspective
+                                    , findWithinNamespace = FindWithinNamespace wsRef
+                                    , changePerspective = ChangePerspective wsRef definitionRef
                                     }
 
                             else
@@ -625,11 +742,13 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
 
                         config =
                             { wsRef = wsRef
+                            , definitionRef = definitionRef
                             , state = state
                             , item = defItem
                             , syntaxConfig = syntaxConfig definitionSummaryTooltip
                             , closeItem = CloseWorkspaceItem wsRef
-                            , changeTab = ChangeDefinitionItemTab wsRef
+                            , codeAndDocsViewMode =
+                                WorkspaceDefinitionItemCard.MixedCodeAndDocs { toggleCodeFold = ToggleCodeFold wsRef }
                             , toggleDocFold = ToggleDocFold wsRef
                             , isFolded =
                                 Set.member
@@ -638,19 +757,22 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                             , toggleFold = ToggleFold wsRef
                             , withDependents = cfg.withDependents
                             , withDependencies = cfg.withDependencies
-                            , showDependents = ShowDependentsOf { defRef = wsRef, defItem = defItem }
+                            , showDependents = ShowDependentsOf wsRef
                             , namespaceDropdown = namespaceDropdown
                             }
                     in
                     WorkspaceDefinitionItemCard.view config
 
-                WorkspaceItem.Success wsRef (WorkspaceItem.DependentsWorkspaceItem defItem dependents) ->
+                WorkspaceItem.Success wsRef (WorkspaceItem.DependentsWorkspaceItem dependentsOfRef state defItem dependents) ->
                     let
                         config =
                             { wsRef = wsRef
+                            , dependentsOfRef = dependentsOfRef
                             , item = defItem
+                            , state = state
+                            , updateQuery = UpdateDependentsSearchQuery wsRef
+                            , changeTab = ChangeDependentsItemTab wsRef
                             , dependents = dependents
-                            , syntaxConfig = syntaxConfig definitionSummaryTooltip
                             , closeItem = CloseWorkspaceItem wsRef
                             , openDefinition = OpenDefinition
                             }
@@ -696,7 +818,7 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                         |> WorkspaceCard.withContent
                             [ div [ class "workspace-card_error" ]
                                 [ p [ class "error" ]
-                                    [ text (Util.httpErrorToString e)
+                                    [ pre [] [ text (Util.httpErrorToString e) ]
                                     ]
                                 , Button.iconThenLabel (Refetch wsRef) Icon.refresh "Try again"
                                     |> Button.small
@@ -714,12 +836,33 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
 
 view : PaneConfig -> Model -> Html Msg
 view cfg model =
+    let
+        minimap =
+            if cfg.withMinimap && WorkspaceItems.length model.workspaceItems > 1 then
+                WorkspaceMinimap.view
+                    { keyboardShortcut = model.keyboardShortcut
+                    , workspaceItems = model.workspaceItems
+                    , selectItemMsg = SetFocusedItem
+                    , closeAllMsg = CloseAll
+                    , closeItemMsg = CloseWorkspaceItem
+                    , isToggled = model.isMinimapToggled
+                    , toggleMinimapMsg = ToggleMinimap
+                    }
+
+            else
+                UI.nothing
+    in
     div
         [ onClick PaneFocus
         , class "workspace-pane"
         , id cfg.paneId
-        , classList [ ( "workspace-pane_focused", cfg.isFocused ) ]
+        , classList
+            [ ( "workspace-pane_focused", cfg.isFocused )
+            , ( "workspace-pane_focused-pane-indicator", cfg.withFocusedPaneIndicator )
+            ]
         ]
-        (model.workspaceItems
-            |> WorkspaceItems.mapToList (viewItem cfg model.collapsedItems model.definitionSummaryTooltip)
+        (minimap
+            :: (model.workspaceItems
+                    |> WorkspaceItems.mapToList (viewItem cfg model.collapsedItems model.definitionSummaryTooltip)
+               )
         )

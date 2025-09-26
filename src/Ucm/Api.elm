@@ -76,16 +76,16 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
                 |> Hash.toString
                 |> Regex.replace constructorSuffixRegex (always "")
 
-        prefixedRefPath prefix ref =
+        refQueryParams ref =
             case Reference.hashQualified ref of
                 HQ.NameOnly fqn ->
-                    prefix ++ [ "by-name", FQN.toApiUrlString fqn ]
+                    [ string "name" (FQN.toApiUrlString fqn) ]
 
                 HQ.HashOnly h ->
-                    prefix ++ [ "by-hash", withoutConstructorSuffix h ]
+                    [ string "name" (withoutConstructorSuffix h) ]
 
                 HQ.HashQualified _ h ->
-                    prefix ++ [ "by-hash", withoutConstructorSuffix h ]
+                    [ string "name" (withoutConstructorSuffix h) ]
 
         refToString r =
             case Reference.hashQualified r of
@@ -142,23 +142,15 @@ codebaseApiEndpointToEndpoint context cbEndpoint =
                 }
 
         CodebaseApi.Dependencies { ref } ->
-            let
-                path =
-                    prefixedRefPath [ "definitions", "dependencies" ] ref
-            in
             GET
-                { path = base ++ path
-                , queryParams = []
+                { path = base ++ [ "getDefinitionDependencies" ]
+                , queryParams = refQueryParams ref
                 }
 
         CodebaseApi.Dependents { ref } ->
-            let
-                path =
-                    prefixedRefPath [ "definitions", "dependents" ] ref
-            in
             GET
-                { path = base ++ path
-                , queryParams = []
+                { path = base ++ [ "getDefinitionDependents" ]
+                , queryParams = refQueryParams ref
                 }
 
         CodebaseApi.Definition { perspective, ref } ->

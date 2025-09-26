@@ -10,6 +10,7 @@ import Code.FullyQualifiedName exposing (FQN)
 import Code2.Workspace.DefinitionItem exposing (DefinitionItem(..))
 import Code2.Workspace.DefinitionMatch exposing (DefinitionMatch)
 import Code2.Workspace.DefinitionWorkspaceItemState exposing (DefinitionWorkspaceItemState)
+import Code2.Workspace.DependentsWorkspaceItemState exposing (DependentsWorkspaceItemState)
 import Code2.Workspace.WorkspaceItemRef exposing (SearchResultsRef, WorkspaceItemRef(..))
 import Http
 import Maybe.Extra as MaybeE
@@ -20,9 +21,9 @@ type alias SearchResultsItem =
 
 
 type LoadedWorkspaceItem
-    = DefinitionWorkspaceItem DefinitionWorkspaceItemState DefinitionItem
+    = DefinitionWorkspaceItem Reference DefinitionWorkspaceItemState DefinitionItem
     | SearchResultsWorkspaceItem SearchResultsItem
-    | DependentsWorkspaceItem DefinitionItem (List DefinitionMatch)
+    | DependentsWorkspaceItem Reference DependentsWorkspaceItemState DefinitionItem (List DefinitionMatch)
 
 
 type WorkspaceItem
@@ -74,16 +75,16 @@ allFqns item =
     case item of
         Success _ loadedItem ->
             case loadedItem of
-                DefinitionWorkspaceItem _ (TermItem (Term _ _ { info })) ->
+                DefinitionWorkspaceItem _ _ (TermItem (Term _ _ { info })) ->
                     Info.allFqns info
 
-                DefinitionWorkspaceItem _ (TypeItem (Type _ _ { info })) ->
+                DefinitionWorkspaceItem _ _ (TypeItem (Type _ _ { info })) ->
                     Info.allFqns info
 
-                DefinitionWorkspaceItem _ (AbilityConstructorItem (AbilityConstructor _ { info })) ->
+                DefinitionWorkspaceItem _ _ (AbilityConstructorItem (AbilityConstructor _ { info })) ->
                     Info.allFqns info
 
-                DefinitionWorkspaceItem _ (DataConstructorItem (DataConstructor _ { info })) ->
+                DefinitionWorkspaceItem _ _ (DataConstructorItem (DataConstructor _ { info })) ->
                     Info.allFqns info
 
                 _ ->

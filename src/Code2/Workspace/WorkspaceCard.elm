@@ -18,6 +18,7 @@ import UI.TabList as TabList exposing (TabList)
 type alias WorkspaceCard msg =
     { titleLeft : List (Html msg)
     , titleRight : List (Html msg)
+    , subtitleBar : Maybe (Html msg)
     , tabList : Maybe (TabList msg)
     , content : List (Html msg)
     , hasFocus : Bool
@@ -38,6 +39,7 @@ empty : WorkspaceCard msg
 empty =
     { titleLeft = []
     , titleRight = []
+    , subtitleBar = Nothing
     , tabList = Nothing
     , content = []
     , hasFocus = False
@@ -86,6 +88,16 @@ withTitlebarLeft left card_ =
 withTitlebarRight : List (Html msg) -> WorkspaceCard msg -> WorkspaceCard msg
 withTitlebarRight right card_ =
     { card_ | titleRight = right }
+
+
+withSubtitle : String -> WorkspaceCard msg -> WorkspaceCard msg
+withSubtitle subtitle card_ =
+    withSubtitleBar (span [ class "subdued" ] [ text subtitle ]) card_
+
+
+withSubtitleBar : Html msg -> WorkspaceCard msg -> WorkspaceCard msg
+withSubtitleBar subtitle card_ =
+    { card_ | subtitleBar = Just subtitle }
 
 
 withContent : List (Html msg) -> WorkspaceCard msg -> WorkspaceCard msg
@@ -160,6 +172,7 @@ map f card_ =
     in
     { titleLeft = map_ card_.titleLeft
     , titleRight = map_ card_.titleRight
+    , subtitleBar = Maybe.map (Html.map f) card_.subtitleBar
     , tabList = Maybe.map (TabList.map f) card_.tabList
     , content = map_ card_.content
     , hasFocus = card_.hasFocus
@@ -209,7 +222,7 @@ consIf x isTrue xs =
 view : OperatingSystem -> WorkspaceCard msg -> Html msg
 view os wsCard =
     let
-        { titleLeft, titleRight, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
+        { titleLeft, titleRight, subtitleBar, tabList, content, hasFocus, domId, click, close, isFolded, toggleFold } =
             wsCard
 
         className =
@@ -265,8 +278,17 @@ view os wsCard =
                 , titleRight_
                 ]
 
+        subtitleBar_ =
+            case subtitleBar of
+                Just stb ->
+                    div [ class "workspace-card_subtitlebar" ] [ stb ]
+
+                Nothing ->
+                    UI.nothing
+
         cardContent =
             [ titlebar
+            , subtitleBar_
             , div [ class "workspace-card_foldable-content" ]
                 [ tabList |> Maybe.map TabList.view |> Maybe.withDefault UI.nothing
                 , section [ class "workspace-card_main-content" ] content
@@ -293,4 +315,8 @@ view os wsCard =
             html
 
         _ ->
-            Click.view [] [ html ] click
+            if hasFocus then
+                html
+
+            else
+                Click.view [ class "clickable-workspace-card" ] [ html ] click
