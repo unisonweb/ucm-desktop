@@ -1,7 +1,7 @@
 {
   "name": "ucm-desktop",
   "productName": "UCM Desktop",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Companion app to the Unison programming language",
   "main": ".webpack/main",
   "scripts": {
