@@ -23,6 +23,10 @@ body::-webkit-scrollbar-corner {
   background: var(--u-color_background);
 }
 
+.window-draggable {
+  app-region: drag;
+}
+
 .connecting {
   margin: 16rem auto;
   width: 32rem;

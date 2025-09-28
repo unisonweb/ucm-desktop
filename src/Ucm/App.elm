@@ -254,7 +254,7 @@ view model =
     case model.appContext.ucmConnectivity of
         Connecting ->
             { title = "UCM Desktop | Connecting..."
-            , body = [ div [ class "connecting" ] [ StatusBanner.working "Connecting..." ] ]
+            , body = [ div [ class "window-draggable connecting" ] [ StatusBanner.working "Connecting..." ] ]
             }
 
         NeverConnected _ ->
@@ -265,7 +265,7 @@ view model =
             in
             { title = "UCM Desktop | Couldn't connect to the UCM CLI"
             , body =
-                [ div []
+                [ div [ class "window-draggable" ]
                     [ div [ class "app-message" ]
                         [ h2 [] [ StatusIndicator.view StatusIndicator.working, text "Waiting on the UCM CLI" ]
                         , p []
