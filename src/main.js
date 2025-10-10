@@ -18,7 +18,7 @@ const createWindow = () => {
 
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1024,
+    width: 1002,
     height: 768,
     titleBarStyle: "hidden",
     icon: "../icons/icon.png",

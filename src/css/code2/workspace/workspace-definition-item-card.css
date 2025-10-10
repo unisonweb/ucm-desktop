@@ -145,7 +145,11 @@
       width: auto;
       margin: 1.5rem 1.5rem 1.5rem 1.5rem;
     }
+  }
+}
 
+@container workspace-pane (max-width: 512px) {
+  .workspace-card.workspace-definition-item-card {
     & .namespace-dropdown,
     & .category-icon,
     & .workspace-definition-item-card_other-names_list,
