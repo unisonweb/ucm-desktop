@@ -147,6 +147,14 @@ viewItem { selectItemMsg, closeItemMsg, keyboardShortcut } index ( item, focused
                         , small [] [ text "dependents" ]
                         ]
 
+                Success _ (DependenciesWorkspaceItem _ _ defItem _) ->
+                    div
+                        [ class "workspace-minimap_item_content dependencies" ]
+                        [ Icon.view Icon.dependencies
+                        , FQN.view (DefinitionItem.name defItem)
+                        , small [] [ text "dependencies" ]
+                        ]
+
                 _ ->
                     UI.nothing
     in

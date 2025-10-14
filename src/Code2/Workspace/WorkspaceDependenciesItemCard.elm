@@ -1,4 +1,4 @@
-module Code2.Workspace.WorkspaceDependentsItemCard exposing (..)
+module Code2.Workspace.WorkspaceDependenciesItemCard exposing (..)
 
 import Code.Definition.Reference exposing (Reference)
 import Code2.Workspace.DefinitionItem exposing (DefinitionItem)
@@ -12,9 +12,9 @@ import Lib.String.Helpers exposing (pluralize)
 
 type alias ViewConfig msg =
     { wsRef : WorkspaceItemRef
-    , dependentsOfRef : Reference
+    , dependenciesOfRef : Reference
     , item : DefinitionItem
-    , dependents : List DefinitionMatch
+    , dependencies : List DefinitionMatch
     , updateQuery : String -> msg
     , closeItem : msg
     , openDefinition : Reference -> msg
@@ -29,18 +29,18 @@ view cfg =
         toSubTitle numDeps =
             String.fromInt numDeps
                 ++ " "
-                ++ pluralize "direct dependent"
-                    "direct dependents"
+                ++ pluralize "direct dependencies"
+                    "direct dependencies"
                     numDeps
 
         cfg_ =
             { wsRef = cfg.wsRef
             , contextItem = cfg.item
-            , contextItemRef = cfg.dependentsOfRef
+            , contextItemRef = cfg.dependenciesOfRef
             , toSubTitle = toSubTitle
-            , searchPlaceholder = "Search dependents"
-            , emptyStateMessage = "has no direct dependents."
-            , matches = cfg.dependents
+            , searchPlaceholder = "Search dependencies"
+            , emptyStateMessage = "has no direct dependencies."
+            , matches = cfg.dependencies
             , updateQuery = cfg.updateQuery
             , closeItem = cfg.closeItem
             , openDefinition = cfg.openDefinition

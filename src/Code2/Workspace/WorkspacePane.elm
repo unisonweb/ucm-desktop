@@ -9,10 +9,11 @@ import Code.FullyQualifiedName exposing (FQN)
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
 import Code2.Workspace.DefinitionMatch as DefinitionMatch exposing (DefinitionMatch)
+import Code2.Workspace.DefinitionMatchesState as DefinitionMatchesState exposing (DefinitionMatchesCardTab)
 import Code2.Workspace.DefinitionWorkspaceItemState as DefinitionWorkspaceItemState exposing (DefinitionItemTab)
-import Code2.Workspace.DependentsWorkspaceItemState as DependentsWorkspaceItemState exposing (DependentsItemTab)
 import Code2.Workspace.WorkspaceCard as WorkspaceCard
 import Code2.Workspace.WorkspaceDefinitionItemCard as WorkspaceDefinitionItemCard
+import Code2.Workspace.WorkspaceDependenciesItemCard as WorkspaceDependenciesItemCard
 import Code2.Workspace.WorkspaceDependentsItemCard as WorkspaceDependentsItemCard
 import Code2.Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 import Code2.Workspace.WorkspaceItemRef as WorkspaceItemRef exposing (WorkspaceItemRef(..))
@@ -80,13 +81,17 @@ type Msg
     | ToggleMinimap
     | ChangeDefinitionItemTab WorkspaceItemRef DefinitionItemTab
     | ToggleCodeFold WorkspaceItemRef
-    | ChangeDependentsItemTab WorkspaceItemRef DependentsItemTab
-    | OpenDefinition Reference
+    | ChangeDependentsItemTab WorkspaceItemRef DefinitionMatchesCardTab
     | ShowDependentsOf WorkspaceItemRef
     | UpdateDependentsSearchQuery WorkspaceItemRef String
+    | FetchDependentsFinished WorkspaceItemRef Reference (HttpResult ( DefinitionItem, List DefinitionMatch ))
+    | ChangeDependenciesItemTab WorkspaceItemRef DefinitionMatchesCardTab
+    | ShowDependenciesOf WorkspaceItemRef
+    | UpdateDependenciesSearchQuery WorkspaceItemRef String
+    | FetchDependenciesFinished WorkspaceItemRef Reference (HttpResult ( DefinitionItem, List DefinitionMatch ))
     | FindWithinNamespace WorkspaceItemRef FQN
     | ChangePerspective WorkspaceItemRef Reference FQN
-    | FetchDependentsFinished WorkspaceItemRef Reference (HttpResult ( DefinitionItem, List DefinitionMatch ))
+    | OpenDefinition Reference
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | ToggleNamespaceDropdown WorkspaceItemRef
     | ToggleFold WorkspaceItemRef
@@ -128,6 +133,9 @@ update config paneId msg model =
                             )
 
                         DependentsItemRef _ ->
+                            ( model, Cmd.none )
+
+                        DependenciesItemRef _ ->
                             ( model, Cmd.none )
             in
             ( model_, cmd, NoOut )
@@ -236,9 +244,6 @@ update config paneId msg model =
             in
             ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
 
-        OpenDefinition r ->
-            openDefinition config paneId model r
-
         ShowDependentsOf defRef ->
             case defRef of
                 WorkspaceItemRef.DefinitionItemRef r ->
@@ -257,7 +262,7 @@ update config paneId msg model =
                             depRef
                             (WorkspaceItem.DependentsWorkspaceItem
                                 defRef
-                                (DependentsWorkspaceItemState.init DependentsWorkspaceItemState.TermsTab)
+                                (DefinitionMatchesState.init DefinitionMatchesState.TermsTab)
                                 defItem
                                 dependents
                             )
@@ -276,6 +281,57 @@ update config paneId msg model =
             , Cmd.none
             , NoOut
             )
+
+        ChangeDependenciesItemTab wsRef newTab ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDependenciesItemState
+                        (\s -> { s | activeTab = newTab })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }, Cmd.none, NoOut )
+
+        ShowDependenciesOf defRef ->
+            case defRef of
+                WorkspaceItemRef.DefinitionItemRef r ->
+                    openDependencies config paneId model r
+
+                _ ->
+                    ( model, Cmd.none, NoOut )
+
+        FetchDependenciesFinished depRef defRef (Ok ( defItem, dependents )) ->
+            let
+                workspaceItems =
+                    WorkspaceItems.replace
+                        model.workspaceItems
+                        depRef
+                        (WorkspaceItem.Success
+                            depRef
+                            (WorkspaceItem.DependenciesWorkspaceItem
+                                defRef
+                                (DefinitionMatchesState.init DefinitionMatchesState.TermsTab)
+                                defItem
+                                dependents
+                            )
+                        )
+            in
+            ( { model | workspaceItems = workspaceItems }, Cmd.none, NoOut )
+
+        FetchDependenciesFinished depRef _ (Err e) ->
+            ( { model
+                | workspaceItems =
+                    WorkspaceItems.replace
+                        model.workspaceItems
+                        depRef
+                        (WorkspaceItem.Failure depRef e)
+              }
+            , Cmd.none
+            , NoOut
+            )
+
+        OpenDefinition r ->
+            openDefinition config paneId model r
 
         ToggleDocFold wsRef foldId ->
             let
@@ -458,6 +514,32 @@ openDependents config paneId ({ workspaceItems } as model) dependentsOfRef =
         ( { model | workspaceItems = nextWorkspaceItems }
         , Cmd.batch
             [ fetchDependents config depRef dependentsOfRef
+            , scrollToItem paneId depRef
+            ]
+        , FocusOn depRef
+        )
+
+
+openDependencies : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+openDependencies config paneId ({ workspaceItems } as model) dependenciesOfRef =
+    let
+        depRef =
+            WorkspaceItemRef.DependenciesItemRef dependenciesOfRef
+    in
+    if WorkspaceItems.includesItem workspaceItems depRef then
+        focusOpenedItem paneId model depRef
+
+    else
+        let
+            nextWorkspaceItems =
+                WorkspaceItems.insertWithFocusBefore
+                    workspaceItems
+                    (WorkspaceItemRef.DefinitionItemRef dependenciesOfRef)
+                    (WorkspaceItem.Loading depRef)
+        in
+        ( { model | workspaceItems = nextWorkspaceItems }
+        , Cmd.batch
+            [ fetchDependencies config depRef dependenciesOfRef
             , scrollToItem paneId depRef
             ]
         , FocusOn depRef
@@ -654,6 +736,30 @@ fetchDependents config depRef defRef =
     Task.attempt (FetchDependentsFinished depRef defRef) t
 
 
+fetchDependencies : Config -> WorkspaceItemRef -> Reference -> Cmd Msg
+fetchDependencies config depRef defRef =
+    let
+        deps =
+            CodebaseApi.Dependencies { ref = defRef }
+                |> config.toApiEndpoint
+                |> HttpApi.toTask config.api.url
+                    (Decode.field "results" DefinitionMatch.decodeList)
+
+        def =
+            CodebaseApi.Definition
+                { perspective = config.perspective
+                , ref = defRef
+                }
+                |> config.toApiEndpoint
+                |> HttpApi.toTask config.api.url
+                    (DefinitionItem.decode defRef)
+
+        t =
+            Task.map2 Tuple.pair def deps
+    in
+    Task.attempt (FetchDependenciesFinished depRef defRef) t
+
+
 scrollToItem : String -> WorkspaceItemRef -> Cmd Msg
 scrollToItem paneId ref =
     let
@@ -683,8 +789,6 @@ type alias PaneConfig =
     , operatingSystem : OperatingSystem
     , isFocused : Bool
     , withFocusedPaneIndicator : Bool
-    , withDependents : Bool
-    , withDependencies : Bool
     , withNamespaceDropdown : Bool
     , withMinimap : Bool
     }
@@ -755,9 +859,8 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                                     (WorkspaceItemRef.toString wsRef)
                                     collapsedItems
                             , toggleFold = ToggleFold wsRef
-                            , withDependents = cfg.withDependents
-                            , withDependencies = cfg.withDependencies
                             , showDependents = ShowDependentsOf wsRef
+                            , showDependencies = ShowDependenciesOf wsRef
                             , namespaceDropdown = namespaceDropdown
                             }
                     in
@@ -778,6 +881,22 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                             }
                     in
                     WorkspaceDependentsItemCard.view config
+
+                WorkspaceItem.Success wsRef (WorkspaceItem.DependenciesWorkspaceItem dependenciesOfRef state defItem dependencies) ->
+                    let
+                        config =
+                            { wsRef = wsRef
+                            , dependenciesOfRef = dependenciesOfRef
+                            , item = defItem
+                            , state = state
+                            , updateQuery = UpdateDependenciesSearchQuery wsRef
+                            , changeTab = ChangeDependenciesItemTab wsRef
+                            , dependencies = dependencies
+                            , closeItem = CloseWorkspaceItem wsRef
+                            , openDefinition = OpenDefinition
+                            }
+                    in
+                    WorkspaceDependenciesItemCard.view config
 
                 WorkspaceItem.Success _ _ ->
                     {- TODO -}
