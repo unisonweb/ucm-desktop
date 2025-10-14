@@ -407,6 +407,19 @@ update config paneId msg model =
             , NoOut
             )
 
+        UpdateDependenciesSearchQuery wsRef query ->
+            let
+                workspaceItems_ =
+                    WorkspaceItems.updateDependenciesItemState
+                        (\s -> { s | searchQuery = query })
+                        wsRef
+                        model.workspaceItems
+            in
+            ( { model | workspaceItems = workspaceItems_ }
+            , Cmd.none
+            , NoOut
+            )
+
         Keydown event ->
             let
                 ( keyboardShortcut, kCmd ) =
