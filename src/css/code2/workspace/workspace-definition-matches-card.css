@@ -1,13 +1,16 @@
 .workspace-card {
-  &:has(.workspace-dependents-item-card_content) .search-dependents {
+  &:has(.workspace-definition-matches-card_content) .search-matches {
     width: 100%;
   }
 
-  & .workspace-card_main-content:has(.workspace-dependents-item-card_content) {
+  &
+    .workspace-card_main-content:has(
+      .workspace-definition-matches-card_content
+    ) {
     padding: 0;
   }
 
-  & .workspace-dependents-item-card_content {
+  & .workspace-definition-matches-card_content {
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -28,18 +31,18 @@
       }
     }
 
-    & .dependents_column {
+    & .matches_column {
       display: flex;
       flex-direction: column;
       padding: 0.75rem;
       display: flex;
       width: 100%;
 
-      & .dependents_items {
+      & .matches_items {
         display: flex;
         flex-direction: column;
 
-        & .dependent {
+        & .match {
           font-family: var(--font-monospace);
           margin-left: -0.25rem;
           padding: 0.25rem;
@@ -58,7 +61,7 @@
       }
     }
 
-    & .dependents_column:last-child {
+    & .matches_column:last-child {
       border: 0;
     }
   }

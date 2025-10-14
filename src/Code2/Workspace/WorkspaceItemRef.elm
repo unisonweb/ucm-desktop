@@ -14,6 +14,7 @@ type WorkspaceItemRef
     = DefinitionItemRef Reference
     | SearchResultsItemRef SearchResultsRef
     | DependentsItemRef Reference
+    | DependenciesItemRef Reference
 
 
 equals : WorkspaceItemRef -> WorkspaceItemRef -> Bool
@@ -34,6 +35,9 @@ same a b =
         ( DependentsItemRef a_r, DependentsItemRef b_r ) ->
             Reference.same a_r b_r
 
+        ( DependenciesItemRef a_r, DependenciesItemRef b_r ) ->
+            Reference.same a_r b_r
+
         _ ->
             a == b
 
@@ -45,6 +49,9 @@ definitionReference ref =
             Just r
 
         DependentsItemRef r ->
+            Just r
+
+        DependenciesItemRef r ->
             Just r
 
         _ ->
@@ -62,6 +69,9 @@ toString ref =
 
         DependentsItemRef r ->
             "Dependents of :" ++ Reference.toString r
+
+        DependenciesItemRef r ->
+            "Dependencies of :" ++ Reference.toString r
 
 
 toDomString : WorkspaceItemRef -> String
@@ -100,6 +110,9 @@ toHumanString ref =
         DependentsItemRef r ->
             defRefToString r
 
+        DependenciesItemRef r ->
+            defRefToString r
+
 
 toUrlPath : WorkspaceItemRef -> List String
 toUrlPath wsRef =
@@ -109,6 +122,9 @@ toUrlPath wsRef =
 
         DependentsItemRef r ->
             "dependents-of" :: Reference.toUrlPath r
+
+        DependenciesItemRef r ->
+            "dependencies-of" :: Reference.toUrlPath r
 
         _ ->
             -- TODO

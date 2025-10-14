@@ -53,8 +53,7 @@ type alias WorkspaceDefinitionItemCardConfig msg =
     , codeAndDocsViewMode : CodeAndDocsViewMode msg
     , syntaxConfig : SyntaxConfig.SyntaxConfig msg
     , showDependents : msg
-    , withDependents : Bool
-    , withDependencies : Bool
+    , showDependencies : msg
     , namespaceDropdown : Maybe (NamespaceDropdown msg)
     }
 
@@ -319,10 +318,18 @@ titlebarRight cfg =
                 ]
 
         dependentsButton =
-            -- Feature flag dependents (which aren't ready in UCM yet, but exist in Share)
-            if cfg.withDependents && not (DefinitionItem.isBuiltin cfg.item) then
+            if not (DefinitionItem.isBuiltin cfg.item) then
                 titlebarButton cfg.showDependents Icon.dependents
                     |> TitlebarButton.withLeftOfTooltip (text "View direct dependents")
+                    |> TitlebarButton.view
+
+            else
+                UI.nothing
+
+        dependenciesButton =
+            if not (DefinitionItem.isBuiltin cfg.item) then
+                titlebarButton cfg.showDependencies Icon.dependencies
+                    |> TitlebarButton.withLeftOfTooltip (text "View dependencies")
                     |> TitlebarButton.view
 
             else
@@ -358,6 +365,7 @@ titlebarRight cfg =
     in
     [ defHash
     , otherNames
+    , dependenciesButton
     , dependentsButton
     ]
 

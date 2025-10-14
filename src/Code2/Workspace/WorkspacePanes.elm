@@ -237,6 +237,25 @@ openDependentsOf config model ref =
             ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
 
 
+openDependenciesOf : Config -> Model -> Reference -> ( Model, Cmd Msg )
+openDependenciesOf config model ref =
+    case model.focusedPane of
+        LeftPaneFocus _ ->
+            let
+                -- TODO: deal with the out msg and routes
+                ( leftPane, leftPaneCmd, _ ) =
+                    WorkspacePane.openDependencies config "workspace-pane_left" model.left ref
+            in
+            ( { model | left = leftPane }, Cmd.map LeftPaneMsg leftPaneCmd )
+
+        RightPaneFocus ->
+            let
+                ( rightPane, rightPaneCmd, _ ) =
+                    WorkspacePane.openDependencies config "workspace-pane_right" model.right ref
+            in
+            ( { model | right = rightPane }, Cmd.map RightPaneMsg rightPaneCmd )
+
+
 currentlyOpenReferences : Model -> List Reference
 currentlyOpenReferences model =
     WorkspacePane.currentlyOpenReferences model.left
@@ -276,8 +295,6 @@ subscriptions model =
 
 type alias PanesConfig =
     { operatingSystem : OperatingSystem
-    , withDependents : Bool
-    , withDependencies : Bool
     , withFocusedPaneIndicator : Bool
     , withNamespaceDropdown : Bool
     , withMinimap : Bool
@@ -289,8 +306,6 @@ view cfg model =
     let
         paneConfig paneId isFocused =
             { operatingSystem = cfg.operatingSystem
-            , withDependents = cfg.withDependents
-            , withDependencies = cfg.withDependencies
             , paneId = paneId
             , isFocused = isFocused
             , withFocusedPaneIndicator = cfg.withFocusedPaneIndicator
