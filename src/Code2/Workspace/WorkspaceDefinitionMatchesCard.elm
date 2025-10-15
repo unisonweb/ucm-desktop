@@ -241,21 +241,24 @@ withTabList cfg group card =
         card
 
     else
-        case cfg.state.activeTab of
-            TermsTab ->
+        case activeTab group cfg.state.activeTab of
+            Just TermsTab ->
                 tabOrCard [] tabs.terms [ tabs.types, tabs.abilities, tabs.docs, tabs.tests ]
 
-            TypesTab ->
+            Just TypesTab ->
                 tabOrCard [ tabs.terms ] tabs.types [ tabs.abilities, tabs.docs, tabs.tests ]
 
-            AbilitiesTab ->
+            Just AbilitiesTab ->
                 tabOrCard [ tabs.terms, tabs.types ] tabs.abilities [ tabs.docs, tabs.tests ]
 
-            DocsTab ->
+            Just DocsTab ->
                 tabOrCard [ tabs.terms, tabs.types, tabs.abilities ] tabs.docs [ tabs.tests ]
 
-            TestsTab ->
+            Just TestsTab ->
                 tabOrCard [ tabs.terms, tabs.types, tabs.abilities, tabs.docs ] tabs.tests []
+
+            Nothing ->
+                card
 
 
 activeTab : GroupedMatches -> DefinitionMatchesCardTab -> Maybe DefinitionMatchesCardTab
