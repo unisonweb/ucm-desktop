@@ -18,6 +18,7 @@
     & .tooltip {
       & .tooltip-bubble {
         height: auto;
+        --u-color_text: var(--color-tooltip-text);
       }
     }
   }

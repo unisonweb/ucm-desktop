@@ -186,18 +186,6 @@ map f card_ =
 
 
 
--- RELATED VIEW HELPERS
-
-
-viewLibraryTag : ProjectDependency -> Html msg
-viewLibraryTag dep =
-    ContextualTag.contextualTag Icon.book (ProjectDependency.toString dep)
-        |> ContextualTag.decorativePurple
-        |> ContextualTag.withTooltipText "Library dependency"
-        |> ContextualTag.view
-
-
-
 -- VIEW
 
 

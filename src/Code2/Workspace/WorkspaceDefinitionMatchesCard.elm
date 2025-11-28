@@ -5,6 +5,7 @@ import Code.Definition.Term as Term exposing (Term(..))
 import Code.Definition.Type as Type exposing (Type(..))
 import Code.DefinitionSummaryTooltip as DefinitionSummaryTooltip
 import Code.FullyQualifiedName as FQN
+import Code.ProjectDependency as ProjectDependency
 import Code.Syntax.SyntaxSegment as SyntaxSegment
 import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem)
 import Code2.Workspace.DefinitionMatch as DefinitionMatch exposing (DefinitionMatch(..))
@@ -328,7 +329,7 @@ view cfg =
         lib =
             cfg.contextItem
                 |> DefinitionItem.toLib
-                |> Maybe.map WorkspaceCard.viewLibraryTag
+                |> Maybe.map ProjectDependency.viewLibraryBadge
                 |> Maybe.withDefault UI.nothing
 
         ({ terms, types, tests, abilities, docs } as group) =

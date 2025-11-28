@@ -7,6 +7,7 @@ import Code.Definition.Term as Term
 import Code.Definition.Type as Type
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash
+import Code.ProjectDependency as ProjectDependency
 import Code.Source.SourceViewConfig as SourceViewConfig
 import Code.Syntax.SyntaxConfig as SyntaxConfig
 import Code2.Workspace.DefinitionItem as DefinitionItem exposing (DefinitionItem(..))
@@ -254,7 +255,7 @@ titlebarLeft cfg =
         lib =
             cfg.item
                 |> DefinitionItem.toLib
-                |> Maybe.map WorkspaceCard.viewLibraryTag
+                |> Maybe.map ProjectDependency.viewLibraryBadge
                 |> Maybe.withDefault UI.nothing
 
         copySourceToClipboard =
