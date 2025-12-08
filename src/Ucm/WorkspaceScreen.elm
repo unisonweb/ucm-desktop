@@ -565,6 +565,7 @@ view appContext model =
             , withNamespaceDropdown = False
             , withFocusedPaneIndicator = True
             , withMinimap = False
+            , withRefreshDefinitionButton = True
             }
 
         content =

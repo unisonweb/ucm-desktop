@@ -298,6 +298,7 @@ type alias PanesConfig =
     , withFocusedPaneIndicator : Bool
     , withNamespaceDropdown : Bool
     , withMinimap : Bool
+    , withRefreshDefinitionButton : Bool
     }
 
 
@@ -311,6 +312,7 @@ view cfg model =
             , withFocusedPaneIndicator = cfg.withFocusedPaneIndicator
             , withNamespaceDropdown = cfg.withNamespaceDropdown
             , withMinimap = cfg.withMinimap
+            , withRefreshDefinitionButton = cfg.withRefreshDefinitionButton
             }
 
         left isFocused =

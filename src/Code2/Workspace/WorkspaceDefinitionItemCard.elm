@@ -55,6 +55,7 @@ type alias WorkspaceDefinitionItemCardConfig msg =
     , syntaxConfig : SyntaxConfig.SyntaxConfig msg
     , showDependents : msg
     , showDependencies : msg
+    , reloadDefinition : Maybe msg
     , namespaceDropdown : Maybe (NamespaceDropdown msg)
     }
 
@@ -258,6 +259,22 @@ titlebarLeft cfg =
                 |> Maybe.map ProjectDependency.viewLibraryBadge
                 |> Maybe.withDefault UI.nothing
 
+        reloadDefinition =
+            case cfg.reloadDefinition of
+                Just reloadMsg ->
+                    Tooltip.tooltip (Tooltip.text "Reload definition")
+                        |> Tooltip.below
+                        |> Tooltip.withArrow Tooltip.Start
+                        |> Tooltip.view
+                            (Button.icon reloadMsg Icon.restartCircle
+                                |> Button.small
+                                |> Button.subdued
+                                |> Button.view
+                            )
+
+                Nothing ->
+                    UI.nothing
+
         copySourceToClipboard =
             case rawSource cfg.item of
                 Just source ->
@@ -299,6 +316,7 @@ titlebarLeft cfg =
     , viewNamespaceDropdown cfg
     , FQN.view (DefinitionItem.name cfg.item)
     , builtin
+    , reloadDefinition
     , copySourceToClipboard
     ]
 

@@ -92,6 +92,7 @@ type Msg
     | FindWithinNamespace WorkspaceItemRef FQN
     | ChangePerspective WorkspaceItemRef Reference FQN
     | OpenDefinition Reference
+    | ReloadDefinition Reference
     | ToggleDocFold WorkspaceItemRef Doc.FoldId
     | ToggleNamespaceDropdown WorkspaceItemRef
     | ToggleFold WorkspaceItemRef
@@ -333,6 +334,9 @@ update config paneId msg model =
         OpenDefinition r ->
             openDefinition config paneId model r
 
+        ReloadDefinition r ->
+            reloadDefinition config paneId model r
+
         ToggleDocFold wsRef foldId ->
             let
                 updateState state =
@@ -458,6 +462,24 @@ update config paneId msg model =
 
 
 -- HELPERS
+
+
+reloadDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+reloadDefinition config paneId ({ workspaceItems } as model) ref =
+    let
+        wsRef =
+            WorkspaceItemRef.DefinitionItemRef ref
+    in
+    let
+        nextWorkspaceItems =
+            WorkspaceItems.replace workspaceItems
+                wsRef
+                (WorkspaceItem.Loading wsRef)
+    in
+    ( { model | workspaceItems = nextWorkspaceItems }
+    , Cmd.batch [ HttpApi.perform config.api (fetchDefinition config ref), scrollToItem paneId wsRef ]
+    , FocusOn wsRef
+    )
 
 
 openDefinition : Config -> String -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
@@ -804,6 +826,7 @@ type alias PaneConfig =
     , withFocusedPaneIndicator : Bool
     , withNamespaceDropdown : Bool
     , withMinimap : Bool
+    , withRefreshDefinitionButton : Bool
     }
 
 
@@ -874,6 +897,12 @@ viewItem cfg collapsedItems definitionSummaryTooltip item isFocused =
                             , toggleFold = ToggleFold wsRef
                             , showDependents = ShowDependentsOf wsRef
                             , showDependencies = ShowDependenciesOf wsRef
+                            , reloadDefinition =
+                                if cfg.withRefreshDefinitionButton then
+                                    Just (ReloadDefinition definitionRef)
+
+                                else
+                                    Nothing
                             , namespaceDropdown = namespaceDropdown
                             }
                     in
