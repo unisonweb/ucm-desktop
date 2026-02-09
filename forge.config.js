@@ -75,11 +75,13 @@ module.exports = {
       name: "@electron-forge/plugin-webpack",
       config: {
         devServer: {
-          proxy: {
-            context: ["/codebase"],
-            target: API_URL,
-            logLevel: "debug",
-          },
+          proxy: [
+            {
+              context: ["/codebase"],
+              target: API_URL,
+              logLevel: "debug",
+            },
+          ],
         },
         mainConfig: "./webpack.main.config.js",
         renderer: {

@@ -50,5 +50,14 @@
   "keywords": [],
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"
+  },
+  "overrides": {
+    "tar": "^7.5.7",
+    "cross-spawn": "^7.0.6",
+    "webpack-dev-server": "^5.2.3",
+    "tmp": "^0.2.5",
+    "form-data": "^4.0.1",
+    "qs": "^6.14.1",
+    "tough-cookie": "^5.0.0"
   }
 }
