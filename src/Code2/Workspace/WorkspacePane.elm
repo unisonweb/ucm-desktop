@@ -469,8 +469,7 @@ reloadDefinition config paneId ({ workspaceItems } as model) ref =
     let
         wsRef =
             WorkspaceItemRef.DefinitionItemRef ref
-    in
-    let
+
         nextWorkspaceItems =
             WorkspaceItems.replace workspaceItems
                 wsRef
