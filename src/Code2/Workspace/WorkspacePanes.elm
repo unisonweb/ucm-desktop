@@ -112,13 +112,13 @@ update config msg model =
         RightPaneMsg workspacePaneMsg ->
             let
                 ( rightPane, rightPaneCmd, rightPaneOut ) =
-                    WorkspacePane.update config "workspace-pane_right" workspacePaneMsg model.left
+                    WorkspacePane.update config "workspace-pane_right" workspacePaneMsg model.right
 
                 ( model_, out ) =
                     case rightPaneOut of
                         WorkspacePane.RequestPaneFocus ->
                             case model.focusedPane of
-                                RightPaneFocus ->
+                                LeftPaneFocus _ ->
                                     ( { model | focusedPane = RightPaneFocus }, NoOut )
 
                                 _ ->
@@ -259,7 +259,7 @@ openDependenciesOf config model ref =
 currentlyOpenReferences : Model -> List Reference
 currentlyOpenReferences model =
     WorkspacePane.currentlyOpenReferences model.left
-        ++ WorkspacePane.currentlyOpenReferences model.left
+        ++ WorkspacePane.currentlyOpenReferences model.right
 
 
 currentlyOpenFqns : Model -> List FQN
